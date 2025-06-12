@@ -5,11 +5,12 @@ import styles from "./styles.css"
 import QuestionService from "../../services/QuestionService";
 import {useRouter} from "next/navigation";
 import Link from 'next/link'
+import UserService from "../../services/UserService";
 
 const Navbar = () => {
-    const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         setIsLoading(true);
@@ -19,6 +20,11 @@ const Navbar = () => {
         //     setIsLogin(false);
         //     router.push("/login");
         // }
+
+        UserService.isAdmin(6)
+            .then(res => setIsAdmin(res.data))
+            .catch(err => console.log(err));
+
         setIsLoading(false);
     }, []);
 
@@ -39,8 +45,9 @@ const Navbar = () => {
                 {isLogin ? (<>
                             <span className="user-icon">👤</span>
                             <div className="dropdown">
-                                <a href="#">Information Account</a>
-                                <Link href={"/questions/list"}>My Questions</Link>
+                                <a href="#">Information</a>
+                                <Link href={"/questions/my"}>My Questions</Link>
+                                {isAdmin && <Link href={"/users"}>Dashboard</Link>}
                                 <a onClick={handleLogout}>Log out</a>
                             </div>
                         </>

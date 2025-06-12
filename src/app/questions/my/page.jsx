@@ -4,19 +4,6 @@ import {useEffect, useState} from "react";
 import style from "./styles.css";
 import QuestionService from "../../../services/QuestionService";
 
-const dataFixed = [
-    {id: 1, content: "q1 ?", type: "multi-choice",answer:true},
-    {id: 2, content: "q2 ?", type: "multi-choice",answer:false},
-    {id: 3, content: "q3 ?", type: "choice",answer:true},
-    {id: 4, content: "q4 ?", type: "choice",answer:false},
-    {id: 5, content: "q5 ?", type: "choice",answer:false},
-    {id: 6, content: "q6 ?", type: "multi-choice",answer:false},
-    {id: 7, content: "q7 ?", type: "multi-choice",answer:false},
-    {id: 8, content: "q8 ?", type: "choice",answer:true},
-    {id: 9, content: "q9 ?", type: "multi-choice",answer:false},
-    {id: 10, content: "q10 ?", type: "choice",answer:false},
-];
-
 const MyQuestions = () => {
     const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
