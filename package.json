@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@emotion/styled": "^11.14.0",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/icons-material": "^7.1.1",
     "@mui/material": "^7.1.1",
     "@mui/material-nextjs": "^7.1.1",
@@ -18,10 +20,12 @@
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-toastify": "^11.0.5",
     "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/node": "24.0.1",
     "eslint": "^9",
     "eslint-config-next": "15.3.3"
   }
