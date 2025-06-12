@@ -1,4 +1,4 @@
-import axiosInstance from "@/services/axiosConfig"
+import axiosInstance from "./config";
 
 class QuestionService {
     static async create(questionData) {
@@ -10,9 +10,9 @@ class QuestionService {
         }
     }
 
-    static async getAll() {
+    static async getAll(userId) {
         try {
-            return await axiosInstance.get("/questions")
+            return await axiosInstance.get(`/questions/user/${userId}`)
         } catch (error) {
             console.error("Lỗi khi lấy danh sách câu hỏi", error)
             throw error

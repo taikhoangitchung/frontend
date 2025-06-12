@@ -1,0 +1,58 @@
+"use client"
+
+import {useEffect, useState} from "react";
+import styles from "./styles.css"
+import QuestionService from "../../services/QuestionService";
+import {useRouter} from "next/navigation";
+import Link from 'next/link'
+
+const Navbar = () => {
+    const router = useRouter();
+    const [isLogin, setIsLogin] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        setIsLoading(true);
+        const token = localStorage.getItem("token");
+
+        // if (!token) {
+        //     setIsLogin(false);
+        //     router.push("/login");
+        // }
+        setIsLoading(false);
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        setIsLogin(false);
+    }
+
+    if (isLoading) return <h1>Is Loading .....</h1>;
+
+    return (
+        <nav className="navbar">
+            <div className="nav-left">
+                <Link href={"/"}>Home</Link>
+                {isLogin && <a href="#">Create a Quiz</a>}
+            </div>
+            <div className="user-menu">
+                {isLogin ? (<>
+                            <span className="user-icon">👤</span>
+                            <div className="dropdown">
+                                <a href="#">Information Account</a>
+                                <Link href={"/questions/list"}>My Questions</Link>
+                                <a onClick={handleLogout}>Log out</a>
+                            </div>
+                        </>
+                    )
+                    : (<>
+                            <Link href={"/"}>Log in</Link>
+                            <Link href={"/"}>Register</Link>
+                        </>
+                    )}
+            </div>
+        </nav>
+    );
+}
+
+export default Navbar;
