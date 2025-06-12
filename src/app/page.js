@@ -1,8 +1,7 @@
 "use client"
 
-import JoinSection from "../components/JoinSection";
 import React from "react"
 
-const Home = () => <JoinSection/>;
+const Home = () => <h1>Home Page</h1>;
 
 export default Home;

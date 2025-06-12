@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/node": "24.0.1",
     "eslint": "^9",
     "eslint-config-next": "15.3.3"
   }

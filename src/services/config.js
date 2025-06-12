@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const instance = axios.create({
+const axiosInstance = axios.create({
     baseURL: "http://localhost:8080",
     timeout: 10000,
 });
 
-instance.interceptors.request.use((config) => {
+axiosInstance.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -13,7 +13,7 @@ instance.interceptors.request.use((config) => {
     return config;
 });
 
-instance.interceptors.response.use(
+axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         console.error("Lỗi:", error);
@@ -21,4 +21,4 @@ instance.interceptors.response.use(
     }
 );
 
-export default instance;
+export default axiosInstance;
