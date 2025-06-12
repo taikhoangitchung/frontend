@@ -58,6 +58,9 @@ const Login = () => {
                     autoClose: 1500,
                     position: 'top-right',
                 });
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('currentUserEmail', email); // Lưu email sau khi đăng nhập
+                }
                 setTimeout(() => router.push('/home'), 1500);
             } else {
                 setGeneralError(message);
