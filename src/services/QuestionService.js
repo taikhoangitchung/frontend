@@ -46,7 +46,7 @@ class QuestionService {
     }
 
     static async findAllByUser(userId) {
-        return axiosInstance.get(`/questions/users/${userId}`);
+        return axiosInstance.get(`/questions/user/${userId}`);
     }
 
 }

@@ -1,6 +1,30 @@
 import axiosInstance from "./config";
 
 class UserService {
+    static async removeUser(userId) {
+        try {
+            return await axiosInstance.delete(`/users/${userId}`);
+        } catch (error) {
+            console.error(`Lỗi khi xóa user với id : ${userId}`);
+            return error;
+        }
+    }
+
+    static async searchFollowNameAndEmail(keyName, keyEmail) {
+        try {
+            const api = keyName.trim() === ""
+                ? `/users/search?keyEmail=${keyEmail}`
+                : (keyEmail.trim() === ""
+                    ? `/users/search?keyName=${keyName}`
+                    : `/users/search?keyName=${keyName}&keyEmail=${keyEmail}`
+                );
+            return await axiosInstance.get(api);
+        } catch (error) {
+            console.error(`Lỗi khi tìm kiếm người dùng với keyName = ${keyName}, keyEmail = ${keyEmail}`);
+            throw error;
+        }
+    }
+
     static async isAdmin(userId) {
         try {
             return await axiosInstance.get(`/users/is-admin/${userId}`);
