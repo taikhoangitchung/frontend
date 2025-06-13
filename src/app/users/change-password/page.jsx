@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
+import UserService from '../../../services/UserService';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -35,8 +35,8 @@ const ChangePassword = () => {
             .required('Mật khẩu cũ không được để trống'),
         newPassword: Yup.string()
             .min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự')
-            .required('Mật khẩu mới không được để trống')
-            .notOneOf([Yup.ref('oldPassword'), null], 'Mật khẩu mới không được giống mật khẩu cũ'),
+            .notOneOf([Yup.ref('oldPassword'), null], 'Mật khẩu mới không được giống mật khẩu cũ')
+            .required('Mật khẩu mới không được để trống'),
         confirmPassword: Yup.string()
             .oneOf([Yup.ref('newPassword'), null], 'Mật khẩu nhập lại không khớp')
             .required('Vui lòng nhập lại mật khẩu'),
@@ -44,26 +44,17 @@ const ChangePassword = () => {
 
     const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
         try {
-            const response = await axios.post('http://localhost:8080/users/change-password', {
-                email: currentEmail,
-                oldPassword: values.oldPassword,
-                newPassword: values.newPassword,
-            });
+            await UserService.changePassword(currentEmail, values.oldPassword, values.newPassword);
             toast.success('Đổi mật khẩu thành công! Chuyển đến trang đăng nhập...', {
                 autoClose: 1500,
             });
             setTimeout(() => router.push('/login'), 1500);
         } catch (err) {
-            // Lấy thông điệp lỗi cụ thể từ response
-            const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Đổi mật khẩu không thành công';
-            setFieldError('oldPassword', errorMsg); // Chỉ truyền string, không phải object
+            const errorMsg = err.response?.data?.message || 'Đổi mật khẩu không thành công';
+            setFieldError('oldPassword', errorMsg);
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const handleCancel = () => {
-        router.push('/');
     };
 
     return (
@@ -83,15 +74,8 @@ const ChangePassword = () => {
                         <div>
                             <label>Mật khẩu cũ <span style={{ color: 'red' }}>*</span></label>
                             <div className="password-container">
-                                <Field
-                                    type={showOldPassword ? 'text' : 'password'}
-                                    name="oldPassword"
-                                    style={{ paddingRight: '30px', width: '100%' }}
-                                />
-                                <span
-                                    onClick={() => setShowOldPassword(!showOldPassword)}
-                                    className="password-toggle"
-                                >
+                                <Field type={showOldPassword ? 'text' : 'password'} name="oldPassword" />
+                                <span onClick={() => setShowOldPassword(!showOldPassword)}>
                                     <FontAwesomeIcon icon={showOldPassword ? faEyeSlash : faEye} />
                                 </span>
                             </div>
@@ -100,15 +84,8 @@ const ChangePassword = () => {
                         <div>
                             <label>Mật khẩu mới <span style={{ color: 'red' }}>*</span></label>
                             <div className="password-container">
-                                <Field
-                                    type={showNewPassword ? 'text' : 'password'}
-                                    name="newPassword"
-                                    style={{ paddingRight: '30px', width: '100%' }}
-                                />
-                                <span
-                                    onClick={() => setShowNewPassword(!showNewPassword)}
-                                    className="password-toggle"
-                                >
+                                <Field type={showNewPassword ? 'text' : 'password'} name="newPassword" />
+                                <span onClick={() => setShowNewPassword(!showNewPassword)}>
                                     <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
                                 </span>
                             </div>
@@ -117,15 +94,8 @@ const ChangePassword = () => {
                         <div>
                             <label>Nhập lại mật khẩu <span style={{ color: 'red' }}>*</span></label>
                             <div className="password-container">
-                                <Field
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    name="confirmPassword"
-                                    style={{ paddingRight: '30px', width: '100%' }}
-                                />
-                                <span
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="password-toggle"
-                                >
+                                <Field type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" />
+                                <span onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                                     <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
                                 </span>
                             </div>
@@ -134,24 +104,10 @@ const ChangePassword = () => {
                         <button type="submit" disabled={isSubmitting}>
                             Lưu
                         </button>
-                        <button type="button" onClick={handleCancel} style={{ marginLeft: '10px', backgroundColor: '#fff', color: '#333', border: '1px solid #ccc' }}>
-                            Hủy
-                        </button>
                     </Form>
                 )}
             </Formik>
-            <ToastContainer
-                position="top-right"
-                autoClose={1500}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                closeButton={false}
-            />
+            <ToastContainer position="top-right" autoClose={1500} />
         </div>
     );
 };
