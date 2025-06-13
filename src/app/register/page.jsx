@@ -1,20 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import UserService from '../../services/UserService';
-import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './style.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import './style.css';
 
 const Register = () => {
     const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const validationSchema = Yup.object({
         email: Yup.string()
@@ -28,75 +25,111 @@ const Register = () => {
             .required('Vui lòng nhập lại mật khẩu'),
     });
 
-    const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
-        const { username, email, password } = values;
-
+    const handleSubmit = async (values, { setSubmitting }) => {
         try {
-            const response = await UserService.register(username, email, password);
-            if (response.status === 200) {
-                toast.success('Đăng ký thành công! Chuyển đến trang đăng nhập...', {
-                    autoClose: 1500,
-                });
-                setTimeout(() => {
-                    localStorage.setItem('autoLogin', JSON.stringify({ email, password }));
-                    router.push('/login');
-                }, 1500);
-            }
-        } catch (err) {
-            const errorMsg = err.response?.data || 'Đăng ký không thành công';
-            setFieldError('email', errorMsg);
+            const response = await axios.post('http://localhost:8080/users/register', {
+                username: values.username,
+                email: values.email,
+                password: values.password,
+            }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+            toast.success(response.data, { autoClose: 1500 });
+            setTimeout(() => {
+                localStorage.setItem('autoLogin', JSON.stringify({ email: values.email, password: values.password }));
+                router.push('/login');
+            }, 1500);
+        } catch (error) {
+            const errorMessage = error.response?.data || 'Đăng ký thất bại. Vui lòng thử lại.';
+            toast.error(errorMessage, { autoClose: 3000 });
+            console.error('Lỗi đăng ký:', error.response ? error.response.data : error.message);
         } finally {
             setSubmitting(false);
         }
     };
 
     return (
-        <div>
+        <div suppressHydrationWarning>
             <h2>Đăng ký</h2>
             <Formik
-                initialValues={{ username: '', email: '', password: '', confirmPassword: '' }}
+                initialValues={{
+                    username: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
             >
-                {({ isSubmitting }) => (
+                {({ isSubmitting, errors, touched }) => (
                     <Form>
                         <div>
-                            <label>Tên hiển thị <span style={{ color: 'red' }}>*</span></label>
-                            <Field type="text" name="username" />
-                            <ErrorMessage name="username" component="p" className="error" />
+                            <label>Tên hiển thị</label>
+                            <Field
+                                type="text"
+                                name="username"
+                            />
+                            <ErrorMessage name="username" component="p" style={{ color: 'red' }} />
                         </div>
                         <div>
                             <label>Email <span style={{ color: 'red' }}>*</span></label>
-                            <Field type="email" name="email" />
-                            <ErrorMessage name="email" component="p" className="error" />
+                            <Field
+                                type="email"
+                                name="email"
+                                required
+                            />
+                            <ErrorMessage name="email" component="p" style={{ color: 'red' }} />
                         </div>
                         <div>
                             <label>Mật khẩu <span style={{ color: 'red' }}>*</span></label>
                             <div className="password-container">
-                                <Field type={showPassword ? 'text' : 'password'} name="password" />
-                                <span onClick={() => setShowPassword(!showPassword)}>
-                                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                                <Field
+                                    type="password"
+                                    name="password"
+                                    required
+                                />
+                                <span onClick={() => {
+                                    const field = document.querySelector('input[name="password"]');
+                                    field.type = field.type === 'password' ? 'text' : 'password';
+                                }}>
+                                    <FontAwesomeIcon icon={faEye} />
                                 </span>
                             </div>
-                            <ErrorMessage name="password" component="p" className="error" />
+                            <ErrorMessage name="password" component="p" style={{ color: 'red' }} />
                         </div>
                         <div>
                             <label>Nhập lại mật khẩu <span style={{ color: 'red' }}>*</span></label>
                             <div className="password-container">
-                                <Field type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" />
-                                <span onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                                    <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                                <Field
+                                    type="password"
+                                    name="confirmPassword"
+                                    required
+                                />
+                                <span onClick={() => {
+                                    const field = document.querySelector('input[name="confirmPassword"]');
+                                    field.type = field.type === 'password' ? 'text' : 'password';
+                                }}>
+                                    <FontAwesomeIcon icon={faEye} />
                                 </span>
                             </div>
-                            <ErrorMessage name="confirmPassword" component="p" className="error" />
+                            <ErrorMessage name="confirmPassword" component="p" style={{ color: 'red' }} />
                         </div>
-                        <button type="submit" disabled={isSubmitting}>
-                            Đăng ký
-                        </button>
+                        <button type="submit" disabled={isSubmitting}>Đăng ký</button>
                     </Form>
                 )}
             </Formik>
-            <ToastContainer position="top-right" autoClose={1500} />
+            <ToastContainer
+                position="top-right"
+                autoClose={1500}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                closeButton={false}
+            />
         </div>
     );
 };
