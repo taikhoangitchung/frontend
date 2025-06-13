@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
+import UserService from '../../services/UserService';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,8 +18,7 @@ const Register = () => {
 
     const validationSchema = Yup.object({
         email: Yup.string()
-            .email('Vui lòng nhập một địa chỉ email hợp lệ, bao gồm "@" và domain (ví dụ: example@email.com)')
-            .matches(/@.+\..+/, 'Vui lòng nhập một địa chỉ email hợp lệ, bao gồm "@" và domain (ví dụ: example@email.com)')
+            .email('Email không hợp lệ')
             .required('Email không được để trống'),
         password: Yup.string()
             .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
@@ -31,29 +30,19 @@ const Register = () => {
 
     const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
         const { username, email, password } = values;
-        const finalUsername = username.trim() || email;
-        console.log('Dữ liệu gửi đi:', { username: finalUsername, email, password });
+
         try {
-            const response = await axios.post('http://localhost:8080/users/register', {
-                username: finalUsername,
-                email,
-                password,
-            });
+            const response = await UserService.register(username, email, password);
             if (response.status === 200) {
                 toast.success('Đăng ký thành công! Chuyển đến trang đăng nhập...', {
                     autoClose: 1500,
                 });
-                // Lưu và chuyển hướng cùng lúc như code cũ
-                if (typeof window !== 'undefined') {
-                    setTimeout(() => {
-                        localStorage.setItem('autoLogin', JSON.stringify({ email, password }));
-                        console.log('Đã lưu autoLogin:', { email, password });
-                        router.push('/login');
-                    }, 1500);
-                }
+                setTimeout(() => {
+                    localStorage.setItem('autoLogin', JSON.stringify({ email, password }));
+                    router.push('/login');
+                }, 1500);
             }
         } catch (err) {
-            console.log('Lỗi từ server:', err.response);
             const errorMsg = err.response?.data || 'Đăng ký không thành công';
             setFieldError('email', errorMsg);
         } finally {
@@ -72,7 +61,7 @@ const Register = () => {
                 {({ isSubmitting }) => (
                     <Form>
                         <div>
-                            <label>Tên hiển thị</label>
+                            <label>Tên hiển thị <span style={{ color: 'red' }}>*</span></label>
                             <Field type="text" name="username" />
                             <ErrorMessage name="username" component="p" className="error" />
                         </div>
@@ -84,16 +73,8 @@ const Register = () => {
                         <div>
                             <label>Mật khẩu <span style={{ color: 'red' }}>*</span></label>
                             <div className="password-container">
-                                <Field
-                                    type={showPassword ? 'text' : 'password'}
-                                    name="password"
-                                    autoComplete="new-password"
-                                    style={{ paddingRight: '30px', width: '100%' }}
-                                />
-                                <span
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="password-toggle"
-                                >
+                                <Field type={showPassword ? 'text' : 'password'} name="password" />
+                                <span onClick={() => setShowPassword(!showPassword)}>
                                     <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                                 </span>
                             </div>
@@ -102,16 +83,8 @@ const Register = () => {
                         <div>
                             <label>Nhập lại mật khẩu <span style={{ color: 'red' }}>*</span></label>
                             <div className="password-container">
-                                <Field
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    name="confirmPassword"
-                                    autoComplete="new-password"
-                                    style={{ paddingRight: '30px', width: '100%' }}
-                                />
-                                <span
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="password-toggle"
-                                >
+                                <Field type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" />
+                                <span onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                                     <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
                                 </span>
                             </div>
@@ -123,18 +96,7 @@ const Register = () => {
                     </Form>
                 )}
             </Formik>
-            <ToastContainer
-                position="top-right"
-                autoClose={1500}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                closeButton={false}
-            />
+            <ToastContainer position="top-right" autoClose={1500} />
         </div>
     );
 };

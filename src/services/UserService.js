@@ -42,6 +42,33 @@ class UserService {
             throw error
         }
     }
+
+    static async login(email, password) {
+        try {
+            return await axiosInstance.post('/users/login', { email, password });
+        } catch (error) {
+            console.error("Lỗi khi đăng nhập", error);
+            throw error;
+        }
+    }
+
+    static async register(username, email, password) {
+        try {
+            return await axiosInstance.post('/users/register', { username, email, password });
+        } catch (error) {
+            console.error("Lỗi khi đăng ký", error);
+            throw error;
+        }
+    }
+
+    static async changePassword(email, oldPassword, newPassword) {
+        try {
+            return await axiosInstance.post('/users/change-password', { email, oldPassword, newPassword });
+        } catch (error) {
+            console.error("Lỗi khi đổi mật khẩu", error);
+            throw error;
+        }
+    }
 }
 
 export default UserService

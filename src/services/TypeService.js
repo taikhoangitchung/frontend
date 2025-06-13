@@ -1,13 +1,13 @@
 import axiosInstance from "../services/config";
 
-class DifficultyService {
+class TypeService {
     static async getAll() {
         try {
-            return await axiosInstance.get("/difficulties");
+            return await axiosInstance.get("/types");
         } catch (error) {
             return Promise.reject(error);
         }
     }
 }
 
-export default DifficultyService;
+export default TypeService;

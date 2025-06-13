@@ -1,18 +1,17 @@
-import axiosInstance from "./config";
+import axiosInstance from "../services/config";
 
 class QuestionService {
     static async create(questionData) {
         try {
             return await axiosInstance.post("/questions", questionData)
         } catch (error) {
-            console.error("Lỗi khi tạo câu hỏi", error)
-            throw error
+            return Promise.reject(error);
         }
     }
 
-    static async getAll(userId) {
+    static async getAll() {
         try {
-            return await axiosInstance.get(`/questions/user/${userId}`)
+            return await axiosInstance.get("/questions")
         } catch (error) {
             console.error("Lỗi khi lấy danh sách câu hỏi", error)
             throw error
@@ -45,6 +44,11 @@ class QuestionService {
             throw error
         }
     }
+
+    static async findAllByUser(userId) {
+        return axiosInstance.get(`/questions/user/${userId}`);
+    }
+
 }
 
 export default QuestionService

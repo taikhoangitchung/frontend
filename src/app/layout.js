@@ -1,10 +1,6 @@
 import "./globals.css";
-
-
-import Navbar from "../components/Navbar";
-
 import React from "react"
-import Navbar from "../components/nav/Navbar";
+import {Toaster} from "sonner";
 
 export const metadata = {
     title: "Quiz App",
@@ -15,8 +11,8 @@ export default function RootLayout({children}) {
     return (
         <html lang="en">
         <body>
-        <Navbar/>
         {children}
+        <Toaster richColors position="top-center" />
         </body>
         </html>
     );
