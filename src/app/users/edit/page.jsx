@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
+import UserService from '../../../services/UserService';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -24,27 +24,26 @@ const EditProfile = () => {
                 return;
             }
             setCurrentEmail(email);
-            // Gán giá trị mặc định từ localStorage hoặc API
             const storedUsername = localStorage.getItem('currentUserUsername') || '';
             const storedAvatarName = localStorage.getItem('currentUserAvatar') || 'default-avatar.png';
             const defaultAvatar = 'http://localhost:8080/media/default-avatar.png';
             setInitialUsername(storedUsername);
-            setAvatarPreview(defaultAvatar); // Sử dụng mặc định ban đầu
-            // Gọi API để lấy thông tin theo email
-            axios.get(`http://localhost:8080/users/profile?email=${encodeURIComponent(email)}`)
+            setAvatarPreview(defaultAvatar);
+
+            UserService.getProfile(email)
                 .then(response => {
                     const user = response.data;
                     const username = user.username || storedUsername;
-                    const avatar = user.avatar; // Lấy trực tiếp từ API
+                    const avatar = user.avatar;
                     const finalAvatar = avatar.startsWith('http') ? avatar : `http://localhost:8080/media/${avatar}`;
                     setInitialUsername(username);
                     setAvatarPreview(finalAvatar);
                     localStorage.setItem('currentUserUsername', username);
-                    localStorage.setItem('currentUserAvatar', avatar); // Lưu giá trị từ API (tên file hoặc URL)
+                    localStorage.setItem('currentUserAvatar', avatar);
                 })
                 .catch(err => {
                     console.error('Lỗi khi lấy thông tin user:', err);
-                    setAvatarPreview(defaultAvatar); // Fallback nếu API lỗi
+                    setAvatarPreview(defaultAvatar);
                 })
                 .finally(() => setLoading(false));
         }
@@ -57,20 +56,11 @@ const EditProfile = () => {
     });
 
     const handleSubmit = async (values, { setSubmitting }) => {
-        const formData = new FormData();
-        formData.append('email', currentEmail);
-        formData.append('username', values.username);
-        if (values.avatar) {
-            formData.append('avatar', values.avatar);
-        }
-
         try {
-            const response = await axios.post('http://localhost:8080/users/edit', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
+            const response = await UserService.editProfile(currentEmail, values.username, values.avatar);
             toast.success('Cập nhật thông tin thành công!', { autoClose: 1500 });
             if (response.data.avatar) {
-                setAvatarPreview(response.data.avatar); // Cập nhật ngay avatarPreview
+                setAvatarPreview(response.data.avatar);
                 localStorage.setItem('currentUserAvatar', response.data.avatar);
             }
             if (values.username) {
@@ -92,22 +82,17 @@ const EditProfile = () => {
     const handleAvatarChange = (event) => {
         const file = event.currentTarget.files[0];
         if (file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            axios.post('http://localhost:8080/users/upload-avatar', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
+            UserService.uploadAvatar(file)
                 .then(response => {
                     const avatarUrl = `http://localhost:8080/media/${response.data}`;
                     setAvatarPreview(avatarUrl);
-                    // Reload profile để cập nhật avatar
-                    axios.get(`http://localhost:8080/users/profile?email=${encodeURIComponent(currentEmail)}`)
-                        .then(profileResponse => {
-                            const avatar = profileResponse.data.avatar;
-                            setAvatarPreview(avatar.startsWith('http') ? avatar : `http://localhost:8080/media/${avatar}`);
-                            localStorage.setItem('currentUserAvatar', avatar);
-                        })
-                        .catch(err => console.error('Lỗi reload profile:', err));
+                    // Reload profile
+                    return UserService.getProfile(currentEmail);
+                })
+                .then(profileResponse => {
+                    const avatar = profileResponse.data.avatar;
+                    setAvatarPreview(avatar.startsWith('http') ? avatar : `http://localhost:8080/media/${avatar}`);
+                    localStorage.setItem('currentUserAvatar', avatar);
                 })
                 .catch(error => {
                     console.error('Lỗi upload avatar:', error);
