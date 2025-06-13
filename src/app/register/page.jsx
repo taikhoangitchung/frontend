@@ -61,7 +61,7 @@ const Register = () => {
                 {({ isSubmitting }) => (
                     <Form>
                         <div>
-                            <label>Tên hiển thị <span style={{ color: 'red' }}>*</span></label>
+                            <label>Tên hiển thị</label>
                             <Field type="text" name="username" />
                             <ErrorMessage name="username" component="p" className="error" />
                         </div>
