@@ -70,7 +70,8 @@ const EditProfile = () => {
             });
             toast.success('Cập nhật thông tin thành công!', { autoClose: 1500 });
             if (response.data.avatar) {
-                localStorage.setItem('currentUserAvatar', response.data.avatar); // Lưu giá trị từ backend
+                setAvatarPreview(response.data.avatar); // Cập nhật ngay avatarPreview
+                localStorage.setItem('currentUserAvatar', response.data.avatar);
             }
             if (values.username) {
                 localStorage.setItem('currentUserUsername', values.username);
@@ -91,8 +92,27 @@ const EditProfile = () => {
     const handleAvatarChange = (event) => {
         const file = event.currentTarget.files[0];
         if (file) {
-            // Dự đoán đường dẫn dựa trên tên file, sẽ được cập nhật sau submit
-            setAvatarPreview(`http://localhost:8080/media/${file.name}`);
+            const formData = new FormData();
+            formData.append('file', file);
+            axios.post('http://localhost:8080/users/upload-avatar', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+                .then(response => {
+                    const avatarUrl = `http://localhost:8080/media/${response.data}`;
+                    setAvatarPreview(avatarUrl);
+                    // Reload profile để cập nhật avatar
+                    axios.get(`http://localhost:8080/users/profile?email=${encodeURIComponent(currentEmail)}`)
+                        .then(profileResponse => {
+                            const avatar = profileResponse.data.avatar;
+                            setAvatarPreview(avatar.startsWith('http') ? avatar : `http://localhost:8080/media/${avatar}`);
+                            localStorage.setItem('currentUserAvatar', avatar);
+                        })
+                        .catch(err => console.error('Lỗi reload profile:', err));
+                })
+                .catch(error => {
+                    console.error('Lỗi upload avatar:', error);
+                    setAvatarPreview('http://localhost:8080/media/default-avatar.png');
+                });
         }
     };
 
