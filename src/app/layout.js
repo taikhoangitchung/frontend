@@ -1,5 +1,6 @@
 import "./globals.css";
 import React from "react"
+import {Toaster} from "sonner";
 
 export const metadata = {
     title: "Quiz App",
@@ -11,6 +12,7 @@ export default function RootLayout({children}) {
         <html lang="en">
         <body>
         {children}
+        <Toaster richColors position="top-center" />
         </body>
         </html>
     );
