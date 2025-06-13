@@ -25,8 +25,9 @@ const MyQuestions = () => {
             // const userId = payload.user_id;
             //
 
-            QuestionService.getAll(1)
+            QuestionService.findAllByUser(1)
                 .then(res => {
+                    console.log(res);
                     setTotalPage(Math.ceil(res.data.length / questionPerPage));
                     const start = page === 1 ? 0 : (page - 1) * questionPerPage;
                     const end = start + questionPerPage;
