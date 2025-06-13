@@ -16,6 +16,7 @@ const Register = () => {
     const validationSchema = Yup.object({
         email: Yup.string()
             .email('Email không hợp lệ')
+            .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Email phải có định dạng hợp lệ, ví dụ: example@email.com')
             .required('Email không được để trống'),
         password: Yup.string()
             .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
