@@ -45,16 +45,13 @@ const Login = () => {
 
         try {
             const response = await UserService.login(email, password);
-            const { message, success } = response.data;
-            if (success) {
+            if (response.status === 200) {
                 toast.success('Đăng nhập thành công!', { autoClose: 1500 });
                 localStorage.setItem('currentUserEmail', email);
                 setTimeout(() => router.push('/home'), 1500);
-            } else {
-                setGeneralError(message);
             }
         } catch (err) {
-            toast.error('Đăng nhập không thành công', { autoClose: 3000 });
+            toast.error(err.response.data, { autoClose: 3000 });
         } finally {
             setSubmitting(false);
         }
