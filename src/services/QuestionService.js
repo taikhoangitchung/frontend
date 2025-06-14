@@ -1,12 +1,11 @@
-import axiosInstance from "@/services/axiosConfig"
+import axiosInstance from "../services/config";
 
 class QuestionService {
     static async create(questionData) {
         try {
             return await axiosInstance.post("/questions", questionData)
         } catch (error) {
-            console.error("Lỗi khi tạo câu hỏi", error)
-            throw error
+            return Promise.reject(error);
         }
     }
 
@@ -45,6 +44,11 @@ class QuestionService {
             throw error
         }
     }
+
+    static async findAllByUser(userId) {
+        return axiosInstance.get(`/questions/user/${userId}`);
+    }
+
 }
 
 export default QuestionService

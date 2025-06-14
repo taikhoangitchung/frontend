@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic"
 
-const QuizCreator = dynamic(() => import("../../../components/question/QuestionForm"), {
+const DynamicWrapper = dynamic(() => import("../../../components/question/CreateForm"), {
     ssr: false,
     loading: () => (
         <div className="flex items-center justify-center h-screen">
@@ -14,5 +14,5 @@ const QuizCreator = dynamic(() => import("../../../components/question/QuestionF
 })
 
 export default function Component() {
-    return <QuizCreator/>
+    return <DynamicWrapper/>
 }
