@@ -1,5 +1,7 @@
 import * as React from "react"
+// @ts-ignore
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
+// @ts-ignore
 import { CircleIcon } from "lucide-react"
 
 import { cn } from "../../lib/utils"

@@ -5,6 +5,10 @@
       "@/*": ["./*"]
     },
     "target": "ES2017",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "lib": [
       "dom",
       "dom.iterable",
