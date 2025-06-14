@@ -50,7 +50,7 @@ const ChangePassword = () => {
             });
             setTimeout(() => router.push('/login'), 1500);
         } catch (err) {
-            const errorMsg = err.response?.data?.message || 'Đổi mật khẩu không thành công';
+            const errorMsg = err.response?.data || 'Đổi mật khẩu không thành công';
             setFieldError('oldPassword', errorMsg);
         } finally {
             setSubmitting(false);
