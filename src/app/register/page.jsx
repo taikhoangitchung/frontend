@@ -28,20 +28,23 @@ const Register = () => {
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
-            const response = await axios.post('http://localhost:8080/users/register', {
+            const response = await axios.post('http://localhost:8080/users', { // Thay /users/register thành /users
                 username: values.username,
                 email: values.email,
                 password: values.password,
             }, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            toast.success(response.data, { autoClose: 1500 });
+            const user = response.data; // Lấy UserResponse
+            toast.success('Đăng ký thành công!', { autoClose: 1500 });
             setTimeout(() => {
                 localStorage.setItem('autoLogin', JSON.stringify({ email: values.email, password: values.password }));
+                localStorage.setItem('currentUserEmail', values.email);
+                localStorage.setItem('currentUserId', user.id); // Giả định UserResponse có id
                 router.push('/login');
             }, 1500);
         } catch (error) {
-            const errorMessage = error.response?.data || 'Đăng ký thất bại. Vui lòng thử lại.';
+            const errorMessage = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
             toast.error(errorMessage, { autoClose: 3000 });
             console.error('Lỗi đăng ký:', error.response ? error.response.data : error.message);
         } finally {
