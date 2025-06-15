@@ -1,4 +1,5 @@
 'use client';
+
 import React, {useEffect, useState} from 'react';
 import CategoryService from '../../services/CategoryService';
 import {Pencil, Trash2} from 'lucide-react';
@@ -29,14 +30,14 @@ const CategoryTable = () => {
     }, []);
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Bạn có chắc chắn muốn xóa chuyên mục này?")) return;
+        if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return;
 
         try {
             await CategoryService.delete(id);
-            toast.success("Xóa chuyên mục thành công.");
+            toast.success("Xóa danh mục thành công.");
             await fetchCategories(); // Reload
         } catch (err) {
-            console.error("Xóa thất bại:", err);
+            console.error(err);
             toast.error("Xóa thất bại. Vui lòng thử lại.");
         }
     };
@@ -60,7 +61,7 @@ const CategoryTable = () => {
 
     return (
         <div className="max-w-6xl mx-auto mt-8">
-            <h2 className="text-2xl font-bold mb-4">Danh sách chuyên mục</h2>
+            <h2 className="text-2xl font-bold mb-4">Danh sách danh mục</h2>
             <table className="w-full border border-gray-300 text-left">
                 <thead className="bg-gray-100">
                 <tr>

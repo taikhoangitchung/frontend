@@ -25,20 +25,10 @@ class UserService {
         }
     }
 
-    static async isAdmin(userId) {
-        try {
-            return await axiosInstance.get(`/users/is-admin/${userId}`);
-        } catch (error) {
-            console.error("Lỗi khi tạo câu hỏi", error);
-            throw error;
-        }
-    }
-
     static async getAllExceptAdmin() {
         try {
             return await axiosInstance.get("/users");
         } catch (error) {
-            console.error("Lỗi khi tạo câu hỏi", error);
             throw error;
         }
     }
@@ -47,7 +37,6 @@ class UserService {
         try {
             return await axiosInstance.patch('/users/login', { email, password });
         } catch (error) {
-            console.error("Lỗi khi đăng nhập", error);
             throw error;
         }
     }
@@ -56,7 +45,6 @@ class UserService {
         try {
             return await axiosInstance.post('/users/register', { username, email, password });
         } catch (error) {
-            console.error("Lỗi khi đăng ký", error);
             throw error;
         }
     }
@@ -65,7 +53,6 @@ class UserService {
         try {
             return await axiosInstance.patch('/users/change-password', { email, oldPassword, newPassword });
         } catch (error) {
-            console.error("Lỗi khi đổi mật khẩu", error);
             throw error;
         }
     }
@@ -79,19 +66,12 @@ class UserService {
         }
     }
 
-    static async editProfile(email, username, avatarFile) {
+    static async editProfile(formData) {
         try {
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('username', username || '');
-            if (avatarFile) {
-                formData.append('avatar', avatarFile);
-            }
-            return await axiosInstance.post('/users/edit', formData, {
+            return await axiosInstance.patch('/users/edit', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
         } catch (error) {
-            console.error(`Lỗi khi cập nhật thông tin user với email: ${email}`, error);
             throw error;
         }
     }
