@@ -1,14 +1,14 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import {useRouter} from 'next/navigation';
+import {Formik, Form, Field, ErrorMessage} from 'formik';
 import * as Yup from 'yup';
-import { ToastContainer, toast } from 'react-toastify';
+import {ToastContainer, toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './style.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faEye, faEyeSlash} from '@fortawesome/free-solid-svg-icons';
+import UserService from "../../services/UserService";
 
 const Register = () => {
     const router = useRouter();
@@ -26,21 +26,21 @@ const Register = () => {
             .required('Vui lòng nhập lại mật khẩu'),
     });
 
-    const handleSubmit = async (values, { setSubmitting }) => {
+    const handleSubmit = async (values, {setSubmitting}) => {
         try {
-            const response = await axios.post('http://localhost:8080/users', { // Thay /users/register thành /users
+            const response = await axios.post('http://localhost:8080/users', {
                 username: values.username,
                 email: values.email,
                 password: values.password,
             }, {
-                headers: { 'Content-Type': 'application/json' }
+                headers: {'Content-Type': 'application/json'}
             });
             const user = response.data; // Lấy UserResponse
             toast.success('Đăng ký thành công!', { autoClose: 1500 });
             setTimeout(() => {
                 localStorage.setItem('autoLogin', JSON.stringify({ email: values.email, password: values.password }));
                 localStorage.setItem('currentUserEmail', values.email);
-                localStorage.setItem('currentUserId', user.id); // Giả định UserResponse có id
+                localStorage.setItem('currentUserId', user.id);
                 router.push('/login');
             }, 1500);
         } catch (error) {
@@ -65,7 +65,7 @@ const Register = () => {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
             >
-                {({ isSubmitting, errors, touched }) => (
+                {({isSubmitting, errors, touched}) => (
                     <Form>
                         <div>
                             <label>Tên hiển thị</label>
@@ -73,19 +73,19 @@ const Register = () => {
                                 type="text"
                                 name="username"
                             />
-                            <ErrorMessage name="username" component="p" style={{ color: 'red' }} />
+                            <ErrorMessage name="username" component="p" style={{color: 'red'}}/>
                         </div>
                         <div>
-                            <label>Email <span style={{ color: 'red' }}>*</span></label>
+                            <label>Email <span style={{color: 'red'}}>*</span></label>
                             <Field
                                 type="email"
                                 name="email"
                                 required
                             />
-                            <ErrorMessage name="email" component="p" style={{ color: 'red' }} />
+                            <ErrorMessage name="email" component="p" style={{color: 'red'}}/>
                         </div>
                         <div>
-                            <label>Mật khẩu <span style={{ color: 'red' }}>*</span></label>
+                            <label>Mật khẩu <span style={{color: 'red'}}>*</span></label>
                             <div className="password-container">
                                 <Field
                                     type="password"
@@ -96,13 +96,13 @@ const Register = () => {
                                     const field = document.querySelector('input[name="password"]');
                                     field.type = field.type === 'password' ? 'text' : 'password';
                                 }}>
-                                    <FontAwesomeIcon icon={faEye} />
+                                    <FontAwesomeIcon icon={faEye}/>
                                 </span>
                             </div>
-                            <ErrorMessage name="password" component="p" style={{ color: 'red' }} />
+                            <ErrorMessage name="password" component="p" style={{color: 'red'}}/>
                         </div>
                         <div>
-                            <label>Nhập lại mật khẩu <span style={{ color: 'red' }}>*</span></label>
+                            <label>Nhập lại mật khẩu <span style={{color: 'red'}}>*</span></label>
                             <div className="password-container">
                                 <Field
                                     type="password"
@@ -113,10 +113,10 @@ const Register = () => {
                                     const field = document.querySelector('input[name="confirmPassword"]');
                                     field.type = field.type === 'password' ? 'text' : 'password';
                                 }}>
-                                    <FontAwesomeIcon icon={faEye} />
+                                    <FontAwesomeIcon icon={faEye}/>
                                 </span>
                             </div>
-                            <ErrorMessage name="confirmPassword" component="p" style={{ color: 'red' }} />
+                            <ErrorMessage name="confirmPassword" component="p" style={{color: 'red'}}/>
                         </div>
                         <button type="submit" disabled={isSubmitting}>Đăng ký</button>
                     </Form>

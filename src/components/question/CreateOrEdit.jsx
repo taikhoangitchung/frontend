@@ -1,6 +1,6 @@
 "use client"
 
-import {useState, useEffect} from "react"
+import {useEffect, useState} from "react"
 import {useFormik} from "formik"
 import * as Yup from "yup"
 
@@ -18,17 +18,16 @@ import {
 } from "../ui/select"
 import {RadioGroup, RadioGroupItem} from "../ui/radio-group"
 import {Checkbox} from "../ui/checkbox"
+import {toast} from "sonner"
 
 import QuestionService from "../../services/QuestionService"
 import CategoryService from "../../services/CategoryService"
 import TypeService from "../../services/TypeService"
 import DifficultyService from "../../services/DifficultyService"
 import {initialAnswers} from "../../initvalues/answer"
-import {cn} from "../../lib/utils";
-import { toast } from "sonner";
+import {cn} from "../../lib/utils"
 
-
-export default function CreateForm() {
+export default function CreateFormUI({initialValues, isEdit = false, questionId = null}) {
     const [categories, setCategories] = useState([])
     const [types, setTypes] = useState([])
     const [difficulties, setDifficulties] = useState([])
@@ -57,7 +56,8 @@ export default function CreateForm() {
     }, [])
 
     const formik = useFormik({
-        initialValues: {
+        enableReinitialize: true,
+        initialValues: initialValues || {
             category: "",
             type: "",
             difficulty: "",
@@ -77,54 +77,56 @@ export default function CreateForm() {
                         correct: Yup.boolean(),
                     })
                 )
-                .test(
-                    "validCorrectAnswers",
-                    "Invalid number of correct answers",
-                    function (answers) {
-                        const type = this.parent.type
-                        const correctCount = answers.filter((a) => a.correct).length
-                        if (type === "multiple") return correctCount >= 2
-                        return correctCount === 1 // for "single" or "boolean"
-                    }
-                ),
+                .test("validCorrectAnswers", "Invalid number of correct answers", function (answers) {
+                    const type = this.parent.type
+                    const correctCount = answers.filter((a) => a.correct).length
+                    if (type === "multiple") return correctCount >= 2
+                    return correctCount === 1
+                }),
         }),
     })
 
     const handleSubmit = async () => {
-        const errors = await formik.validateForm();
+        const errors = await formik.validateForm()
         if (Object.keys(errors).length > 0) {
-            toast.error("Vui lòng nhập đầy đủ thông tin!");
-            return;
+            toast.error("Vui lòng nhập đầy đủ thông tin!")
+            return
         }
 
-        const cleanedAnswers = formik.values.answers.map(({ content, correct }) => ({
+        const cleanedAnswers = formik.values.answers.map(({content, correct}) => ({
             content,
             correct,
-        }));
+        }))
 
         const payload = {
             ...formik.values,
             answers: cleanedAnswers,
-        };
+        }
 
         try {
-            setIsSubmitting(true);
-            await QuestionService.create(payload);
-            toast.success("Tạo câu hỏi thành công! 🎉");
-            formik.resetForm();
+            setIsSubmitting(true)
+            if (isEdit && questionId) {
+                await QuestionService.update(questionId, payload)
+                toast.success("Cập nhật câu hỏi thành công!")
+            } else {
+                await QuestionService.create(payload)
+                toast.success("Tạo câu hỏi thành công! 🎉")
+            }
+            formik.resetForm()
         } catch (err) {
-            toast.error("Đã xảy ra lỗi khi tạo câu hỏi. Vui lòng thử lại sau.");
+            toast.error("Đã xảy ra lỗi. Vui lòng thử lại.")
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false)
         }
-    };
+    }
 
     useEffect(() => {
-        const currentType = formik.values.type
+        const currentType = formik.values.type;
         if (currentType) {
-            formik.setFieldValue("answers", initialAnswers(currentType))
+            formik.setFieldValue("answers", initialAnswers(currentType));
         }
-    }, [formik.values.type])
+    }, [formik.values.type]);
+
 
     const handleSelectChange = (field) => (value) => {
         formik.setFieldValue(field, value)
@@ -144,13 +146,11 @@ export default function CreateForm() {
                 {/* Dropdowns */}
                 <div className="flex flex-wrap gap-4 mb-8">
                     <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
-                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20 font-medium tracking-wide text-sm">
-
-                        <SelectValue placeholder="Select Category"/>
+                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20">
+                            <SelectValue placeholder="Select Category"/>
                         </SelectTrigger>
-                        <SelectContent className="bg-purple-900 text-white border-white/20 text-sm font-medium tracking-wide">
-
-                        {categories.map((cat) => (
+                        <SelectContent className="bg-purple-900 text-white border-white/20">
+                            {categories.map((cat) => (
                                 <SelectItem key={cat.id} value={cat.name}>
                                     {cat.name}
                                 </SelectItem>
@@ -159,13 +159,11 @@ export default function CreateForm() {
                     </Select>
 
                     <Select value={formik.values.difficulty} onValueChange={handleSelectChange("difficulty")}>
-                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20 font-medium tracking-wide text-sm">
-
-                        <SelectValue placeholder="Select Difficulty"/>
+                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20">
+                            <SelectValue placeholder="Select Difficulty"/>
                         </SelectTrigger>
-                        <SelectContent className="bg-purple-900 text-white border-white/20 text-sm font-medium tracking-wide">
-
-                        {difficulties.map((diff) => (
+                        <SelectContent className="bg-purple-900 text-white border-white/20">
+                            {difficulties.map((diff) => (
                                 <SelectItem key={diff.id} value={diff.name}>
                                     {diff.name}
                                 </SelectItem>
@@ -174,13 +172,11 @@ export default function CreateForm() {
                     </Select>
 
                     <Select value={formik.values.type} onValueChange={handleSelectChange("type")}>
-                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20 font-medium tracking-wide text-sm">
-
-                        <SelectValue placeholder="Select Type"/>
+                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20">
+                            <SelectValue placeholder="Select Type"/>
                         </SelectTrigger>
-                        <SelectContent className="bg-purple-900 text-white border-white/20 text-sm font-medium tracking-wide">
-
-                        {types.map((type) => (
+                        <SelectContent className="bg-purple-900 text-white border-white/20">
+                            {types.map((type) => (
                                 <SelectItem key={type.id} value={type.name}>
                                     {type.name}
                                 </SelectItem>
@@ -196,9 +192,8 @@ export default function CreateForm() {
                         placeholder="Type your question here"
                         value={formik.values.content}
                         onChange={formik.handleChange}
-                        className="bg-transparent border-none text-white placeholder:text-white/60 text-xl leading-relaxed tracking-wide font-medium resize-none min-h-[100px] focus:ring-0 focus:outline-none"
+                        className="bg-transparent border-none text-white placeholder:text-white/60 text-xl resize-none min-h-[100px]"
                     />
-
                 </Card>
 
                 {/* Answer Options */}
@@ -212,16 +207,16 @@ export default function CreateForm() {
                     {formik.values.answers.map((answer, index) => (
                         <Card
                             key={answer.id}
-                            className={`bg-gradient-to-br ${answer.color} border-none h-80 relative overflow-hidden`}
+                            className={`bg-gradient-to-br ${answer.color} border-none h-80 relative`}
                         >
                             <div className="absolute top-4 right-4">
                                 {formik.values.type === "multiple" ? (
                                     <Checkbox
                                         checked={answer.correct}
                                         onCheckedChange={(checked) => {
-                                            const updatedAnswers = [...formik.values.answers]
-                                            updatedAnswers[index].correct = checked
-                                            formik.setFieldValue("answers", updatedAnswers)
+                                            const updated = [...formik.values.answers]
+                                            updated[index].correct = checked
+                                            formik.setFieldValue("answers", updated)
                                         }}
                                         className="w-5 h-5 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900"
                                     />
@@ -229,23 +224,16 @@ export default function CreateForm() {
                                     <RadioGroup
                                         value={formik.values.answers.find((a) => a.correct)?.id.toString()}
                                         onValueChange={(val) => {
-                                            const updatedAnswers = formik.values.answers.map((a) => ({
+                                            const updated = formik.values.answers.map((a) => ({
                                                 ...a,
                                                 correct: a.id.toString() === val,
                                             }))
-                                            formik.setFieldValue("answers", updatedAnswers)
+                                            formik.setFieldValue("answers", updated)
                                         }}
                                     >
                                         <RadioGroupItem
                                             value={answer.id.toString()}
                                             id={`answer-${answer.id}`}
-                                            checked={formik.values.answers.some((a) => a.id === answer.id && a.correct)}
-                                            onChange={() => {
-                                                const updatedAnswers = formik.values.answers.map((a) =>
-                                                    a.id === answer.id ? {...a, correct: true} : {...a, correct: false}
-                                                );
-                                                formik.setFieldValue("answers", updatedAnswers);
-                                            }}
                                             className={cn(
                                                 "w-6 h-6 rounded-full border-2 border-white/40 text-white relative transition-colors",
                                                 "data-[state=checked]:bg-white data-[state=checked]:border-white",
@@ -258,7 +246,6 @@ export default function CreateForm() {
                                 )}
                             </div>
 
-                            {/* Answer Input */}
                             <div className="p-4 h-full flex flex-col justify-center">
                                 <label htmlFor={`answer-${answer.id}`} className="sr-only">
                                     Answer {index + 1}
@@ -267,14 +254,13 @@ export default function CreateForm() {
                                     id={`answer-${answer.id}`}
                                     value={answer.content}
                                     onChange={(e) => {
-                                        const updatedAnswers = [...formik.values.answers];
-                                        updatedAnswers[index].content = e.target.value;
-                                        formik.setFieldValue("answers", updatedAnswers);
+                                        const updated = [...formik.values.answers]
+                                        updated[index].content = e.target.value
+                                        formik.setFieldValue("answers", updated)
                                     }}
                                     placeholder={`Answer Option ${index + 1}`}
-                                    className="bg-transparent border-none text-white placeholder:text-white/60 text-base leading-relaxed tracking-wide font-medium focus:ring-0 focus:outline-none h-full"
+                                    className="bg-transparent border-none text-white placeholder:text-white/60 text-base h-full"
                                 />
-
                             </div>
                         </Card>
                     ))}
@@ -287,18 +273,17 @@ export default function CreateForm() {
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-8 text-base font-semibold tracking-wide"
+                        className="bg-purple-500 hover:bg-purple-600 text-white px-8 text-base font-semibold"
                     >
-
-                    {isSubmitting ? (
+                        {isSubmitting ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                                Submitting
+                                {isEdit ? "Updating" : "Submitting"}
                             </>
                         ) : (
                             <>
                                 <Send className="mr-2 h-4 w-4"/>
-                                Submit Question
+                                {isEdit ? "Update Question" : "Submit Question"}
                             </>
                         )}
                     </Button>
@@ -307,5 +292,3 @@ export default function CreateForm() {
         </div>
     )
 }
-
-

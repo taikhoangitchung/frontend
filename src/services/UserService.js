@@ -25,29 +25,18 @@ class UserService {
         }
     }
 
-    static async isAdmin(userId) {
-        try {
-            return await axiosInstance.get(`/users/is-admin/${userId}`);
-        } catch (error) {
-            console.error("Lỗi khi tạo câu hỏi", error);
-            throw error;
-        }
-    }
-
     static async getAllExceptAdmin() {
         try {
             return await axiosInstance.get("/users");
         } catch (error) {
-            console.error("Lỗi khi tạo câu hỏi", error);
             throw error;
         }
     }
 
     static async login(email, password) {
         try {
-            return await axiosInstance.post('/users/login', { email, password });
+            return await axiosInstance.patch('/users/login', { email, password });
         } catch (error) {
-            console.error("Lỗi khi đăng nhập", error);
             throw error;
         }
     }
@@ -56,7 +45,6 @@ class UserService {
         try {
             return await axiosInstance.post('/users', { username, email, password }); // Thay /users/register thành /users
         } catch (error) {
-            console.error("Lỗi khi đăng ký", error);
             throw error;
         }
     }
@@ -65,7 +53,6 @@ class UserService {
         try {
             return await axiosInstance.patch(`/users/${userId}/password`, { oldPassword, newPassword });
         } catch (error) {
-            console.error("Lỗi khi đổi mật khẩu", error);
             throw error;
         }
     }
