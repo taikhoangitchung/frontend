@@ -11,26 +11,26 @@ import './style.css';
 
 const EditProfile = () => {
     const router = useRouter();
-    const [currentEmail, setCurrentEmail] = useState('');
+    const [userId, setUserId] = useState(null); // Thay currentEmail bằng userId
     const [avatarPreview, setAvatarPreview] = useState('');
     const [initialUsername, setInitialUsername] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const email = localStorage.getItem('currentUserEmail');
-            if (!email) {
+            const storedUserId = localStorage.getItem('currentUserId'); // Giả định lưu userId
+            if (!storedUserId) {
                 router.push('/login');
                 return;
             }
-            setCurrentEmail(email);
+            setUserId(parseInt(storedUserId, 10));
             const storedUsername = localStorage.getItem('currentUserUsername') || '';
             const storedAvatarName = localStorage.getItem('currentUserAvatar') || 'default-avatar.png';
             const defaultAvatar = 'http://localhost:8080/media/default-avatar.png';
             setInitialUsername(storedUsername);
             setAvatarPreview(defaultAvatar);
 
-            UserService.getProfile(email)
+            UserService.getProfile(storedUserId) // Sửa email thành userId
                 .then(response => {
                     const user = response.data;
                     const username = user.username || storedUsername;
@@ -57,7 +57,11 @@ const EditProfile = () => {
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
-            const response = await UserService.editProfile(currentEmail, values.username, values.avatar);
+            const formData = new FormData();
+            formData.append('request', new Blob([JSON.stringify(values)], { type: 'application/json' }));
+            if (values.avatar) formData.append('avatar', values.avatar);
+
+            const response = await UserService.editProfile(userId, values); // Sửa email thành userId
             toast.success('Cập nhật thông tin thành công!', { autoClose: 1500 });
             if (response.data.avatar) {
                 setAvatarPreview(response.data.avatar);
@@ -82,12 +86,11 @@ const EditProfile = () => {
     const handleAvatarChange = (event) => {
         const file = event.currentTarget.files[0];
         if (file) {
-            UserService.uploadAvatar(file)
+            UserService.uploadAvatar(file) // Cần cập nhật nếu có
                 .then(response => {
                     const avatarUrl = `http://localhost:8080/media/${response.data}`;
                     setAvatarPreview(avatarUrl);
-                    // Reload profile
-                    return UserService.getProfile(currentEmail);
+                    return UserService.getProfile(userId); // Sửa email thành userId
                 })
                 .then(profileResponse => {
                     const avatar = profileResponse.data.avatar;
@@ -117,7 +120,7 @@ const EditProfile = () => {
                     <Form>
                         <div>
                             <label>Email <span style={{ color: 'red' }}>*</span></label>
-                            <p>{currentEmail || 'Không tìm thấy email'}</p>
+                            <p>{localStorage.getItem('currentUserEmail') || 'Không tìm thấy email'}</p>
                         </div>
                         <div>
                             <label>Tên hiển thị <span style={{ color: 'red' }}>*</span></label>

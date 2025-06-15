@@ -43,35 +43,41 @@ class UserService {
 
     static async register(username, email, password) {
         try {
-            return await axiosInstance.post('/users/register', { username, email, password });
+            return await axiosInstance.post('/users', { username, email, password }); // Thay /users/register thành /users
         } catch (error) {
             throw error;
         }
     }
 
-    static async changePassword(email, oldPassword, newPassword) {
+    static async changePassword(userId, oldPassword, newPassword) {
         try {
-            return await axiosInstance.patch('/users/change-password', { email, oldPassword, newPassword });
+            return await axiosInstance.patch(`/users/${userId}/password`, { oldPassword, newPassword });
         } catch (error) {
             throw error;
         }
     }
 
-    static async getProfile(email) {
+    static async getProfile(userId) {
         try {
-            return await axiosInstance.get(`/users/profile?email=${encodeURIComponent(email)}`);
+            return await axiosInstance.get(`/users/${userId}`);
         } catch (error) {
-            console.error(`Lỗi khi lấy thông tin user với email: ${email}`, error);
+            console.error(`Lỗi khi lấy thông tin user với id: ${userId}`, error);
             throw error;
         }
     }
 
-    static async editProfile(formData) {
+    static async editProfile(userId, data) {
         try {
-            return await axiosInstance.patch('/users/edit', formData, {
+            const formData = new FormData();
+            formData.append('request', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+            if (data.avatar) {
+                formData.append('avatar', data.avatar);
+            }
+            return await axiosInstance.put(`/users/${userId}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
         } catch (error) {
+            console.error(`Lỗi khi cập nhật thông tin user với id: ${userId}`, error);
             throw error;
         }
     }
@@ -79,7 +85,7 @@ class UserService {
     static async uploadAvatar(file) {
         try {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('avatar', file);
             return await axiosInstance.post('/users/upload-avatar', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });

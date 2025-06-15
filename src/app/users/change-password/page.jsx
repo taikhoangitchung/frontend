@@ -16,16 +16,16 @@ const ChangePassword = () => {
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [currentEmail, setCurrentEmail] = useState('');
+    const [userId, setUserId] = useState(null); // Thay currentEmail bằng userId
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const email = localStorage.getItem('currentUserEmail');
-            if (email) {
-                setCurrentEmail(email);
-            } else {
+            const storedUserId = localStorage.getItem('currentUserId'); // Giả định lưu userId
+            if (!storedUserId) {
                 router.push('/login');
+                return;
             }
+            setUserId(parseInt(storedUserId, 10));
         }
     }, [router]);
 
@@ -44,7 +44,7 @@ const ChangePassword = () => {
 
     const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
         try {
-            await UserService.changePassword(currentEmail, values.oldPassword, values.newPassword);
+            await UserService.changePassword(userId, values.oldPassword, values.newPassword); // Sửa tham số
             toast.success('Đổi mật khẩu thành công! Chuyển đến trang đăng nhập...', {
                 autoClose: 1500,
             });
@@ -69,7 +69,7 @@ const ChangePassword = () => {
                     <Form>
                         <div>
                             <label>Email</label>
-                            <p>{currentEmail || 'Không tìm thấy email'}</p>
+                            <p>{localStorage.getItem('currentUserEmail') || 'Không tìm thấy email'}</p>
                         </div>
                         <div>
                             <label>Mật khẩu cũ <span style={{ color: 'red' }}>*</span></label>
