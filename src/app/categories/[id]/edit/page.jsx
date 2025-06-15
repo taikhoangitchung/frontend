@@ -36,7 +36,7 @@ export default function EditCategoryForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-        setSubmitting(true);
+            setSubmitting(true);
             await CategoryService.update(id, form);
             toast.success('Cập nhật thành công!');
         } catch (err) {

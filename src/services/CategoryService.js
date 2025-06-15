@@ -32,6 +32,13 @@ class CategoryService {
             return Promise.reject(error);
         }
     }
+    static async create(form) {
+        try {
+            return await axiosInstance.post("/categories", form);
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
 }
 
 export default CategoryService;
