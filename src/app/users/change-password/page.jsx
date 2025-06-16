@@ -16,22 +16,21 @@ const ChangePassword = () => {
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [userId, setUserId] = useState(null); // Thay currentEmail bằng userId
+    const [userEmail, setUserEmail] = useState(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const storedUserId = localStorage.getItem('currentUserId'); // Giả định lưu userId
-            if (!storedUserId) {
+            const storedUserEmail = localStorage.getItem('currentUserEmail');
+            if (!storedUserEmail) {
                 router.push('/login');
                 return;
             }
-            setUserId(parseInt(storedUserId, 10));
+            setUserEmail(storedUserEmail);
         }
     }, [router]);
 
     const validationSchema = Yup.object({
         oldPassword: Yup.string()
-            .min(6, 'Mật khẩu cũ phải có ít nhất 6 ký tự')
             .required('Mật khẩu cũ không được để trống'),
         newPassword: Yup.string()
             .min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự')
@@ -44,7 +43,11 @@ const ChangePassword = () => {
 
     const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
         try {
-            await UserService.changePassword(userId, values.oldPassword, values.newPassword); // Sửa tham số
+            await UserService.changePassword({
+                email: userEmail,
+                oldPassword: values.oldPassword,
+                newPassword: values.newPassword,
+            });
             toast.success('Đổi mật khẩu thành công! Chuyển đến trang đăng nhập...', {
                 autoClose: 1500,
             });
@@ -52,10 +55,13 @@ const ChangePassword = () => {
         } catch (err) {
             const errorMsg = err.response?.data || 'Đổi mật khẩu không thành công';
             setFieldError('oldPassword', errorMsg);
+            toast.error(errorMsg, { autoClose: 3000 });
         } finally {
             setSubmitting(false);
         }
     };
+
+    if (!userEmail) return null;
 
     return (
         <div>
@@ -69,7 +75,7 @@ const ChangePassword = () => {
                     <Form>
                         <div>
                             <label>Email</label>
-                            <p>{localStorage.getItem('currentUserEmail') || 'Không tìm thấy email'}</p>
+                            <p>{userEmail}</p>
                         </div>
                         <div>
                             <label>Mật khẩu cũ <span style={{ color: 'red' }}>*</span></label>
