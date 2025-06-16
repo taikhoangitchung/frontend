@@ -11,6 +11,18 @@ import { Pencil, Trash2, Plus, Search, Grid3X3, Check } from "lucide-react"
 import CategoryService from "../../services/CategoryService"
 import {Skeleton} from "../../components/ui/skeleton";
 
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogFooter,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogCancel,
+    AlertDialogAction
+} from "../../components/ui/alert-dialog"
+
 const ITEMS_PER_PAGE = 10
 
 const CategoryTable = () => {
@@ -26,8 +38,15 @@ const CategoryTable = () => {
             const res = await CategoryService.getAll()
             const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name, "vi", { sensitivity: "base" }))
             setCategories(sorted)
-        } catch (err) {
-            console.error("Lỗi khi fetch categories:", err)
+        } catch (error) {
+            if (error.response?.status === 403) {
+                router.push("/forbidden");
+            } else if (error.response?.status === 401) {
+                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...")
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2500);
+            }
         } finally {
             setLoading(false)
         }
@@ -38,7 +57,6 @@ const CategoryTable = () => {
     }, [])
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return
         try {
             await CategoryService.delete(id)
             toast.success("Xóa danh mục thành công.")
@@ -138,14 +156,34 @@ const CategoryTable = () => {
                                     >
                                         <Pencil className="w-4 h-4" />
                                     </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="p-1 text-destructive"
-                                        onClick={() => handleDelete(category.id)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    <AlertDialog key={`dialog-${category.id}`}>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="p-1 text-destructive hover:bg-red-50"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent className="backdrop-brightness-100 bg-white z-50 max-w-sm p-6">
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle className="text-lg font-semibold">
+                                                    Bạn chắc chắn muốn xóa?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription className="text-sm text-muted-foreground">
+                                                    Hành động này sẽ xóa mục này vĩnh viễn và không thể khôi phục.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(category.id)}>
+                                                    Xác nhận
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+
                                 </div>
                             </div>
                         </CardHeader>

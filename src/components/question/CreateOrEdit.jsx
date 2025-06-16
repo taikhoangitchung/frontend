@@ -47,8 +47,16 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
             setCategories(catRes.data)
             setTypes(typeRes.data)
             setDifficulties(diffRes.data)
-        } catch (err) {
-            console.error("Error fetching dropdowns:", err)
+        } catch (error) {
+            console.log(error)
+            if (error.response?.status === 403) {
+                router.push("/forbidden");
+            } else if (error.response?.status === 401) {
+                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...")
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2500);
+            }
         } finally {
             setLoading(false)
         }
