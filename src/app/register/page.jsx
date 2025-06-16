@@ -114,7 +114,7 @@ const Register = () => {
                                     validationSchema={validationSchema}
                                     onSubmit={handleSubmit}
                                 >
-                                    {({isSubmitting}) => (
+                                    {() => (
                                         <Form className="space-y-4">
                                             <div>
                                                 <div className="relative">
