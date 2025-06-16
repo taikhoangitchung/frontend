@@ -1,5 +1,7 @@
 "use client"
 
+import { ArrowLeft } from "lucide-react"
+import { useRouter } from "next/navigation"
 import {useEffect, useState} from "react"
 import {useFormik} from "formik"
 import * as Yup from "yup"
@@ -28,6 +30,7 @@ import {initialAnswers} from "../../initvalues/answer"
 import {cn} from "../../lib/utils"
 
 export default function CreateFormUI({initialValues, isEdit = false, questionId = null}) {
+    const router = useRouter()
     const [categories, setCategories] = useState([])
     const [types, setTypes] = useState([])
     const [difficulties, setDifficulties] = useState([])
@@ -65,31 +68,45 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
             answers: initialAnswers("single"),
         },
         validationSchema: Yup.object().shape({
-            category: Yup.string().required("Category is required"),
-            type: Yup.string().required("Type is required"),
-            difficulty: Yup.string().required("Difficulty is required"),
-            content: Yup.string().required("Question content is required"),
+            category: Yup.string().required("Vui lòng chọn chủ đề"),
+            type: Yup.string().required("Vui lòng chọn loại câu hỏi"),
+            difficulty: Yup.string().required("Vui lòng chọn độ khó"),
+            content: Yup.string().required("Vui lòng nhập nội dung câu hỏi"),
             answers: Yup.array()
                 .of(
                     Yup.object().shape({
                         id: Yup.number().required(),
-                        content: Yup.string().trim().required("Answer is required"),
+                        content: Yup.string().trim().required("Vui lòng nhập nội dung đáp án"),
                         correct: Yup.boolean(),
                     })
                 )
-                .test("validCorrectAnswers", "Invalid number of correct answers", function (answers) {
-                    const type = this.parent.type
-                    const correctCount = answers.filter((a) => a.correct).length
-                    if (type === "multiple") return correctCount >= 2
-                    return correctCount === 1
-                }),
-        }),
+                .test(
+                    "validCorrectAnswers",
+                    "Số lượng đáp án đúng không hợp lệ",
+                    function (answers) {
+                        const type = this.parent.type
+                        const correctCount = answers.filter((a) => a.correct).length
+                        if (type === "multiple") return correctCount >= 2
+                        return correctCount === 1
+                    }
+                ),
+        })
     })
 
     const handleSubmit = async () => {
         const errors = await formik.validateForm()
         if (Object.keys(errors).length > 0) {
-            toast.error("Vui lòng nhập đầy đủ thông tin!")
+            const firstError = Object.values(errors)[0]
+
+            if (typeof firstError === "string") {
+                toast.error(firstError)
+            } else if (Array.isArray(firstError)) {
+                const nestedFirst = firstError.find(e => typeof e === 'object' && e !== null)
+                if (nestedFirst) {
+                    const nestedMessage = Object.values(nestedFirst)[0]
+                    if (typeof nestedMessage === "string") toast.error(nestedMessage)
+                }
+            }
             return
         }
 
@@ -143,11 +160,26 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6">
             <div className="max-w-6xl mx-auto">
+                {/* Back Button and Title */}
+                <div className="flex items-center gap-4 mb-6">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push("/questions/my")}
+                        className="p-2 text-white hover:bg-white/10"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    <h1 className="text-2xl font-semibold text-white">
+                        {isEdit ? "Chỉnh sửa câu hỏi" : "Tạo câu hỏi mới"}
+                    </h1>
+                </div>
+
                 {/* Dropdowns */}
                 <div className="flex flex-wrap gap-4 mb-8">
                     <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
                         <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20">
-                            <SelectValue placeholder="Select Category"/>
+                            <SelectValue placeholder="Chọn chủ đề"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {categories.map((cat) => (
@@ -160,7 +192,7 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
 
                     <Select value={formik.values.difficulty} onValueChange={handleSelectChange("difficulty")}>
                         <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20">
-                            <SelectValue placeholder="Select Difficulty"/>
+                            <SelectValue placeholder="Chọn độ khó"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {difficulties.map((diff) => (
@@ -173,7 +205,7 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
 
                     <Select value={formik.values.type} onValueChange={handleSelectChange("type")}>
                         <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20">
-                            <SelectValue placeholder="Select Type"/>
+                            <SelectValue placeholder="Chọn loại câu hỏi"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {types.map((type) => (
@@ -189,7 +221,7 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
                 <Card className="bg-white/10 border-white/20 backdrop-blur-sm mb-8 p-8">
                     <Textarea
                         name="content"
-                        placeholder="Type your question here"
+                        placeholder="Nhập nội dung câu hỏi"
                         value={formik.values.content}
                         onChange={formik.handleChange}
                         className="bg-transparent border-none text-white placeholder:text-white/60 text-xl resize-none min-h-[100px]"
@@ -258,7 +290,7 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
                                         updated[index].content = e.target.value
                                         formik.setFieldValue("answers", updated)
                                     }}
-                                    placeholder={`Answer Option ${index + 1}`}
+                                    placeholder={`Nhập đáp án ${index + 1}`}
                                     className="bg-transparent border-none text-white placeholder:text-white/60 text-base h-full"
                                 />
                             </div>
@@ -278,14 +310,15 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                                {isEdit ? "Updating" : "Submitting"}
+                                {isEdit ? "Đang cập nhật" : "Đang gửi"}
                             </>
                         ) : (
                             <>
                                 <Send className="mr-2 h-4 w-4"/>
-                                {isEdit ? "Update Question" : "Submit Question"}
+                                {isEdit ? "Cập nhật câu hỏi" : "Tạo câu hỏi"}
                             </>
                         )}
+
                     </Button>
                 </div>
             </div>

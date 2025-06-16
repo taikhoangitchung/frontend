@@ -11,33 +11,31 @@ import './style.css';
 
 const EditProfile = () => {
     const router = useRouter();
-    const [userId, setUserId] = useState(null); // Thay currentEmail bằng userId
+    const [userEmail, setUserEmail] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState('');
     const [initialUsername, setInitialUsername] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const storedUserId = localStorage.getItem('currentUserId'); // Giả định lưu userId
-            if (!storedUserId) {
+            const storedUserEmail = localStorage.getItem('currentUserEmail');
+            if (!storedUserEmail) {
                 router.push('/login');
                 return;
             }
-            setUserId(parseInt(storedUserId, 10));
+            setUserEmail(storedUserEmail);
             const storedUsername = localStorage.getItem('currentUserUsername') || '';
-            const storedAvatarName = localStorage.getItem('currentUserAvatar') || 'default-avatar.png';
             const defaultAvatar = 'http://localhost:8080/media/default-avatar.png';
             setInitialUsername(storedUsername);
             setAvatarPreview(defaultAvatar);
 
-            UserService.getProfile(storedUserId) // Sửa email thành userId
+            UserService.getProfile(storedUserEmail)
                 .then(response => {
                     const user = response.data;
                     const username = user.username || storedUsername;
-                    const avatar = user.avatar;
-                    const finalAvatar = avatar.startsWith('http') ? avatar : `http://localhost:8080/media/${avatar}`;
+                    const avatar = user.avatar || defaultAvatar;
                     setInitialUsername(username);
-                    setAvatarPreview(finalAvatar);
+                    setAvatarPreview(`http://localhost:8080${avatar}`);
                     localStorage.setItem('currentUserUsername', username);
                     localStorage.setItem('currentUserAvatar', avatar);
                 })
@@ -51,28 +49,33 @@ const EditProfile = () => {
 
     const validationSchema = Yup.object({
         username: Yup.string()
-            .required('Tên hiển thị không được để trống')
             .max(50, 'Tên hiển thị không được vượt quá 50 ký tự'),
+        avatar: Yup.mixed()
+            .test('fileSize', 'File quá lớn', (value) => !value || value.size <= 5 * 1024 * 1024)
+            .test('fileType', 'Chỉ hỗ trợ file ảnh', (value) => !value || ['image/jpeg', 'image/png', 'image/gif'].includes(value.type)),
     });
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
             const formData = new FormData();
-            formData.append('request', new Blob([JSON.stringify(values)], { type: 'application/json' }));
+            formData.append('email', userEmail);
+            if (values.username) formData.append('username', values.username);
             if (values.avatar) formData.append('avatar', values.avatar);
 
-            const response = await UserService.editProfile(userId, values); // Sửa email thành userId
-            toast.success('Cập nhật thông tin thành công!', { autoClose: 1500 });
-            if (response.data.avatar) {
-                setAvatarPreview(response.data.avatar);
-                localStorage.setItem('currentUserAvatar', response.data.avatar);
+            const response = await UserService.editProfile(formData);
+            toast.success(response.data, { autoClose: 1500 });
+            if (values.avatar) {
+                const newAvatar = response.data.avatar || avatarPreview;
+                setAvatarPreview(newAvatar);
+                localStorage.setItem('currentUserAvatar', newAvatar);
             }
             if (values.username) {
                 localStorage.setItem('currentUserUsername', values.username);
             }
             setTimeout(() => router.push('/'), 1500);
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Cập nhật không thành công. Vui lòng kiểm tra lại file upload hoặc kết nối backend.', { autoClose: 3000 });
+            const errorMsg = err.response?.data || 'Cập nhật không thành công. Vui lòng kiểm tra lại file upload hoặc kết nối backend.';
+            toast.error(errorMsg, { autoClose: 3000 });
             console.error('Lỗi submit:', err);
         } finally {
             setSubmitting(false);
@@ -83,28 +86,17 @@ const EditProfile = () => {
         router.push('/');
     };
 
-    const handleAvatarChange = (event) => {
+    const handleAvatarChange = (event, setFieldValue) => {
         const file = event.currentTarget.files[0];
         if (file) {
-            UserService.uploadAvatar(file) // Cần cập nhật nếu có
-                .then(response => {
-                    const avatarUrl = `http://localhost:8080/media/${response.data}`;
-                    setAvatarPreview(avatarUrl);
-                    return UserService.getProfile(userId); // Sửa email thành userId
-                })
-                .then(profileResponse => {
-                    const avatar = profileResponse.data.avatar;
-                    setAvatarPreview(avatar.startsWith('http') ? avatar : `http://localhost:8080/media/${avatar}`);
-                    localStorage.setItem('currentUserAvatar', avatar);
-                })
-                .catch(error => {
-                    console.error('Lỗi upload avatar:', error);
-                    setAvatarPreview('http://localhost:8080/media/default-avatar.png');
-                });
+            setFieldValue('avatar', file);
+            const reader = new FileReader();
+            reader.onload = () => setAvatarPreview(reader.result);
+            reader.readAsDataURL(file);
         }
     };
 
-    if (loading) {
+    if (loading || !userEmail) {
         return <div>Đang tải...</div>;
     }
 
@@ -120,10 +112,10 @@ const EditProfile = () => {
                     <Form>
                         <div>
                             <label>Email <span style={{ color: 'red' }}>*</span></label>
-                            <p>{localStorage.getItem('currentUserEmail') || 'Không tìm thấy email'}</p>
+                            <p>{userEmail}</p>
                         </div>
                         <div>
-                            <label>Tên hiển thị <span style={{ color: 'red' }}>*</span></label>
+                            <label>Tên hiển thị</label>
                             <Field
                                 type="text"
                                 name="username"
@@ -139,12 +131,11 @@ const EditProfile = () => {
                             <input
                                 type="file"
                                 name="avatar"
-                                onChange={(event) => {
-                                    setFieldValue('avatar', event.currentTarget.files[0]);
-                                    handleAvatarChange(event);
-                                }}
+                                accept="image/*"
+                                onChange={(event) => handleAvatarChange(event, setFieldValue)}
                                 style={{ marginBottom: '10px' }}
                             />
+                            <ErrorMessage name="avatar" component="p" className="error" />
                         </div>
                         <button type="submit" disabled={isSubmitting}>
                             Cập nhật
