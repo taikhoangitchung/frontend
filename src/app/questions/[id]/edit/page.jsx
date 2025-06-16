@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from "react"
 import {useParams} from "next/navigation"
-import CreateFormUI from "../../../../components/question/CreateOrEdit"
+import QuestionFormUI from "../../../../components/CreateOrEditQuestion"
 import QuestionService from "../../../../services/QuestionService"
 import {Loader2} from "lucide-react"
 
@@ -29,7 +29,6 @@ export default function EditQuestion() {
                 setLoading(false)
             }
         }
-
         fetchQuestion()
     }, [id])
 
@@ -42,7 +41,7 @@ export default function EditQuestion() {
     }
 
     return (
-        <CreateFormUI
+        <QuestionFormUI
             initialValues={initialValues}
             isEdit={true}
             questionId={id}

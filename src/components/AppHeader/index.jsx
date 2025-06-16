@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, HelpCircle, ChevronDown, LogOut, User,Lock } from "lucide-react"
+import {Bell, HelpCircle, ChevronDown, LogOut, User, Lock} from "lucide-react"
 
 import {
     DropdownMenu,
@@ -10,8 +10,15 @@ import {
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import {Button} from "../ui/button";
+import {useRouter} from "next/navigation";
 
 export function AppHeader() {
+    const router = useRouter();
+    const email = localStorage.getItem("currentUserEmail");
+    const handleLogout = () => {
+        localStorage.clear();
+        router.push("/login");
+    }
     return (
         <header className="h-16 border-b bg-white flex items-center justify-end px-6 shadow-sm">
             <div className="flex items-center gap-4">
@@ -23,7 +30,7 @@ export function AppHeader() {
                     title="Thông báo"
                     aria-label="Thông báo"
                 >
-                    <Bell className="w-6 h-6" />
+                    <Bell className="w-6 h-6"/>
                 </Button>
 
                 {/* Nút Nhập mã */}
@@ -41,7 +48,7 @@ export function AppHeader() {
                     className="text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150"
                     title="Liên hệ hỗ trợ"
                 >
-                    <HelpCircle className="w-5 h-5 mr-2" />
+                    <HelpCircle className="w-5 h-5 mr-2"/>
                     Nhận trợ giúp
                 </Button>
 
@@ -54,40 +61,53 @@ export function AppHeader() {
                             aria-label="Menu hồ sơ"
                         >
                             <div className="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center">
-                                <span className="text-white font-semibold text-sm">H</span>
+                                <span className="text-white font-semibold text-sm">{email[0].toUpperCase()}</span>
                             </div>
-                            <ChevronDown className="w-5 h-5 text-gray-500" />
+                            <ChevronDown className="w-5 h-5 text-gray-500"/>
                         </Button>
                     </DropdownMenuTrigger>
-
-                        <DropdownMenuContent align="end" className="w-64 p-2">
-                            <div className="flex items-center gap-3 p-3 rounded-lg">
-                                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <span className="text-white font-semibold text-lg">H</span>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="font-semibold text-gray-900">Họ tên</div>
-                                    <div className="text-sm text-gray-500">email@example.com</div>
-                                </div>
+                    <DropdownMenuContent align="end" className="w-64 p-2">
+                        <div className="flex items-center gap-3 p-3 rounded-lg">
+                            <div className="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center">
+                                <span className="text-white font-semibold text-sm">{email[0].toUpperCase()}</span>
                             </div>
+                            <div className="flex-1">
+                                <div className="text-sm text-gray-500">{email}</div>
+                            </div>
+                        </div>
 
-                            <DropdownMenuSeparator className="my-1" />
+                        <DropdownMenuSeparator className="my-1"/>
+                        <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
+                            <User className="w-5 h-5 text-gray-600" />
+                            <button
+                                onClick={() => router.push('users/profile')}
+                                className="text-sm text-left w-full"
+                            >
+                                Hồ sơ
+                            </button>
+                        </DropdownMenuItem>
 
-                            <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
-                                <User className="w-5 h-5 text-gray-600" />
-                                <span className="text-sm">Hồ sơ</span>
-                            </DropdownMenuItem>
+                        <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
+                            <Lock className="w-5 h-5 text-gray-600" />
+                            <button
+                                onClick={() => router.push('/users/change-password')}
+                                className="text-sm text-left w-full"
+                            >
+                                Đổi mật khẩu
+                            </button>
+                        </DropdownMenuItem>
 
-                            <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
-                                <Lock className="w-5 h-5 text-gray-600" />
-                                <span className="text-sm">Đổi mật khẩu</span>
-                            </DropdownMenuItem>
+                        <DropdownMenuItem className="flex items-center gap-2 p-3 text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer rounded-lg">
+                            <LogOut className="w-5 h-5" />
+                            <button
+                                onClick={handleLogout}
+                                className="text-sm text-left w-full"
+                            >
+                                Đăng xuất
+                            </button>
+                        </DropdownMenuItem>
 
-                            <DropdownMenuItem className="flex items-center gap-2 p-3 text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer rounded-lg">
-                                <LogOut className="w-5 h-5" />
-                                <span className="text-sm">Đăng xuất</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
+                    </DropdownMenuContent>
                 </DropdownMenu>
             </div>
         </header>

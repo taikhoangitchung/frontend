@@ -1,27 +1,31 @@
 "use client"
 
-import { Plus, Home, FolderOpen, BarChart3, Users, Settings, Sparkles, Info, AlertTriangle } from "lucide-react"
+import {Plus, Home, FolderOpen, BarChart3, Users, Settings, Sparkles, Info, AlertTriangle} from "lucide-react"
 import {Button} from "../ui/button";
+import Image from "next/image";
 
 
 const menuItems = [
-    { title: "Khám phá", icon: Home, url: "#", active: false },
-    { title: "Thư viện", icon: FolderOpen, url: "#", active: false },
-    { title: "Báo cáo", icon: BarChart3, url: "#", active: false },
-    { title: "Các lớp học", icon: Users, url: "#", hasWarning: true, active: false },
-    { title: "Tùy chỉnh phù hợp", icon: Settings, url: "#", active: false },
-    { title: "Quizizz AI", icon: Sparkles, url: "#", active: false },
+    {title: "Khám phá", icon: Home, url: "#", active: false},
+    {title: "Thư viện", icon: FolderOpen, url: "#", active: false},
+    {title: "Báo cáo", icon: BarChart3, url: "#", active: false},
+    {title: "Các lớp học", icon: Users, url: "#", hasWarning: true, active: false},
+    {title: "Tùy chỉnh phù hợp", icon: Settings, url: "#", active: false},
+    {title: "Quizizz AI", icon: Sparkles, url: "#", active: false},
 ]
 
 export function AppSidebar() {
     return (
         <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col shadow-sm">
             {/* Logo */}
-            <div className="p-4 border-b border-gray-100 hover:bg-purple-50 transition-all duration-150">
-                <div className="flex items-center gap-2">
-                    <div className="text-2xl font-bold text-purple-600">QUIZIZZ</div>
-                    <span className="text-sm text-gray-500 font-medium">BASIC</span>
-                </div>
+            <div className="flex items-center">
+                <Image
+                    src="/logo.png"
+                    alt="QuizGym Logo"
+                    width={120}
+                    height={0}
+                    priority
+                />
             </div>
 
             {/* Nút Tạo Quiz */}
@@ -30,7 +34,7 @@ export function AppSidebar() {
                     className="w-full bg-purple-600 hover:bg-purple-700 hover:shadow-xl hover:scale-105 text-white rounded-lg h-12 text-base font-semibold transition-all duration-200 ease-in-out"
                     aria-label="Tạo quiz mới"
                 >
-                    <Plus className="w-6 h-6 mr-2" />
+                    <Plus className="w-6 h-6 mr-2"/>
                     Quiz
                 </Button>
             </div>
@@ -49,9 +53,9 @@ export function AppSidebar() {
                             }`}
                             aria-label={item.title}
                         >
-                            <item.icon className="w-6 h-6 transition-colors duration-150" />
+                            <item.icon className="w-6 h-6 transition-colors duration-150"/>
                             <span className="text-base font-medium">{item.title}</span>
-                            {item.hasWarning && <AlertTriangle className="w-5 h-5 ml-auto text-orange-500" />}
+                            {item.hasWarning && <AlertTriangle className="w-5 h-5 ml-auto text-orange-500"/>}
                         </a>
                     ))}
                 </nav>
@@ -64,7 +68,7 @@ export function AppSidebar() {
                     title="Bạn đã sử dụng 0/20 hoạt động miễn phí"
                 >
                     <span>0/20 hoạt động được tạo ra</span>
-                    <Info className="w-5 h-5" />
+                    <Info className="w-5 h-5"/>
                 </div>
                 <Button
                     className="w-full bg-yellow-400 hover:bg-yellow-500 hover:shadow-xl hover:scale-105 text-black rounded-lg h-12 text-base font-semibold transition-all duration-200 ease-in-out"
