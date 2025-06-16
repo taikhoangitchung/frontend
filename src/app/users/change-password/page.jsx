@@ -6,7 +6,6 @@ import * as Yup from 'yup';
 import UserService from '../../../services/UserService';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
@@ -112,7 +111,6 @@ const ChangePassword = () => {
                     </Form>
                 )}
             </Formik>
-            <ToastContainer position="top-right" autoClose={1500} />
         </div>
     );
 };

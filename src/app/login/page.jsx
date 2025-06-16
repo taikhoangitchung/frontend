@@ -1,31 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Formik, Form, Field, ErrorMessage } from "formik"
+import {useState, useEffect} from "react"
+import {Formik, Form, Field, ErrorMessage} from "formik"
 import * as Yup from "yup"
 import UserService from "../../services/UserService"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import "react-toastify/dist/ReactToastify.css"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import {useRouter} from "next/navigation"
+import {toast} from "sonner"
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faEye, faEyeSlash, faEnvelope, faArrowLeft, faLock} from "@fortawesome/free-solid-svg-icons"
-import { ToastContainer } from "react-toastify"
-import Link from "next/link"
+import {jwtDecode} from "jwt-decode";
 
 const Login = () => {
     const router = useRouter()
     const [showPassword, setShowPassword] = useState(false)
-    const [generalError, setGeneralError] = useState("")
     const [isReady, setIsReady] = useState(false)
     const [showEmailForm, setShowEmailForm] = useState(false)
-    const [initialValues, setInitialValues] = useState({ email: "", password: "" })
+    const [initialValues, setInitialValues] = useState({email: "", password: ""})
 
     useEffect(() => {
         if (typeof window !== "undefined") {
             const autoLogin = localStorage.getItem("autoLogin")
             if (autoLogin) {
-                const { email, password } = JSON.parse(autoLogin)
-                setInitialValues({ email, password })
+                const {email, password} = JSON.parse(autoLogin)
+                setInitialValues({email, password})
                 localStorage.removeItem("autoLogin")
             }
             setIsReady(true)
@@ -37,17 +34,27 @@ const Login = () => {
         password: Yup.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự").required("Mật khẩu không được để trống"),
     })
 
-    const handleSubmit = async (values, { setSubmitting }) => {
-        setGeneralError("")
+    const handleSubmit = async (values, {setSubmitting}) => {
         try {
             const response = await UserService.login(values)
-            toast.success(response.data, { autoClose: 1500 })
+            toast.success("Đăng nhập thành công", {autoClose: 1500})
             localStorage.setItem("currentUserEmail", values.email)
-            setTimeout(() => router.push("/home"), 1500)
+            const token = response.data
+            localStorage.setItem("token", token)
+            const userId = jwtDecode(token).id
+            const role = jwtDecode(token).role
+            localStorage.setItem("id", userId)
+            localStorage.setItem("role", role)
+            let nextPage = ""
+            if (role === "ADMIN") {
+                nextPage = "/admin"
+            } else {
+                nextPage = "/users/dashboard"
+            }
+            setTimeout(() => router.push(nextPage), 1500)
         } catch (err) {
             const errorMessage = err.response?.data || "Đăng nhập không thành công. Vui lòng kiểm tra email hoặc mật khẩu."
-            setGeneralError(errorMessage)
-            toast.error(errorMessage, { autoClose: 3000 })
+            toast.error(errorMessage, {autoClose: 3000})
         } finally {
             setSubmitting(false)
         }
@@ -58,21 +65,6 @@ const Login = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
             {/* Header */}
-            <header className="flex justify-between items-center p-6">
-                <div className="text-white text-2xl font-bold">Quizizz</div>
-                <div className="flex items-center gap-4">
-                    <Link href="/join" className="text-white hover:text-purple-200 transition-colors">
-                        Tham gia một trò chơi
-                    </Link>
-                    <Link
-                        href="/register"
-                        className="bg-white text-purple-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-                    >
-                        Đăng ký
-                    </Link>
-                </div>
-            </header>
-
             {/* Main Content */}
             <div className="flex items-start justify-center px-6 py-5">
                 <div
@@ -82,9 +74,8 @@ const Login = () => {
                     {/* Left Panel - Login Form */}
                     <div className="flex-1 p-5">
                         {!showEmailForm ? (
-                            // Initial Login Options
                             <div className="max-w-md mx-auto py-8">
-                                <h1 className="text-2xl font-bold text-gray-900 mb-12">Đăng nhập vào Quizizz</h1>
+                                <h1 className="text-2xl font-bold text-gray-900 mb-12">Đăng nhập vào QuizGym</h1>
 
                                 <div className="space-y-6 mb-16">
                                     {/* Google Login Button */}
@@ -117,10 +108,13 @@ const Login = () => {
 
                                 <div className="text-center">
                                     <span className="text-gray-600">Không có tài khoản? </span>
-                                    <Link href="/register"
-                                          className="text-purple-600 hover:text-purple-700 font-medium">
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push("/register")}
+                                        className="text-purple-600 hover:text-purple-700 font-medium"
+                                    >
                                         Đăng ký
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         ) : (
@@ -182,10 +176,12 @@ const Login = () => {
                                             </div>
 
                                             <div className="text-left">
-                                                <Link href="/forget-password"
-                                                      className="text-purple-600 hover:text-purple-700 text-sm">
+                                                <button
+                                                    onClick={() => router.push("/forgot-password")}
+                                                    className="text-purple-600 hover:text-purple-700 text-sm"
+                                                >
                                                     Quên mật khẩu?
-                                                </Link>
+                                                </button>
                                             </div>
 
                                             <button
@@ -195,19 +191,19 @@ const Login = () => {
                                             >
                                                 {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
                                             </button>
-
-                                            {generalError &&
-                                                <p className="text-red-500 text-sm text-center">{generalError}</p>}
                                         </Form>
                                     )}
                                 </Formik>
 
                                 <div className="mt-4 text-center">
                                     <span className="text-gray-600">Không có tài khoản? </span>
-                                    <Link href="/register"
-                                          className="text-purple-600 hover:text-purple-700 font-medium">
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push("/register")}
+                                        className="text-purple-600 hover:text-purple-700 font-medium"
+                                    >
                                         Đăng ký
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -224,13 +220,11 @@ const Login = () => {
                                 <span className="ml-2">😍</span>
                             </div>
                             <p className="text-sm opacity-90">Tham gia cùng hơn 200 triệu nhà sư phạm và người học trên
-                                Quizizz</p>
+                                QuizGym</p>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <ToastContainer position="top-right" autoClose={1500}/>
         </div>
     )
 }

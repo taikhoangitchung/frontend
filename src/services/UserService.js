@@ -35,16 +35,14 @@ class UserService {
         try {
             return await axiosInstance.patch("/users/login", loginRequest);
         } catch (error) {
-            console.error("Lỗi khi đăng nhập", error);
             throw error;
         }
     }
 
-    static async register(username, email, password, confirmPassword) {
+    static async register(form) {
         try {
-            return await axiosInstance.post("/users/register", { username, email, password, confirmPassword });
+            return await axiosInstance.post("/users/register", form);
         } catch (error) {
-            console.error("Lỗi khi đăng ký", error);
             throw error;
         }
     }

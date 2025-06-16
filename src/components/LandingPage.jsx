@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 
-import { useRouter } from "next/navigation";
-import { Button } from "./ui/button";
+import {useRouter} from "next/navigation";
+import {Button} from "./ui/button";
 
 export default function LandingPage() {
     const router = useRouter();
@@ -13,11 +13,15 @@ export default function LandingPage() {
             {/* Background decorative elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200 rounded-3xl rotate-12 opacity-60"></div>
-                <div className="absolute top-40 right-20 w-24 h-24 bg-purple-200 rounded-2xl -rotate-12 opacity-60"></div>
-                <div className="absolute bottom-40 left-20 w-28 h-28 bg-pink-200 rounded-3xl rotate-45 opacity-60"></div>
-                <div className="absolute bottom-20 right-40 w-20 h-20 bg-yellow-200 rounded-2xl -rotate-45 opacity-60"></div>
+                <div
+                    className="absolute top-40 right-20 w-24 h-24 bg-purple-200 rounded-2xl -rotate-12 opacity-60"></div>
+                <div
+                    className="absolute bottom-40 left-20 w-28 h-28 bg-pink-200 rounded-3xl rotate-45 opacity-60"></div>
+                <div
+                    className="absolute bottom-20 right-40 w-20 h-20 bg-yellow-200 rounded-2xl -rotate-45 opacity-60"></div>
                 <div className="absolute top-60 left-1/3 w-16 h-16 bg-green-200 rounded-xl rotate-12 opacity-60"></div>
-                <div className="absolute top-80 right-1/3 w-36 h-36 bg-indigo-200 rounded-3xl -rotate-12 opacity-40"></div>
+                <div
+                    className="absolute top-80 right-1/3 w-36 h-36 bg-indigo-200 rounded-3xl -rotate-12 opacity-40"></div>
             </div>
 
             {/* Header */}
@@ -28,7 +32,8 @@ export default function LandingPage() {
                         <Image
                             src="/logo.png"
                             alt="QuizGym Logo"
-                            width={120}                            height={0}
+                            width={120}
+                            height={0}
                             priority
                         />
                     </div>
