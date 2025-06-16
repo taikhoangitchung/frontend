@@ -35,20 +35,23 @@ const Login = () => {
             .email('Email không hợp lệ')
             .required('Email không được để trống'),
         password: Yup.string()
+            .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
             .required('Mật khẩu không được để trống'),
     });
 
     const handleSubmit = async (values, { setSubmitting }) => {
+        const { email, password } = values;
         setGeneralError('');
+
         try {
-            const response = await UserService.login(values);
-            toast.success(response.data, { autoClose: 1500 });
-            localStorage.setItem('currentUserEmail', values.email);
-            setTimeout(() => router.push('/home'), 1500);
+            const response = await UserService.login(email, password);
+            if (response.status === 200) {
+                toast.success('Đăng nhập thành công!', { autoClose: 1500 });
+                localStorage.setItem('currentUserEmail', email);
+                setTimeout(() => router.push('/home'), 1500);
+            }
         } catch (err) {
-            const errorMessage = err.response?.data || 'Đăng nhập không thành công';
-            setGeneralError(errorMessage);
-            toast.error(errorMessage, { autoClose: 3000 });
+            toast.error(err.response.data, { autoClose: 3000 });
         } finally {
             setSubmitting(false);
         }
