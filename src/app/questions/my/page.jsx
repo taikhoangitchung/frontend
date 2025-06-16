@@ -8,6 +8,7 @@ import {Separator} from "../../../components/ui/separator"
 import {Search, Plus, Edit, Trash2, X, Check, Grid3X3} from "lucide-react"
 import {useRouter} from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
+import {toast} from "sonner";
 
 export default function QuizInterface() {
     const router = useRouter()
@@ -27,7 +28,7 @@ export default function QuizInterface() {
         try {
             QuestionService.getByUserId(1)
                 .then(res => {
-                    const filteredQuestions = searchTerm.trim() === ""
+                    const filteredQuestions = searchTerm.trim() !== ""
                         ? res.data.filter((q) => q.content.toLowerCase().includes(searchTerm.toLowerCase()))
                         : res.data;
                     handlePagination(filteredQuestions);
@@ -53,12 +54,34 @@ export default function QuizInterface() {
     const handleNextPage = () => setPage(page + 1);
 
     const handleAddQuestion = () => {
-        console.log("Add question clicked")
+        router.push("/questions/create")
     }
 
-    function handleDelete(id) {
-        console.log("Delete question clicked")
+    async function handleDelete(id) {
+        const confirmed = window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?");
+        if (!confirmed) return;
+
+        try {
+            const result = await QuestionService.delete(id);
+            toast.success(result.data);
+
+            const response = await QuestionService.getByUserId(1);
+            const filteredQuestions = searchTerm.trim() !== ""
+                ? response.data.filter((q) => q.content.toLowerCase().includes(searchTerm.toLowerCase()))
+                : response.data;
+
+            const newTotalPages = Math.ceil(filteredQuestions.length / questionPerPage);
+            if (page > newTotalPages) {
+                setPage(1);
+            }
+
+            handlePagination(filteredQuestions);
+        } catch (error) {
+            toast.error(error.response.data);
+            console.error("Xóa thất bại:", error);
+        }
     }
+
 
     return (
         <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -111,7 +134,7 @@ export default function QuizInterface() {
 
                                 <div className="flex items-center gap-1">
                                     <Check className="w-4 h-4 text-green-600"/>
-                                    <span className="font-medium">{index + 1}. Nhiều lựa chọn</span>
+                                    <span className="font-medium">{index + 1}. {question.type}</span>
                                 </div>
 
                                 <div className="flex items-center gap-1 ml-auto">
