@@ -7,52 +7,50 @@ import {Card, CardContent, CardHeader} from "../../../components/ui/card"
 import {Separator} from "../../../components/ui/separator"
 import {Search, Plus, Edit, Trash2, X, Check, Grid3X3} from "lucide-react"
 import {useRouter} from "next/navigation";
+import QuestionService from "../../../services/QuestionService";
 
 export default function QuizInterface() {
     const router = useRouter()
     const [searchTerm, setSearchTerm] = useState("")
     const [questions, setQuestions] = useState([])
     const [loading, setLoading] = useState(false)
+    const [page, setPage] = useState(1)
+    const [totalPage, setTotalPage] = useState(1)
+    const questionPerPage = 20
+
     const [filters, setFilters] = useState({
         questionType: "multiple-choice",
     })
 
-    const fetchQuestions = async (searchQuery = "") => {
+    useEffect(() => {
         setLoading(true)
         try {
-            // Simulate API call delay
-            await new Promise((resolve) => setTimeout(resolve, 500))
-
-            // Mock data - replace with actual API call
-            const mockQuestions = [
-                {
-                    id: 1,
-                    question: "eqwewewe",
-                    type: "multiple-choice",
-                    answers: [
-                        {id: 1, text: "qq", isCorrect: false},
-                        {id: 2, text: "qweqe", isCorrect: false},
-                        {id: 3, text: "qwqe", isCorrect: true},
-                    ],
-                },
-            ]
-
-            // Filter based on search term
-            const filteredQuestions = searchQuery
-                ? mockQuestions.filter((q) => q.question.toLowerCase().includes(searchQuery.toLowerCase()))
-                : mockQuestions
-
-            setQuestions(filteredQuestions)
+            QuestionService.getByUserId(1)
+                .then(res => {
+                    const filteredQuestions = searchTerm.trim() === ""
+                        ? res.data.filter((q) => q.content.toLowerCase().includes(searchTerm.toLowerCase()))
+                        : res.data;
+                    handlePagination(filteredQuestions);
+                })
         } catch (error) {
             console.error("Error fetching questions:", error)
         } finally {
             setLoading(false)
         }
+    }, [searchTerm, page])
+
+    const handlePagination = (data) => {
+        setTotalPage(Math.ceil(data.length / questionPerPage))
+        const start = page === 1 ? 0 : (page - 1) * questionPerPage
+        const end = start + questionPerPage
+
+        const thisPageItems = data.slice(start, end)
+        setQuestions([...thisPageItems])
     }
 
-    useEffect(() => {
-        fetchQuestions(searchTerm)
-    }, [searchTerm])
+    const handlePrePage = () => setPage(page - 1);
+
+    const handleNextPage = () => setPage(page + 1);
 
     const handleAddQuestion = () => {
         console.log("Add question clicked")
@@ -139,7 +137,7 @@ export default function QuizInterface() {
 
                         <CardContent className="space-y-4">
                             {/* Question Text */}
-                            <div className="text-lg font-medium">{question.question}</div>
+                            <div className="text-lg font-medium">{question.content}</div>
 
                             {/* Answer Choices */}
                             <div className="space-y-3">
@@ -150,10 +148,10 @@ export default function QuizInterface() {
                                         <div
                                             key={answer.id}
                                             className={`flex items-center gap-2 p-3 rounded-lg border ${
-                                                answer.isCorrect ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+                                                answer.correct ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
                                             }`}
                                         >
-                                            {answer.isCorrect ? (
+                                            {answer.correct ? (
                                                 <Check className="w-4 h-4 text-green-600"/>
                                             ) : (
                                                 <X className="w-4 h-4 text-red-600"/>
@@ -166,6 +164,34 @@ export default function QuizInterface() {
                         </CardContent>
                     </Card>
                 ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
+                {page !== 1 && (
+                    <Button
+                        variant="outline"
+                        onClick={handlePrePage}
+                        className="border-purple-200 hover:bg-purple-100 hover:text-purple-700 text-sm"
+                    >
+                        Trang trước
+                    </Button>
+                )}
+                <Button
+                    className="text-blue-700"
+                    disabled
+                >
+                    {page}/{totalPage}
+                </Button>
+                {page !== totalPage && (
+                    <Button
+                        variant="outline"
+                        onClick={handleNextPage}
+                        className="border-purple-200 hover:bg-purple-100 hover:text-purple-700 text-sm"
+                    >
+                        Trang sau
+                    </Button>
+                )}
             </div>
 
             {/* Loading State */}

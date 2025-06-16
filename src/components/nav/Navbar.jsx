@@ -8,6 +8,7 @@ import Link from 'next/link'
 import UserService from "../../services/UserService";
 
 const Navbar = () => {
+    const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -20,10 +21,6 @@ const Navbar = () => {
         //     setIsLogin(false);
         //     router.push("/login");
         // }
-
-        UserService.isAdmin(6)
-            .then(res => setIsAdmin(res.data))
-            .catch(err => console.log(err));
 
         setIsLoading(false);
     }, []);

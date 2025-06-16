@@ -57,19 +57,14 @@ const UserManager = () => {
                         alert(`Xóa thành công user : ${id}`);
                         setReload(!reload);
                     }
-                    else alert(`Lỗi xóa user ${id}`);
                 })
                 .catch(err => alert(err));
         }
     }
 
-    const handlePrePage = () => {
-        setPage(page - 1)
-    }
+    const handlePrePage = () => setPage(page - 1);
 
-    const handleNextPage = () => {
-        setPage(page + 1)
-    }
+    const handleNextPage = () => setPage(page + 1);
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -137,7 +132,7 @@ const UserManager = () => {
                                                 className="text-blue-700"
                                                 disabled
                                             >
-                                                {page}
+                                                {page}/{totalPage}
                                             </Button>
                                             {page !== totalPage && (
                                                 <Button

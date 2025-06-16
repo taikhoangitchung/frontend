@@ -25,6 +25,14 @@ class QuestionService {
         }
     }
 
+    static async getByUserId(id) {
+        try {
+            return await axiosInstance.get(`/questions/user/${id}`)
+        } catch (error) {
+            throw error
+        }
+    }
+
     static async update(id, questionData) {
         try {
             return await axiosInstance.put(`/questions/${id}`, questionData)
