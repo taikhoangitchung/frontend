@@ -111,7 +111,7 @@ export default function QuizInterface() {
 
                                 <div className="flex items-center gap-1">
                                     <Check className="w-4 h-4 text-green-600"/>
-                                    <span className="font-medium">{index + 1}. Nhiều lựa chọn</span>
+                                    <span className="font-medium">{index + 1}. {question.type}</span>
                                 </div>
 
                                 <div className="flex items-center gap-1 ml-auto">
