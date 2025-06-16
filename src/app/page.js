@@ -9,4 +9,4 @@ export default function Home(){
             <p className="text-lg text-gray-700">This is a simple home page built with React.</p>
         </div>
     )
-} ;
+};
