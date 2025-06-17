@@ -5,10 +5,11 @@ import {Button} from "../../../components/ui/button"
 import {Input} from "../../../components/ui/input"
 import {Card, CardContent, CardHeader} from "../../../components/ui/card"
 import {Separator} from "../../../components/ui/separator"
-import {Search, Plus, Edit, Trash2, X, Check, Grid3X3} from "lucide-react"
+import {Search, Plus, Edit, X, Check, Grid3X3} from "lucide-react"
 import {useRouter} from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
 import {toast} from "sonner";
+import DeleteButton from "../../../components/DeleleButton";
 
 export default function QuizInterface() {
     const router = useRouter()
@@ -18,6 +19,7 @@ export default function QuizInterface() {
     const [page, setPage] = useState(1)
     const [totalPage, setTotalPage] = useState(1)
     const questionPerPage = 20
+    const userId = localStorage.getItem("id")
 
     const [filters, setFilters] = useState({
         questionType: "multiple-choice",
@@ -25,8 +27,9 @@ export default function QuizInterface() {
 
     useEffect(() => {
         setLoading(true)
+        const userId = localStorage.getItem("id")
         try {
-            QuestionService.getByUserId(1)
+            QuestionService.getByUserId(userId)
                 .then(res => {
                     const filteredQuestions = searchTerm.trim() !== ""
                         ? res.data.filter((q) => q.content.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -34,7 +37,14 @@ export default function QuizInterface() {
                     handlePagination(filteredQuestions);
                 })
         } catch (error) {
-            console.error("Error fetching questions:", error)
+            if (error.response?.status === 403) {
+                router.push("/forbidden");
+            } else if (error.response?.status === 401) {
+                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...")
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2500);
+            }
         } finally {
             setLoading(false)
         }
@@ -58,14 +68,11 @@ export default function QuizInterface() {
     }
 
     async function handleDelete(id) {
-        const confirmed = window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?");
-        if (!confirmed) return;
-
         try {
             const result = await QuestionService.delete(id);
             toast.success(result.data);
 
-            const response = await QuestionService.getByUserId(1);
+            const response = await QuestionService.getByUserId(userId);
             const filteredQuestions = searchTerm.trim() !== ""
                 ? response.data.filter((q) => q.content.toLowerCase().includes(searchTerm.toLowerCase()))
                 : response.data;
@@ -88,14 +95,14 @@ export default function QuizInterface() {
             {/* Header */}
             <div className="space-y-4">
                 <h1 className="text-2xl font-semibold text-gray-900">
-                    Tìm kiếm câu hỏi từ Thư viện Quizizz
+                    Tìm kiếm câu hỏi của tôi
                 </h1>
 
                 {/* Search Input with Icon */}
                 <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"/>
                     <Input
-                        placeholder="Nhập tên chủ đề của câu hỏi..."
+                        placeholder="Nhập nội dung câu hỏi..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
@@ -146,14 +153,7 @@ export default function QuizInterface() {
                                     >
                                         <Edit className="w-4 h-4"/>
                                     </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="p-1"
-                                        onClick={() => handleDelete(question.id)}
-                                    >
-                                        <Trash2 className="w-4 h-4"/>
-                                    </Button>
+                                    <DeleteButton item={question} handleDelete={handleDelete}/>
                                 </div>
                             </div>
                         </CardHeader>
@@ -179,7 +179,7 @@ export default function QuizInterface() {
                                             ) : (
                                                 <X className="w-4 h-4 text-red-600"/>
                                             )}
-                                            <span className="text-sm">{answer.text}</span>
+                                            <span className="text-sm">{answer.content}</span>
                                         </div>
                                     ))}
                                 </div>

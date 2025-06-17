@@ -1,15 +1,15 @@
 "use client"
 
-import { ArrowLeft } from "lucide-react"
-import { useRouter } from "next/navigation"
+import {ArrowLeft} from "lucide-react"
+import {useRouter} from "next/navigation"
 import {useEffect, useState} from "react"
 import {useFormik} from "formik"
 import * as Yup from "yup"
 
-import {Button} from "../ui/button"
-import {Card} from "../ui/card"
-import {Textarea} from "../ui/textarea"
-import {Input} from "../ui/input"
+import {Button} from "./ui/button"
+import {Card} from "./ui/card"
+import {Textarea} from "./ui/textarea"
+import {Input} from "./ui/input"
 import {Send, Loader2} from "lucide-react"
 import {
     Select,
@@ -17,19 +17,19 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "../ui/select"
-import {RadioGroup, RadioGroupItem} from "../ui/radio-group"
-import {Checkbox} from "../ui/checkbox"
+} from "./ui/select"
+import {RadioGroup, RadioGroupItem} from "./ui/radio-group"
+import {Checkbox} from "./ui/checkbox"
 import {toast} from "sonner"
 
-import QuestionService from "../../services/QuestionService"
-import CategoryService from "../../services/CategoryService"
-import TypeService from "../../services/TypeService"
-import DifficultyService from "../../services/DifficultyService"
-import {initialAnswers} from "../../initvalues/answer"
-import {cn} from "../../lib/utils"
+import QuestionService from "../services/QuestionService"
+import CategoryService from "../services/CategoryService"
+import TypeService from "../services/TypeService"
+import DifficultyService from "../services/DifficultyService"
+import {initialAnswers} from "../initvalues/answer"
+import {cn} from "../lib/utils"
 
-export default function CreateFormUI({initialValues, isEdit = false, questionId = null}) {
+export default function QuestionFormUI({initialValues, isEdit = false, questionId = null}) {
     const router = useRouter()
     const [categories, setCategories] = useState([])
     const [types, setTypes] = useState([])
@@ -47,8 +47,16 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
             setCategories(catRes.data)
             setTypes(typeRes.data)
             setDifficulties(diffRes.data)
-        } catch (err) {
-            console.error("Error fetching dropdowns:", err)
+        } catch (error) {
+            console.log(error)
+            if (error.response?.status === 403) {
+                router.push("/forbidden");
+            } else if (error.response?.status === 401) {
+                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...")
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2500);
+            }
         } finally {
             setLoading(false)
         }
@@ -120,6 +128,7 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
             answers: cleanedAnswers,
         }
 
+        console.log(payload)
         try {
             setIsSubmitting(true)
             if (isEdit && questionId) {
@@ -128,10 +137,10 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
             } else {
                 await QuestionService.create(payload)
                 toast.success("Tạo câu hỏi thành công! 🎉")
+                formik.resetForm()
             }
-            formik.resetForm()
         } catch (err) {
-            toast.error("Đã xảy ra lỗi. Vui lòng thử lại.")
+            toast.error(err.response.data)
         } finally {
             setIsSubmitting(false)
         }
@@ -168,7 +177,7 @@ export default function CreateFormUI({initialValues, isEdit = false, questionId 
                         onClick={() => router.push("/questions/my")}
                         className="p-2 text-white hover:bg-white/10"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-4 h-4"/>
                     </Button>
                     <h1 className="text-2xl font-semibold text-white">
                         {isEdit ? "Chỉnh sửa câu hỏi" : "Tạo câu hỏi mới"}
