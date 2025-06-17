@@ -48,11 +48,11 @@ export default function HeaderUser() {
                         <Home className="h-4 w-4 mr-2" />
                         Trang chủ
                     </Button>
-                    <Button variant="ghost" className="text-gray-600">
+                    <Button variant="ghost" className="text-gray-600" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
                         <Activity className="h-4 w-4 mr-2" />
                         Hoạt động
                     </Button>
-                    <Button variant="ghost" className="text-gray-600">
+                    <Button variant="ghost" className="text-gray-600" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
                         <Users className="h-4 w-4 mr-2" />
                         Các lớp học
                     </Button>
@@ -76,7 +76,7 @@ export default function HeaderUser() {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="flex items-center gap-2 hover:bg-purple-50 rounded-lg transition-all duration-150 px-3 py-2"
+                                className="flex items-center gap-2 hover:bg-purple-50 rounded-lg transition-all duration-150 px-3 py-2 "
                                 aria-label="Menu hồ sơ"
                             >
                                 <div className="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center">

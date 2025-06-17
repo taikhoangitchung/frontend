@@ -45,6 +45,7 @@ const Register = () => {
             setTimeout(() => {
                 localStorage.setItem("autoLogin", JSON.stringify({ email: values.email, password: values.password }))
                 localStorage.setItem("currentUserEmail", values.email)
+                localStorage.setItem("currentUserUsername", values.username)
                 router.push("/login")
             }, 1500)
         } catch (error) {
@@ -63,8 +64,7 @@ const Register = () => {
         >
             {/* Main Content */}
             <div className="flex items-start justify-center px-6 py-10">
-                <div
-                    className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex"
+                <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex"
                     style={{ minHeight: "500px" }}
                 >
                     {/* Left Panel */}

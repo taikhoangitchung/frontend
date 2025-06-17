@@ -19,7 +19,6 @@ import {useRouter} from "next/navigation";
 
 const menuItems = [
     {title: "Quản lý người dùng", icon: Users, url: "/admin/users", active: false},
-    {title: "Quản lý câu hỏi", icon: HelpCircle, url: "/admin/questions", active: false},
     {title: "Quản lý danh mục", icon: FolderOpen, url: "/admin/categories", active: false},
     {title: "Quản lý thể loại", icon: Tags, url: "/admin/types", active: false},
     {title: "Quản lý độ khó", icon: BarChart3, url: "/admin/difficulties", active: false},
@@ -52,6 +51,7 @@ export function AppSidebar() {
             {/* Nút Tạo Quiz */}
             <div className="p-4">
                 <Button
+                    onClick={() => handleMenuClick("/admin/quiz")}
                     className="w-full bg-purple-600 hover:bg-purple-700 hover:shadow-xl hover:scale-105 text-white rounded-lg h-12 text-base font-semibold transition-all duration-200 ease-in-out"
                     aria-label="Tạo quiz mới"
                 >
