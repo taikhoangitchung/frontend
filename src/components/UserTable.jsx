@@ -3,8 +3,8 @@
 import {useEffect, useState} from "react"
 import {toast} from "sonner";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import { faCheckCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
-import { Search } from "lucide-react";
+import {faCheckCircle, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
+import {Search} from "lucide-react";
 
 import UserService from "../services/UserService";
 import EmailService from "../services/EmailService";
@@ -29,7 +29,11 @@ const UserTable = () => {
             setIsLoading(true);
             await UserService.blockUser(user.id)
             try {
-                await EmailService.sendMail({to:user.email,subject:"Thông báo từ Quizizz Gym",html:"Tài khoản của bạn đã bị khóa"});
+                await EmailService.sendMail({
+                    to: user.email,
+                    subject: "Thông báo từ Quizizz Gym",
+                    html: "Tài khoản của bạn đã bị khóa"
+                });
             } catch (error) {
                 toast.error(error);
             }
@@ -75,18 +79,9 @@ const UserTable = () => {
         setKeyEmail(e.target.value);
     }
 
-    const handleConfirm = (boolean) => {
-        if (boolean) handleDeleteUser()
-    }
-
     const handlePrePage = () => setPage(page - 1);
 
     const handleNextPage = () => setPage(page + 1);
-
-    const handleOpenDialog = (user) => {
-        setUser(user)
-        setIsOpen(!open);
-    }
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -139,28 +134,37 @@ const UserTable = () => {
                                                 {!isLoading && users.length === 0 && (keyName || keyEmail) ? (
                                                     <TableRow>
                                                         <TableCell colSpan={6}>
-                                                            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                                                                <Search className="w-12 h-12 mb-4 opacity-50" />
-                                                                <p>Không tìm thấy người dùng nào với từ khóa "{keyName || keyEmail}"</p>
+                                                            <div
+                                                                className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                                                <Search className="w-12 h-12 mb-4 opacity-50"/>
+                                                                <p>Không tìm thấy người dùng nào với từ khóa
+                                                                    "{keyName || keyEmail}"</p>
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 ) : (
                                                     users.map((user) => (
-                                                        <TableRow key={user.id} className="hover:bg-purple-50 border-b border-gray-100">
+                                                        <TableRow key={user.id}
+                                                                  className="hover:bg-purple-50 border-b border-gray-100">
                                                             <TableCell className="py-3 px-4 font-medium">
                                                                 {user.active ? (
-                                                                    <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
+                                                                    <FontAwesomeIcon icon={faCheckCircle}
+                                                                                     className="text-green-500"/>
                                                                 ) : (
-                                                                    <FontAwesomeIcon icon={faTimesCircle} className="text-red-500" />
+                                                                    <FontAwesomeIcon icon={faTimesCircle}
+                                                                                     className="text-red-500"/>
                                                                 )}
                                                             </TableCell>
-                                                            <TableCell className="py-3 px-4 font-medium">{user.email}</TableCell>
+                                                            <TableCell
+                                                                className="py-3 px-4 font-medium">{user.email}</TableCell>
                                                             <TableCell className="py-3 px-4">{user.username}</TableCell>
-                                                            <TableCell className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
-                                                            <TableCell className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
+                                                            <TableCell
+                                                                className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
+                                                            <TableCell
+                                                                className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
                                                             <TableCell className="py-3 px-4 text-gray-600">
-                                                                <DeleteButton item={user} handleDelete={handleDeleteUser} />
+                                                                <DeleteButton item={user}
+                                                                              handleDelete={handleDeleteUser}/>
                                                             </TableCell>
                                                         </TableRow>
                                                     ))
