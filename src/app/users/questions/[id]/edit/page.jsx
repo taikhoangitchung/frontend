@@ -2,8 +2,8 @@
 
 import {useEffect, useState} from "react"
 import {useParams} from "next/navigation"
-import QuestionFormUI from "../../../../components/CreateOrEditQuestion"
-import QuestionService from "../../../../services/QuestionService"
+import QuestionFormUI from "../../../../../components/CreateOrEditQuestion"
+import QuestionService from "../../../../../services/QuestionService"
 import {Loader2} from "lucide-react"
 
 export default function EditQuestion() {

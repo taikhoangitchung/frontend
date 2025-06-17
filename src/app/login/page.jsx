@@ -45,7 +45,13 @@ const Login = () => {
             const role = jwtDecode(token).role
             localStorage.setItem("id", userId)
             localStorage.setItem("role", role)
-            setTimeout(() => router.push("/"), 1500)
+            let nextPage = ""
+            if (role === "ADMIN") {
+                nextPage = "/admin/dashboard"
+            } else {
+                nextPage = "/users/dashboard"
+            }
+            setTimeout(() => router.push(nextPage), 1500)
         } catch (err) {
             const errorMessage = err.response?.data || "Đăng nhập không thành công. Vui lòng kiểm tra email hoặc mật khẩu."
             toast.error(errorMessage, {autoClose: 3000})
