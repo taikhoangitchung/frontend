@@ -152,7 +152,7 @@ const EditProfile = () => {
                                                         <img
                                                             src={avatarPreview || "/placeholder.svg"}
                                                             alt="Avatar"
-                                                            className="w-20 h-20 rounded-full object-cover border-4 border-gray-200 shadow-md"
+                                                            className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
                                                         />
                                                     )}
                                                     <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-2">
