@@ -3,9 +3,8 @@ import axiosInstance from "./config";
 class UserService {
     static async blockUser(userId) {
         try {
-            return await axiosInstance.patch(`/users/${userId}`);
+            return await axiosInstance.patch(`/users/${userId}/block`);
         } catch (error) {
-            console.error(`Lỗi khi xóa user với id: ${userId}`, error);
             throw error;
         }
     }
