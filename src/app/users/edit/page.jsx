@@ -19,60 +19,61 @@ const EditProfile = () => {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const storedUserEmail = localStorage.getItem("currentUserEmail")
+            const storedUserEmail = localStorage.getItem("currentUserEmail");
             if (!storedUserEmail) {
-                router.push("/login")
-                return
+                router.push("/login");
+                return;
             }
-            setUserEmail(storedUserEmail)
-            const storedUsername = localStorage.getItem("currentUserUsername") || ""
-            const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
-            setInitialUsername(storedUsername)
-            setAvatarPreview(defaultAvatar)
+            setUserEmail(storedUserEmail);
+            const storedUsername = localStorage.getItem("currentUserUsername") || "";
+            const defaultAvatar = "http://localhost:8080/media/default-avatar.png";
+            setInitialUsername(storedUsername);
+            setAvatarPreview(defaultAvatar);
 
             UserService.getProfile(storedUserEmail)
                 .then((response) => {
-                    const user = response.data
-                    const username = user.username || storedUsername
-                    const avatar = user.avatar || defaultAvatar
-                    setInitialUsername(username)
-                    setAvatarPreview(`http://localhost:8080${avatar}`)
-                    localStorage.setItem("currentUserUsername", username)
-                    localStorage.setItem("currentUserAvatar", avatar)
+                    const user = response.data;
+                    const username = user.username || storedUsername;
+                    const avatar = user.avatar || defaultAvatar;
+                    setInitialUsername(username);
+                    setAvatarPreview(`http://localhost:8080${avatar}`);
+                    localStorage.setItem("currentUserUsername", username);
+                    localStorage.setItem("currentUserAvatar", avatar);
                 })
                 .catch((err) => {
-                    console.error("Lỗi khi lấy thông tin user:", err)
-                    setAvatarPreview(defaultAvatar)
+                    console.error("Lỗi khi lấy thông tin user:", err);
+                    setAvatarPreview(defaultAvatar);
                 })
                 .finally(() => {
-                    setLoading(false)
-                    setIsReady(true)
-                })
+                    setLoading(false);
+                    setIsReady(true);
+                });
         }
-    }, [router])
+    }, [router]);
 
     const validationSchema = Yup.object({
         username: Yup.string().max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
         avatar: Yup.mixed()
-            .test("fileSize", "File quá lớn", (value) => !value || value.size <= 5 * 1024 * 1024)
+            .nullable() // Cho phép null
+            .test("fileSize", "File quá lớn", (value) => !value || (value && value.size <= 5 * 1024 * 1024))
             .test(
                 "fileType",
                 "Chỉ hỗ trợ file ảnh",
-                (value) => !value || ["image/jpeg", "image/png", "image/gif"].includes(value.type),
+                (value) => !value || (value && ["image/jpeg", "image/png", "image/gif"].includes(value.type)),
             ),
-    })
+    });
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
             const formData = new FormData();
             formData.append("email", userEmail);
-            if (values.username) formData.append("username", values.username); // Chỉ gửi nếu có username mới
+            if (values.username && values.username !== initialUsername) formData.append("username", values.username); // Chỉ gửi nếu thay đổi
             if (values.avatar && values.avatar instanceof File) formData.append("avatar", values.avatar);
 
             console.log("FormData being sent:", Object.fromEntries(formData)); // Kiểm tra log
             const response = await UserService.editProfile(formData);
             toast.success(response.data, { autoClose: 1500 });
-            if (values.username) {
+            if (values.username && values.username !== initialUsername) {
                 localStorage.setItem("currentUserUsername", values.username);
             }
             setTimeout(() => window.location.reload(), 1500);
