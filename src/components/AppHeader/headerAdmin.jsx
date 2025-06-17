@@ -80,7 +80,7 @@ export function AppHeader() {
                         <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
                             <User className="w-5 h-5 text-gray-600" />
                             <button
-                                onClick={() => router.push('/users/profile')}
+                                onClick={() => router.push('/profile')}
                                 className="text-sm text-left w-full"
                             >
                                 Hồ sơ
@@ -90,7 +90,7 @@ export function AppHeader() {
                         <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
                             <Lock className="w-5 h-5 text-gray-600" />
                             <button
-                                onClick={() => router.push('/users/change-password')}
+                                onClick={() => router.push('/change-password')}
                                 className="text-sm text-left w-full"
                             >
                                 Đổi mật khẩu
