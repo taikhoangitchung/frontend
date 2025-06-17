@@ -8,8 +8,8 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
-import {Button} from "../ui/button";
+} from "./ui/dropdown-menu"
+import {Button} from "./ui/button";
 import {useRouter} from "next/navigation";
 
 export function AppHeader() {
@@ -31,25 +31,6 @@ export function AppHeader() {
                     aria-label="Thông báo"
                 >
                     <Bell className="w-6 h-6"/>
-                </Button>
-
-                {/* Nút Nhập mã */}
-                <Button
-                    variant="outline"
-                    className="text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150"
-                    title="Nhập mã để tham gia"
-                >
-                    Nhập mã
-                </Button>
-
-                {/* Nút Nhận trợ giúp */}
-                <Button
-                    variant="outline"
-                    className="text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150"
-                    title="Liên hệ hỗ trợ"
-                >
-                    <HelpCircle className="w-5 h-5 mr-2"/>
-                    Nhận trợ giúp
                 </Button>
 
                 {/* Dropdown hồ sơ */}

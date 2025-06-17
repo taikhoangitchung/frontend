@@ -90,7 +90,7 @@ export default function EditCategoryForm() {
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" onClick={() => router.push("/categories")} className="p-2">
+                    <Button variant="ghost" size="sm" onClick={() => router.push("/admin/dashboard")} className="p-2">
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
                     <h1 className="text-2xl font-semibold text-gray-900">Chỉnh sửa danh mục</h1>
@@ -152,7 +152,7 @@ export default function EditCategoryForm() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => router.push("/categories")}
+                                    onClick={() => router.push("/admin/dashboard")}
                                     disabled={submitting}
                                     className="flex items-center gap-2"
                                 >

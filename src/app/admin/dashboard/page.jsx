@@ -1,21 +1,34 @@
-import {AppSidebar} from "../../../components/AppSidebar/sidebarAdmin";
-import {AppHeader} from "../../../components/AppHeader/headerAdmin";
+'use client';
+
+import {AdminSidebar} from "../../../components/AdminSidebar";
+import {AppHeader} from "../../../components/AdminHeader";
+import UserTable from "../../../components/UserTable";
+import {useState} from "react";
+import CategoryTable from "../../../components/CategoryTable";
+import TypeTable from "../../../components/TypeTable";
+import DifficultyTable from "../../../components/DifficultyTable";
+import {Users} from "lucide-react";
 
 export default function Page() {
+    const [selectedMenu, setSelectedMenu] = useState({
+        title: "Quản lý người dùng",
+        icon: Users,
+        component: "users",
+        active: false
+    });
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Sidebar */}
-            <AppSidebar />
+            <AdminSidebar onSelectMenu={(item) => setSelectedMenu(item)}/>
 
             {/* Main content */}
             <div className="flex-1 flex flex-col">
-                <AppHeader />
-
+                <AppHeader/>
                 <main className="flex-1 p-6">
-                    <div className="text-center py-20">
-                        <h1 className="text-2xl font-semibold text-gray-800 mb-4">Hôm nay bạn dạy gì?</h1>
-                        <p className="text-gray-600">Nội dung chính sẽ được thêm vào đây...</p>
-                    </div>
+                    {selectedMenu?.component === "users" && (<UserTable/>)}
+                    {selectedMenu?.component === "categories" && (<CategoryTable/>)}
+                    {selectedMenu?.component === "types" && (<TypeTable/>)}
+                    {selectedMenu?.component === "difficulties" && (<DifficultyTable/>)}
                 </main>
             </div>
         </div>

@@ -1,20 +1,20 @@
 "use client"
 
 import {Search, Home, Activity, Users, CreditCard, Plus, Menu, LogOut, ChevronDown, User, Lock} from 'lucide-react'
-import {Button} from "../ui/button";
-import {Input} from "../ui/input";
+import {Button} from "./ui/button";
+import {Input} from "./ui/input";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger
-} from "../ui/dropdown-menu";
+} from "./ui/dropdown-menu";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
 
 
-export default function HeaderUser() {
+export default function UserHeader() {
     const router = useRouter();
     const email = localStorage.getItem("currentUserEmail");
     const handleLogout = () => {
