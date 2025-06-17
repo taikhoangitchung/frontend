@@ -67,9 +67,9 @@ export default function QuizInterface() {
         router.push("/users/questions/create")
     }
 
-    async function handleDelete(id) {
+    async function handleDelete(question) {
         try {
-            const result = await QuestionService.delete(id);
+            const result = await QuestionService.delete(question.id);
             toast.success(result.data);
 
             const response = await QuestionService.getByUserId(userId);
@@ -84,6 +84,7 @@ export default function QuizInterface() {
 
             handlePagination(filteredQuestions);
         } catch (error) {
+            console.log(error);
             toast.error(error.response.data);
             console.error("Xóa thất bại:", error);
         }
@@ -94,9 +95,18 @@ export default function QuizInterface() {
         <div className="max-w-6xl mx-auto p-6 space-y-6">
             {/* Header */}
             <div className="space-y-4">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    Tìm kiếm câu hỏi của tôi
-                </h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-semibold text-gray-900">
+                        Tìm kiếm câu hỏi của tôi
+                    </h1>
+                    <Button
+                        onClick={() => router.push("/users/dashboard")}
+                        className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
+                        variant="outline"
+                    >
+                        Quay về trang chính
+                    </Button>
+                </div>
 
                 {/* Search Input with Icon */}
                 <div className="relative w-full">
