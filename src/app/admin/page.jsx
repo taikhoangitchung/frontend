@@ -1,5 +1,5 @@
-import {AppHeader} from "../../components/AppHeader";
-import {AppSidebar} from "../../components/AppSidebar";
+import {AppHeader} from "../../components/AppHeader/headerAdmin";
+import {AppSidebar} from "../../components/AppSidebar/sidebarAdmin";
 
 
 export default function Page() {
