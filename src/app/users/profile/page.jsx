@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import UserService from "../../services/UserService"
+import UserService from "../../../services/UserService"
 import { toast } from "sonner"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEdit, faEnvelope, faCalendarAlt } from "@fortawesome/free-solid-svg-icons"
@@ -118,7 +118,7 @@ const Profile = () => {
                                 <div className="text-sm text-gray-600 font-medium">QUIZ</div>
                             </div>
                             <button
-                                onClick={() => router.push("/profile/edit")}
+                                onClick={() => router.push("/users/edit")}
                                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                             >
                                 <FontAwesomeIcon icon={faEdit} className="w-4 h-4 text-gray-600" />

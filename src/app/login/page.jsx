@@ -43,10 +43,8 @@ const Login = () => {
             localStorage.setItem("token", token)
             const userId = jwtDecode(token).id
             const role = jwtDecode(token).role
-            const username = jwtDecode(token).username
             localStorage.setItem("id", userId)
             localStorage.setItem("role", role)
-            localStorage.setItem("currentUserUsername", username)
             let nextPage = ""
             if (role === "ADMIN") {
                 nextPage = "/admin/dashboard"

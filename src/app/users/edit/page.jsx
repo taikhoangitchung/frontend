@@ -76,8 +76,7 @@ const EditProfile = () => {
             if (values.username && values.username !== initialUsername) {
                 localStorage.setItem("currentUserUsername", values.username);
             }
-            // Chuyển trang từ từ thay vì reload
-            setTimeout(() => router.push("/profile"), 1500); // Delay 1.5 giây để người dùng thấy thông báo
+            setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
             const errorMsg = err.response?.data || "Cập nhật không thành công. Vui lòng kiểm tra lại kết nối backend.";
             toast.error(errorMsg, { autoClose: 3000 });
@@ -88,21 +87,21 @@ const EditProfile = () => {
     };
 
     const handleCancel = () => {
-        router.back();
-    };
+        router.back()
+    }
 
     const handleAvatarChange = (event, setFieldValue) => {
-        const file = event.currentTarget.files[0];
+        const file = event.currentTarget.files[0]
         if (file) {
-            setFieldValue("avatar", file);
-            const reader = new FileReader();
-            reader.onload = () => setAvatarPreview(reader.result);
-            reader.readAsDataURL(file);
+            setFieldValue("avatar", file)
+            const reader = new FileReader()
+            reader.onload = () => setAvatarPreview(reader.result)
+            reader.readAsDataURL(file)
         }
-    };
+    }
 
     if (!isReady || loading || !userEmail) {
-        return null;
+        return null
     }
 
     return (

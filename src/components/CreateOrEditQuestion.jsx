@@ -1,6 +1,6 @@
 "use client"
 
-import {ArrowLeft, Loader2, Send} from "lucide-react"
+import {ArrowLeft} from "lucide-react"
 import {useRouter} from "next/navigation"
 import {useEffect, useState} from "react"
 import {useFormik} from "formik"
@@ -10,6 +10,7 @@ import {Button} from "./ui/button"
 import {Card} from "./ui/card"
 import {Textarea} from "./ui/textarea"
 import {Input} from "./ui/input"
+import {Send, Loader2} from "lucide-react"
 import {
     Select,
     SelectContent,
@@ -25,6 +26,7 @@ import QuestionService from "../services/QuestionService"
 import CategoryService from "../services/CategoryService"
 import TypeService from "../services/TypeService"
 import DifficultyService from "../services/DifficultyService"
+import {initialAnswers} from "../initvalues/answer"
 import {cn} from "../lib/utils"
 
 export default function QuestionFormUI({initialValues, isEdit = false, questionId = null}) {
@@ -46,11 +48,14 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
             setTypes(typeRes.data)
             setDifficulties(diffRes.data)
         } catch (error) {
+            console.log(error)
             if (error.response?.status === 403) {
-                router.push("/forbidden")
+                router.push("/forbidden");
             } else if (error.response?.status === 401) {
                 toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...")
-                setTimeout(() => router.push("/login"), 2500)
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2500);
             }
         } finally {
             setLoading(false)
@@ -63,7 +68,13 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
 
     const formik = useFormik({
         enableReinitialize: true,
-        initialValues: initialValues,
+        initialValues: initialValues || {
+            category: "",
+            type: "",
+            difficulty: "",
+            content: "",
+            answers: initialAnswers("single"),
+        },
         validationSchema: Yup.object().shape({
             category: Yup.string().required("Vui lòng chọn chủ đề"),
             type: Yup.string().required("Vui lòng chọn loại câu hỏi"),
@@ -72,27 +83,33 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
             answers: Yup.array()
                 .of(
                     Yup.object().shape({
+                        id: Yup.number().required(),
                         content: Yup.string().trim().required("Vui lòng nhập nội dung đáp án"),
                         correct: Yup.boolean(),
                     })
                 )
-                .test("validCorrectAnswers", "Số lượng đáp án đúng không hợp lệ", function (answers) {
-                    const type = this.parent.type
-                    const correctCount = answers.filter((a) => a.correct).length
-                    if (type === "multiple") return correctCount >= 2
-                    return correctCount === 1
-                }),
-        }),
+                .test(
+                    "validCorrectAnswers",
+                    "Số lượng đáp án đúng không hợp lệ",
+                    function (answers) {
+                        const type = this.parent.type
+                        const correctCount = answers.filter((a) => a.correct).length
+                        if (type === "multiple") return correctCount >= 2
+                        return correctCount === 1
+                    }
+                ),
+        })
     })
 
     const handleSubmit = async () => {
         const errors = await formik.validateForm()
         if (Object.keys(errors).length > 0) {
             const firstError = Object.values(errors)[0]
+
             if (typeof firstError === "string") {
                 toast.error(firstError)
             } else if (Array.isArray(firstError)) {
-                const nestedFirst = firstError.find((e) => typeof e === "object" && e !== null)
+                const nestedFirst = firstError.find(e => typeof e === 'object' && e !== null)
                 if (nestedFirst) {
                     const nestedMessage = Object.values(nestedFirst)[0]
                     if (typeof nestedMessage === "string") toast.error(nestedMessage)
@@ -101,13 +118,19 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
             return
         }
 
+        const cleanedAnswers = formik.values.answers.map(({content, correct}) => ({
+            content,
+            correct,
+        }))
+
+        const payload = {
+            ...formik.values,
+            answers: cleanedAnswers,
+        }
+
+        console.log(payload)
         try {
             setIsSubmitting(true)
-            const payload = {
-                ...formik.values,
-                answers: formik.values.answers.map(({id, ...rest}) => rest),
-            }
-
             if (isEdit && questionId) {
                 await QuestionService.update(questionId, payload)
                 toast.success("Cập nhật câu hỏi thành công!")
@@ -117,49 +140,23 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
                 formik.resetForm()
             }
         } catch (err) {
-            toast.error(err.response?.data || "Đã xảy ra lỗi")
+            toast.error(err.response.data)
         } finally {
             setIsSubmitting(false)
         }
     }
 
+    useEffect(() => {
+        const currentType = formik.values.type;
+        if (currentType) {
+            formik.setFieldValue("answers", initialAnswers(currentType));
+        }
+    }, [formik.values.type]);
+
+
     const handleSelectChange = (field) => (value) => {
         formik.setFieldValue(field, value)
     }
-    useEffect(() => {
-        const type = formik.values.type
-
-        if (type === "boolean" && formik.values.answers.length !== 2) {
-            formik.setFieldValue("answers", generateAnswers(2, "boolean"))
-        } else if ((type === "single" || type === "multiple") && formik.values.answers.length !== 4) {
-            formik.setFieldValue("answers", generateAnswers(4, type))
-        }
-    }, [formik.values.type])
-
-
-    const generateAnswers = (count, type = "single") => {
-        let colors
-
-        if (type === "boolean") {
-            colors = ["from-green-400 to-green-500", "from-red-400 to-red-500"]
-        } else {
-            const colors = [
-                "from-pink-400 to-pink-500",         // Hồng nhẹ, dễ nhìn
-                "from-emerald-300 to-emerald-400",   // Xanh ngọc nhẹ hơn
-                "from-orange-300 to-orange-400",     // Cam nhẹ, không quá chói
-                "from-cyan-400 to-cyan-500",         // Xanh ngọc dịu
-            ]
-        }
-
-        return Array.from({length: count}).map((_, index) => ({
-            id: index + 1,
-            content: "",
-            correct: false,
-            color: colors[index % colors.length],
-        }))
-    }
-
-
 
     if (loading) {
         return (
@@ -169,12 +166,10 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
         )
     }
 
-    const displayedAnswers = formik.values.answers
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6">
             <div className="max-w-6xl mx-auto">
-                {/* Header */}
+                {/* Back Button and Title */}
                 <div className="flex items-center gap-4 mb-6">
                     <Button
                         variant="ghost"
@@ -231,7 +226,7 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
                     </Select>
                 </div>
 
-                {/* Câu hỏi */}
+                {/* Question Content */}
                 <Card className="bg-white/10 border-white/20 backdrop-blur-sm mb-8 p-8">
                     <Textarea
                         name="content"
@@ -242,12 +237,21 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
                     />
                 </Card>
 
-                {/* Đáp án */}
-                {formik.values.type === "multiple" ? (
-                    <div className="grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-                        {displayedAnswers.map((answer, index) => (
-                            <Card key={answer.id} className={`bg-gradient-to-br ${answer.color} border-none h-80 relative`}>
-                                <div className="absolute top-4 right-4">
+                {/* Answer Options */}
+                <div
+                    className={`grid gap-4 mb-8 ${
+                        formik.values.answers.length === 2
+                            ? "grid-cols-1 md:grid-cols-2"
+                            : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+                    }`}
+                >
+                    {formik.values.answers.map((answer, index) => (
+                        <Card
+                            key={answer.id}
+                            className={`bg-gradient-to-br ${answer.color} border-none h-80 relative`}
+                        >
+                            <div className="absolute top-4 right-4">
+                                {formik.values.type === "multiple" ? (
                                     <Checkbox
                                         checked={answer.correct}
                                         onCheckedChange={(checked) => {
@@ -257,71 +261,53 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
                                         }}
                                         className="w-5 h-5 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900"
                                     />
-                                </div>
-                                <div className="p-4 h-full flex flex-col justify-center">
-                                    <Input
-                                        id={`answer-${answer.id}`}
-                                        value={answer.content}
-                                        onChange={(e) => {
-                                            const updated = [...formik.values.answers]
-                                            updated[index].content = e.target.value
+                                ) : (
+                                    <RadioGroup
+                                        value={formik.values.answers.find((a) => a.correct)?.id.toString()}
+                                        onValueChange={(val) => {
+                                            const updated = formik.values.answers.map((a) => ({
+                                                ...a,
+                                                correct: a.id.toString() === val,
+                                            }))
                                             formik.setFieldValue("answers", updated)
                                         }}
-                                        placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-transparent border-none text-white placeholder:text-white/60 text-base h-full"
-                                    />
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
-                ) : (
-                    <RadioGroup
-                        value={formik.values.answers.find((a) => a.correct)?.id.toString()}
-                        onValueChange={(val) => {
-                            const updated = formik.values.answers.map((a) => ({
-                                ...a,
-                                correct: a.id.toString() === val,
-                            }))
-                            formik.setFieldValue("answers", updated)
-                        }}
-                        className={`grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 ${
-                            displayedAnswers.length === 2 ? "" : "lg:grid-cols-4"
-                        }`}
-                    >
-                        {displayedAnswers.map((answer, index) => (
-                            <Card key={answer.id} className={`bg-gradient-to-br ${answer.color} border-none h-80 relative`}>
-                                <div className="absolute top-4 right-4">
-                                    <RadioGroupItem
-                                        value={answer.id.toString()}
-                                        id={`answer-${answer.id}`}
-                                        className={cn(
-                                            "w-6 h-6 rounded-full border-2 border-white/40 text-white relative transition-colors",
-                                            "data-[state=checked]:bg-white data-[state=checked]:border-white",
-                                            "after:content-['✓'] after:absolute after:text-purple-900 after:font-bold after:text-sm",
-                                            "after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
-                                            "data-[state=unchecked]:after:content-none"
-                                        )}
-                                    />
-                                </div>
-                                <div className="p-4 h-full flex flex-col justify-center">
-                                    <Input
-                                        id={`answer-${answer.id}`}
-                                        value={answer.content}
-                                        onChange={(e) => {
-                                            const updated = [...formik.values.answers]
-                                            updated[index].content = e.target.value
-                                            formik.setFieldValue("answers", updated)
-                                        }}
-                                        placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-transparent border-none text-white placeholder:text-white/60 text-base h-full"
-                                    />
-                                </div>
-                            </Card>
-                        ))}
-                    </RadioGroup>
-                )}
+                                    >
+                                        <RadioGroupItem
+                                            value={answer.id.toString()}
+                                            id={`answer-${answer.id}`}
+                                            className={cn(
+                                                "w-6 h-6 rounded-full border-2 border-white/40 text-white relative transition-colors",
+                                                "data-[state=checked]:bg-white data-[state=checked]:border-white",
+                                                "after:content-['✓'] after:absolute after:text-purple-900 after:font-bold after:text-sm",
+                                                "after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
+                                                "data-[state=unchecked]:after:content-none"
+                                            )}
+                                        />
+                                    </RadioGroup>
+                                )}
+                            </div>
 
-                {/* Gửi */}
+                            <div className="p-4 h-full flex flex-col justify-center">
+                                <label htmlFor={`answer-${answer.id}`} className="sr-only">
+                                    Answer {index + 1}
+                                </label>
+                                <Input
+                                    id={`answer-${answer.id}`}
+                                    value={answer.content}
+                                    onChange={(e) => {
+                                        const updated = [...formik.values.answers]
+                                        updated[index].content = e.target.value
+                                        formik.setFieldValue("answers", updated)
+                                    }}
+                                    placeholder={`Nhập đáp án ${index + 1}`}
+                                    className="bg-transparent border-none text-white placeholder:text-white/60 text-base h-full"
+                                />
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+
+                {/* Submit Button */}
                 <div className="flex gap-4">
                     <Button
                         variant="outline"
@@ -341,6 +327,7 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
                                 {isEdit ? "Cập nhật câu hỏi" : "Tạo câu hỏi"}
                             </>
                         )}
+
                     </Button>
                 </div>
             </div>
