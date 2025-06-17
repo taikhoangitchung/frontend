@@ -22,7 +22,7 @@ const menuItems = [
     {title: "Quản lý câu hỏi", icon: HelpCircle, url: "/admin/questions", active: false},
     {title: "Quản lý danh mục", icon: FolderOpen, url: "/admin/categories", active: false},
     {title: "Quản lý thể loại", icon: Tags, url: "/admin/types", active: false},
-    {title: "Quản lý độ khó", icon: BarChart3, url: "/admin/difficulty", active: false},
+    {title: "Quản lý độ khó", icon: BarChart3, url: "/admin/difficulties", active: false},
 ]
 
 
