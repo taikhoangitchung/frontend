@@ -19,7 +19,7 @@ export default function Page() {
                     {/* Left side - Join Quiz */}
                     <div className="lg:col-span-2">
                         <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-gray-900 mb-3">Tham gia Quiz ngay!</h1>
+                            <h1 className="text-4xl font-bold text-gray-900 mb-3">Tham gia QuizGym ngay!</h1>
                             <p className="text-lg text-gray-600">Nhập mã quiz để bắt đầu trải nghiệm học tập thú vị</p>
                         </div>
 

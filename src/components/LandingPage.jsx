@@ -103,7 +103,7 @@ export default function LandingPage() {
 
                     {/* Main heading */}
                     <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                        {'"I had no idea Quizizz could do that."'}
+                        {'"I had no idea QuizGym could do that."'}
                     </h1>
 
                     {/* Attribution */}

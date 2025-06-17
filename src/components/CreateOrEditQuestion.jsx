@@ -174,7 +174,7 @@ export default function QuestionFormUI({initialValues, isEdit = false, questionI
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => router.push("/questions/my")}
+                        onClick={() => router.push("/users/questions/my")}
                         className="p-2 text-white hover:bg-white/10"
                     >
                         <ArrowLeft className="w-4 h-4"/>

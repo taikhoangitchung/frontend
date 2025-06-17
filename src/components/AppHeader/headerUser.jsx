@@ -11,6 +11,7 @@ import {
     DropdownMenuTrigger
 } from "../ui/dropdown-menu";
 import {useRouter} from "next/navigation";
+import {toast} from "sonner";
 
 
 export default function HeaderUser() {
@@ -55,15 +56,15 @@ export default function HeaderUser() {
                         <Users className="h-4 w-4 mr-2" />
                         Các lớp học
                     </Button>
-                    <Button variant="ghost" className="text-gray-600">
+                    <Button variant="ghost" className="text-gray-600" onClick={()=> router.push('/users/questions/my')}>
                         <CreditCard className="h-4 w-4 mr-2" />
-                        Flashcards
+                       Câu hỏi của tôi
                     </Button>
                 </nav>
 
                 {/* Right side buttons */}
                 <div className="flex items-center space-x-3">
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                    <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
                         <Plus className="h-4 w-4 mr-2" />
                         Tạo một bài quiz
                     </Button>
@@ -98,7 +99,7 @@ export default function HeaderUser() {
                             <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
                                 <User className="w-5 h-5 text-gray-600" />
                                 <button
-                                    onClick={() => router.push('users/profile')}
+                                    onClick={() => router.push('/users/profile')}
                                     className="text-sm text-left w-full"
                                 >
                                     Hồ sơ
