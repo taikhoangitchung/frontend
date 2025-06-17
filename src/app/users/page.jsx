@@ -6,9 +6,14 @@ import {Input} from "../../components/ui/input"
 import {Card, CardContent} from "../../components/ui/card"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "../../components/ui/table"
 import UserService from "../../services/UserService"
+import DialogConfirm from "../../components/DialogConfirm";
+import EmailService from "../../services/EmailService";
+import {toast} from "sonner";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const UserManager = () => {
     const [users, setUsers] = useState([])
+    const [open, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false)
     const [reload, setReload] = useState(false)
     const [page, setPage] = useState(1)
@@ -16,21 +21,42 @@ const UserManager = () => {
     const questionPerPage = 20
     const [keyName, setKeyName] = useState("");
     const [keyEmail, setKeyEmail] = useState("");
+    const [user, setUser] = useState(null);
+
+    async function handleDeleteUser() {
+        try {
+            setIsLoading(true);
+            await UserService.removeUser(user.id)
+            try {
+                await EmailService.sendMail(user.email,"Bạn đã bị xóa tài khoản rồi nhé ?","Thông Báo From QuizizzGym");
+            } catch (error) {
+                toast.error(error);
+            }
+
+            toast.success("Xóa người dùng thành công");
+            setReload(!reload);
+        } catch (error) {
+            toast.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     useEffect(() => {
-        setIsLoading(true)
-        if (keyName.trim() === "" && keyEmail.trim() === "") {
-            UserService.getAllExceptAdmin()
-                .then(res => handlePagination(res))
-                .catch(err => console.log(err))
-        } else {
-            UserService.searchFollowNameAndEmail(keyName, keyEmail)
-                .then(res => handlePagination(res))
-                .catch(err => console.log(err));
-        }
+            setIsLoading(true)
+            if (keyName.trim() === "" && keyEmail.trim() === "") {
+                UserService.getAllExceptAdmin()
+                    .then(res => handlePagination(res))
+                    .catch(err => console.log(err))
+            } else {
+                UserService.searchFollowNameAndEmail(keyName, keyEmail)
+                    .then(res => handlePagination(res))
+                    .catch(err => console.log(err));
+            }
 
-        setIsLoading(false)
-    }, [page,keyName,keyEmail,reload])
+            setIsLoading(false)
+        }, [page, keyName, keyEmail, reload]
+    )
 
     const handlePagination = (res) => {
         setTotalPage(Math.ceil(res.data.length / questionPerPage))
@@ -49,25 +75,24 @@ const UserManager = () => {
         setKeyEmail(e.target.value);
     }
 
-    const handleDeleteUser = (id) => {
-        if (confirm(`Bạn có muốn xóa người dùng với id ${id}`)) {
-            UserService.removeUser(id)
-                .then(res => {
-                    if (res.data) {
-                        alert(`Xóa thành công user : ${id}`);
-                        setReload(!reload);
-                    }
-                })
-                .catch(err => alert(err));
-        }
+    const handleConfirm = (boolean) => {
+        if (boolean) handleDeleteUser()
     }
 
     const handlePrePage = () => setPage(page - 1);
 
     const handleNextPage = () => setPage(page + 1);
 
+    const handleOpenDialog = (user) => {
+        setUser(user)
+        setIsOpen(!open);
+    }
+
     return (
         <div className="flex min-h-screen bg-gray-50">
+
+            <DialogConfirm open={open} setIsOpen={setIsOpen} handleConfirm={handleConfirm}/>
+
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
 
@@ -81,8 +106,10 @@ const UserManager = () => {
                                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
                                     <h2 className="text-lg font-semibold">Danh sách người dùng</h2>
                                     <div className="flex items-center">
-                                        <Input placeholder="Tìm kiếm theo tên" className="w-64 h-9 mr-2" onChange={handleKeyName}/>
-                                        <Input placeholder="Tìm kiếm theo email" className="w-64 h-9 mr-2" onChange={handleKeyEmail}/>
+                                        <Input placeholder="Tìm kiếm theo tên" className="w-64 h-9 mr-2"
+                                               onChange={handleKeyName}/>
+                                        <Input placeholder="Tìm kiếm theo email" className="w-64 h-9 mr-2"
+                                               onChange={handleKeyEmail}/>
                                     </div>
                                 </div>
 
@@ -95,22 +122,41 @@ const UserManager = () => {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow className="bg-gray-50 hover:bg-gray-50">
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Email</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Tên hiển thị</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Ngày tạo</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Lần truy cập cuối</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Hành động</TableHead>
+                                                    <TableCell
+                                                        className="py-3 px-4 font-medium">Active</TableCell>
+                                                    <TableHead
+                                                        className="py-3 px-4 text-gray-700 font-medium">Email</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Tên hiển
+                                                        thị</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Ngày
+                                                        tạo</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Lần truy
+                                                        cập
+                                                        cuối</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Hành
+                                                        động</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {users.map((user) => (
-                                                    <TableRow key={user.id} className="hover:bg-purple-50 border-b border-gray-100">
-                                                        <TableCell className="py-3 px-4 font-medium">{user.email}</TableCell>
+                                                    <TableRow key={user.id}
+                                                              className="hover:bg-purple-50 border-b border-gray-100">
+                                                        <TableCell className="py-3 px-4 font-medium">
+                                                            {user.active
+                                                                ? <FontAwesomeIcon icon={"block-brick"}/>
+                                                                : <FontAwesomeIcon icon={"ticket-alt"}/>
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell
+                                                            className="py-3 px-4 font-medium">{user.email}</TableCell>
                                                         <TableCell className="py-3 px-4">{user.username}</TableCell>
-                                                        <TableCell className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
-                                                        <TableCell className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
+                                                        <TableCell
+                                                            className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
+                                                        <TableCell
+                                                            className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
                                                         <TableCell className="py-3 px-4 text-gray-600">
-                                                            <Button onClick={() => handleDeleteUser(user.id)}>Delete</Button>
+                                                            <Button variant="outline" onClick={() => handleOpenDialog(user)}>
+                                                                {user.active ? "Block" : "Active"}</Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
@@ -118,7 +164,8 @@ const UserManager = () => {
                                         </Table>
 
                                         {/* Pagination */}
-                                        <div className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
+                                        <div
+                                            className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
                                             {page !== 1 && (
                                                 <Button
                                                     variant="outline"
