@@ -1,6 +1,6 @@
 "use client"
 
-import QuestionFormUI from "../../../components/CreateOrEditQuestion"
+import QuestionFormUI from "../../../../components/CreateOrEditQuestion"
 
 export default function CreateQuestion() {
     return (

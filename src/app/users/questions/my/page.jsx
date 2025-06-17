@@ -1,15 +1,15 @@
 "use client"
 
 import {useState, useEffect} from "react"
-import {Button} from "../../../components/ui/button"
-import {Input} from "../../../components/ui/input"
-import {Card, CardContent, CardHeader} from "../../../components/ui/card"
-import {Separator} from "../../../components/ui/separator"
+import {Button} from "../../../../components/ui/button"
+import {Input} from "../../../../components/ui/input"
+import {Card, CardContent, CardHeader} from "../../../../components/ui/card"
+import {Separator} from "../../../../components/ui/separator"
 import {Search, Plus, Edit, X, Check, Grid3X3} from "lucide-react"
 import {useRouter} from "next/navigation";
-import QuestionService from "../../../services/QuestionService";
+import QuestionService from "../../../../services/QuestionService";
 import {toast} from "sonner";
-import DeleteButton from "../../../components/DeleleButton";
+import DeleteButton from "../../../../components/DeleleButton";
 
 export default function QuizInterface() {
     const router = useRouter()
@@ -64,7 +64,7 @@ export default function QuizInterface() {
     const handleNextPage = () => setPage(page + 1);
 
     const handleAddQuestion = () => {
-        router.push("/questions/create")
+        router.push("/users/questions/create")
     }
 
     async function handleDelete(id) {
@@ -149,7 +149,7 @@ export default function QuizInterface() {
                                         variant="ghost"
                                         size="sm"
                                         className="p-1"
-                                        onClick={() => router.push(`/questions/${question.id}/edit`)}
+                                        onClick={() => router.push(`/users/questions/${question.id}/edit`)}
                                     >
                                         <Edit className="w-4 h-4"/>
                                     </Button>

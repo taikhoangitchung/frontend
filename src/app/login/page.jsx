@@ -47,7 +47,7 @@ const Login = () => {
             localStorage.setItem("role", role)
             let nextPage = ""
             if (role === "ADMIN") {
-                nextPage = "/admin"
+                nextPage = "/admin/dashboard"
             } else {
                 nextPage = "/users/dashboard"
             }
