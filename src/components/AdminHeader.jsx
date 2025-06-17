@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, HelpCircle, ChevronDown, LogOut, User, Lock } from "lucide-react"
+import {Bell, HelpCircle, ChevronDown, LogOut, User, Lock} from "lucide-react"
 
 import {
     DropdownMenu,
@@ -8,16 +8,16 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
-import { Button } from "../ui/button"
-import { useRouter } from "next/navigation"
+} from "./ui/dropdown-menu"
+import {Button} from "./ui/button";
+import {useRouter} from "next/navigation";
 
 export function AppHeader() {
-    const router = useRouter()
-    const email = localStorage.getItem("currentUserEmail")
+    const router = useRouter();
+    const email = localStorage.getItem("currentUserEmail");
     const handleLogout = () => {
-        localStorage.clear()
-        router.push("/login")
+        localStorage.clear();
+        router.push("/login");
     }
     return (
         <header className="h-16 border-b bg-white flex items-center justify-end px-6 shadow-sm">
@@ -26,30 +26,11 @@ export function AppHeader() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-600 w-10 h-10 hover:bg-purple-100 hover:text-purple-600 rounded-full transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+                    className="text-gray-600 w-10 h-10 hover:bg-purple-100 hover:text-purple-600 rounded-full transition-all duration-150"
                     title="Thông báo"
                     aria-label="Thông báo"
                 >
-                    <Bell className="w-6 h-6" />
-                </Button>
-
-                {/* Nút Nhập mã */}
-                <Button
-                    variant="outline"
-                    className="text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
-                    title="Nhập mã để tham gia"
-                >
-                    Nhập mã
-                </Button>
-
-                {/* Nút Nhận trợ giúp */}
-                <Button
-                    variant="outline"
-                    className="text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
-                    title="Liên hệ hỗ trợ"
-                >
-                    <HelpCircle className="w-5 h-5 mr-2" />
-                    Nhận trợ giúp
+                    <Bell className="w-6 h-6"/>
                 </Button>
 
                 {/* Dropdown hồ sơ */}
@@ -57,13 +38,13 @@ export function AppHeader() {
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
-                            className="flex items-center gap-2 hover:bg-purple-50 rounded-lg transition-all duration-200 px-3 py-2 cursor-pointer disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 hover:bg-purple-50 rounded-lg transition-all duration-150 px-3 py-2"
                             aria-label="Menu hồ sơ"
                         >
                             <div className="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center">
                                 <span className="text-white font-semibold text-sm">{email[0].toUpperCase()}</span>
                             </div>
-                            <ChevronDown className="w-5 h-5 text-gray-500" />
+                            <ChevronDown className="w-5 h-5 text-gray-500"/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-64 p-2">
@@ -76,12 +57,12 @@ export function AppHeader() {
                             </div>
                         </div>
 
-                        <DropdownMenuSeparator className="my-1" />
+                        <DropdownMenuSeparator className="my-1"/>
                         <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
                             <User className="w-5 h-5 text-gray-600" />
                             <button
-                                onClick={() => router.push("/profile")}
-                                className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
+                                onClick={() => router.push('/users/profile')}
+                                className="text-sm text-left w-full"
                             >
                                 Hồ sơ
                             </button>
@@ -90,8 +71,8 @@ export function AppHeader() {
                         <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
                             <Lock className="w-5 h-5 text-gray-600" />
                             <button
-                                onClick={() => router.push("/change-password")}
-                                className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
+                                onClick={() => router.push('/users/change-password')}
+                                className="text-sm text-left w-full"
                             >
                                 Đổi mật khẩu
                             </button>
@@ -101,11 +82,12 @@ export function AppHeader() {
                             <LogOut className="w-5 h-5" />
                             <button
                                 onClick={handleLogout}
-                                className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
+                                className="text-sm text-left w-full"
                             >
                                 Đăng xuất
                             </button>
                         </DropdownMenuItem>
+
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

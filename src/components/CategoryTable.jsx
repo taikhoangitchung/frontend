@@ -3,26 +3,15 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Card, CardContent, CardHeader } from "../../../components/ui/card"
-import { Button } from "../../../components/ui/button"
-import { Input } from "../../../components/ui/input"
-import { Separator } from "../../../components/ui/separator"
-import { Pencil, Trash2, Plus, Search, Grid3X3, Check } from "lucide-react"
-import CategoryService from "../../../services/CategoryService"
-import {Skeleton} from "../../../components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "./ui/card"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
+import { Separator } from "./ui/separator"
+import { Pencil, Plus, Search, Grid3X3, Check } from "lucide-react"
+import CategoryService from "../services/CategoryService"
+import {Skeleton} from "./ui/skeleton";
 
-import {
-    AlertDialog,
-    AlertDialogTrigger,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogFooter,
-    AlertDialogTitle,
-    AlertDialogDescription,
-    AlertDialogCancel,
-    AlertDialogAction
-} from "../../../components/ui/alert-dialog"
-import DeleteButton from "../../../components/DeleleButton";
+import DeleteButton from "./DeleleButton";
 
 const ITEMS_PER_PAGE = 10
 
@@ -57,9 +46,9 @@ const CategoryTable = () => {
         fetchCategories()
     }, [])
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (category) => {
         try {
-            await CategoryService.delete(id)
+            await CategoryService.delete(category.id)
             toast.success("Xóa danh mục thành công.")
             await fetchCategories()
         } catch (err) {
@@ -69,11 +58,11 @@ const CategoryTable = () => {
     }
 
     const handleEdit = (id) => {
-        router.push(`/categories/${id}/edit`)
+        router.push(`/admin/categories/${id}/edit`)
     }
 
     const handleCreate = () => {
-        router.push(`/categories/create`)
+        router.push(`/admin/categories/create`)
     }
 
     // Filter categories based on search term

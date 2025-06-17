@@ -1,9 +1,9 @@
 import axiosInstance from "./config";
 
 class EmailService {
-    static async sendMail(to, subject, text) {
+    static async sendMail(params) {
         try {
-            return await axiosInstance.get(`/send-email?to=${to}&subject=${subject}&text=${text}`);
+            return await axiosInstance.post(`/email/send`,params);
         } catch (error) {
             console.log(error);
             return null;

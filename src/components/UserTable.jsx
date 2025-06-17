@@ -5,17 +5,16 @@ import {toast} from "sonner";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
-import UserService from "../../../services/UserService";
-import EmailService from "../../../services/EmailService";
-import {Card, CardContent} from "../../../components/ui/card";
-import {Input} from "../../../components/ui/input";
-import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "../../../components/ui/table";
-import {Button} from "../../../components/ui/button";
-import DeleteButton from "../../../components/DeleleButton";
+import UserService from "../services/UserService";
+import EmailService from "../services/EmailService";
+import {Card, CardContent} from "./ui/card";
+import {Input} from "./ui/input";
+import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "./ui/table";
+import {Button} from "./ui/button";
+import DeleteButton from "./DeleleButton";
 
-const UserManager = () => {
+const UserTable = () => {
     const [users, setUsers] = useState([])
-    const [open, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false)
     const [reload, setReload] = useState(false)
     const [page, setPage] = useState(1)
@@ -27,9 +26,9 @@ const UserManager = () => {
     async function handleDeleteUser(user) {
         try {
             setIsLoading(true);
-            await UserService.removeUser(user.id)
+            await UserService.blockUser(user.id)
             try {
-                await EmailService.sendMail(user.email,"Bạn đã bị xóa tài khoản rồi nhé ?","Thông Báo From QuizizzGym");
+                await EmailService.sendMail({to:user.email,subject:"Thông báo từ Quizizz Gym",html:"Tài khoản của bạn đã bị khóa"});
             } catch (error) {
                 toast.error(error);
             }
@@ -75,12 +74,24 @@ const UserManager = () => {
         setKeyEmail(e.target.value);
     }
 
+    const handleConfirm = (boolean) => {
+        if (boolean) handleDeleteUser()
+    }
+
     const handlePrePage = () => setPage(page - 1);
 
     const handleNextPage = () => setPage(page + 1);
 
+    const handleOpenDialog = (user) => {
+        setUser(user)
+        setIsOpen(!open);
+    }
+
     return (
         <div className="flex min-h-screen bg-gray-50">
+
+            <DialogConfirm open={open} setIsOpen={setIsOpen} handleConfirm={handleConfirm}/>
+
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
 
@@ -190,4 +201,6 @@ const UserManager = () => {
     )
 }
 
-export default UserManager
+export default UserTable
+
+

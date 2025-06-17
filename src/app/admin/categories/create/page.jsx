@@ -1,9 +1,8 @@
 "use client"
 
-import jwt_decode from "jwt-decode";
 import { useFormik } from "formik"
 import * as Yup from "yup"
-import {useEffect, useState} from "react"
+import { useState} from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader } from "../../../../components/ui/card"
 import { Label } from "../../../../components/ui/label"
@@ -51,7 +50,7 @@ export default function CreateCategoryForm() {
             {/* Header */}
             <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" onClick={() => router.push("/categories")} className="p-2">
+                    <Button variant="ghost" size="sm" onClick={() => router.push("/admin/dashboard")} className="p-2">
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
                     <h1 className="text-2xl font-semibold text-gray-900">Thêm danh mục mới</h1>
@@ -133,7 +132,7 @@ export default function CreateCategoryForm() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => router.push("/categories")}
+                                    onClick={() => router.push("/admin/dashboard")}
                                     disabled={isSubmitting}
                                     className="flex items-center gap-2"
                                 >
