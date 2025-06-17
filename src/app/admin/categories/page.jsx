@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Card, CardContent, CardHeader } from "../../components/ui/card"
-import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import { Separator } from "../../components/ui/separator"
+import { Card, CardContent, CardHeader } from "../../../components/ui/card"
+import { Button } from "../../../components/ui/button"
+import { Input } from "../../../components/ui/input"
+import { Separator } from "../../../components/ui/separator"
 import { Pencil, Trash2, Plus, Search, Grid3X3, Check } from "lucide-react"
-import CategoryService from "../../services/CategoryService"
-import {Skeleton} from "../../components/ui/skeleton";
+import CategoryService from "../../../services/CategoryService"
+import {Skeleton} from "../../../components/ui/skeleton";
 
 import {
     AlertDialog,
@@ -21,7 +21,8 @@ import {
     AlertDialogDescription,
     AlertDialogCancel,
     AlertDialogAction
-} from "../../components/ui/alert-dialog"
+} from "../../../components/ui/alert-dialog"
+import DeleteButton from "../../../components/DeleleButton";
 
 const ITEMS_PER_PAGE = 10
 
@@ -156,34 +157,7 @@ const CategoryTable = () => {
                                     >
                                         <Pencil className="w-4 h-4" />
                                     </Button>
-                                    <AlertDialog key={`dialog-${category.id}`}>
-                                        <AlertDialogTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="p-1 text-destructive hover:bg-red-50"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent className="backdrop-brightness-100 bg-white z-50 max-w-sm p-6">
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle className="text-lg font-semibold">
-                                                    Bạn chắc chắn muốn xóa?
-                                                </AlertDialogTitle>
-                                                <AlertDialogDescription className="text-sm text-muted-foreground">
-                                                    Hành động này sẽ xóa mục này vĩnh viễn và không thể khôi phục.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDelete(category.id)}>
-                                                    Xác nhận
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-
+                                    <DeleteButton item={category} handleDelete={handleDelete}></DeleteButton>
                                 </div>
                             </div>
                         </CardHeader>

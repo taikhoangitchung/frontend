@@ -1,15 +1,17 @@
 "use client"
 
 import {useEffect, useState} from "react"
-import {Button} from "../../components/ui/button"
-import {Input} from "../../components/ui/input"
-import {Card, CardContent} from "../../components/ui/card"
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "../../components/ui/table"
-import UserService from "../../services/UserService"
-import DialogConfirm from "../../components/DialogConfirm";
-import EmailService from "../../services/EmailService";
 import {toast} from "sonner";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faCheckCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+
+import UserService from "../../../services/UserService";
+import EmailService from "../../../services/EmailService";
+import {Card, CardContent} from "../../../components/ui/card";
+import {Input} from "../../../components/ui/input";
+import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "../../../components/ui/table";
+import {Button} from "../../../components/ui/button";
+import DeleteButton from "../../../components/DeleleButton";
 
 const UserManager = () => {
     const [users, setUsers] = useState([])
@@ -21,9 +23,8 @@ const UserManager = () => {
     const questionPerPage = 20
     const [keyName, setKeyName] = useState("");
     const [keyEmail, setKeyEmail] = useState("");
-    const [user, setUser] = useState(null);
 
-    async function handleDeleteUser() {
+    async function handleDeleteUser(user) {
         try {
             setIsLoading(true);
             await UserService.removeUser(user.id)
@@ -32,11 +33,10 @@ const UserManager = () => {
             } catch (error) {
                 toast.error(error);
             }
-
             toast.success("Xóa người dùng thành công");
             setReload(!reload);
         } catch (error) {
-            toast.error(error);
+            toast.error(error.response.data);
         } finally {
             setIsLoading(false);
         }
@@ -75,24 +75,12 @@ const UserManager = () => {
         setKeyEmail(e.target.value);
     }
 
-    const handleConfirm = (boolean) => {
-        if (boolean) handleDeleteUser()
-    }
-
     const handlePrePage = () => setPage(page - 1);
 
     const handleNextPage = () => setPage(page + 1);
 
-    const handleOpenDialog = (user) => {
-        setUser(user)
-        setIsOpen(!open);
-    }
-
     return (
         <div className="flex min-h-screen bg-gray-50">
-
-            <DialogConfirm open={open} setIsOpen={setIsOpen} handleConfirm={handleConfirm}/>
-
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
 
@@ -142,10 +130,11 @@ const UserManager = () => {
                                                     <TableRow key={user.id}
                                                               className="hover:bg-purple-50 border-b border-gray-100">
                                                         <TableCell className="py-3 px-4 font-medium">
-                                                            {user.active
-                                                                ? <FontAwesomeIcon icon={"block-brick"}/>
-                                                                : <FontAwesomeIcon icon={"ticket-alt"}/>
-                                                            }
+                                                            {user.active ? (
+                                                                <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
+                                                            ) : (
+                                                                <FontAwesomeIcon icon={faTimesCircle} className="text-red-500" />
+                                                            )}
                                                         </TableCell>
                                                         <TableCell
                                                             className="py-3 px-4 font-medium">{user.email}</TableCell>
@@ -155,8 +144,7 @@ const UserManager = () => {
                                                         <TableCell
                                                             className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
                                                         <TableCell className="py-3 px-4 text-gray-600">
-                                                            <Button variant="outline" onClick={() => handleOpenDialog(user)}>
-                                                                {user.active ? "Block" : "Active"}</Button>
+                                                            <DeleteButton item={user} handleDelete={handleDeleteUser}/>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
