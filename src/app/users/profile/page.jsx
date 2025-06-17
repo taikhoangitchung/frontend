@@ -94,7 +94,7 @@ const Profile = () => {
                             <img
                                 src={userInfo.avatar || "/placeholder.svg"}
                                 alt="Avatar"
-                                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-md"
+                                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
                             />
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{userInfo.username}</h1>
