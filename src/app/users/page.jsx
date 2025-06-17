@@ -26,9 +26,9 @@ const UserManager = () => {
     async function handleDeleteUser() {
         try {
             setIsLoading(true);
-            await UserService.removeUser(user.id)
+            await UserService.blockUser(user.id)
             try {
-                await EmailService.sendMail(user.email,"Bạn đã bị xóa tài khoản rồi nhé ?","Thông Báo From QuizizzGym");
+                await EmailService.sendMail({to:user.email,subject:"Thông báo từ Quizizz Gym",html:"Tài khoản của bạn đã bị khóa"});
             } catch (error) {
                 toast.error(error);
             }

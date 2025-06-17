@@ -177,7 +177,7 @@ const Login = () => {
 
                                             <div className="text-left">
                                                 <button
-                                                    onClick={() => router.push("/forgot-password")}
+                                                    onClick={() => router.push("/users/forgot-password")}
                                                     className="text-purple-600 hover:text-purple-700 text-sm"
                                                 >
                                                     Quên mật khẩu?
