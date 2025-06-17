@@ -1,12 +1,6 @@
 "use client"
 
-import {
-    FolderOpen,
-    BarChart3,
-    Users,
-    AlertTriangle,
-    Tags
-} from "lucide-react"
+import { FolderOpen, BarChart3, Users, AlertTriangle, Tags } from 'lucide-react'
 import Image from "next/image";
 
 const menuItems = [
@@ -15,8 +9,6 @@ const menuItems = [
     {title: "Quản lý thể loại", icon: Tags, component: "types", active: false},
     {title: "Quản lý độ khó", icon: BarChart3, component: "difficulties", active: false},
 ]
-
-
 
 export function AdminSidebar({ onSelectMenu }) {
     return (
@@ -39,7 +31,7 @@ export function AdminSidebar({ onSelectMenu }) {
                         <button
                             key={item.title}
                             onClick={() => onSelectMenu(item)}
-                            className={`w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg transition-all duration-150 ease-in-out transform hover:translate-x-1 ${
+                            className={`w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg cursor-pointer transition-all duration-200 ease-in-out transform hover:translate-x-1 disabled:cursor-not-allowed ${
                                 item.active
                                     ? "bg-purple-100 text-purple-700 border-l-4 border-purple-500"
                                     : "hover:bg-purple-50 hover:text-purple-700 hover:border-l-4 hover:border-purple-500"

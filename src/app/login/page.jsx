@@ -176,12 +176,12 @@ const Login = () => {
                                             </div>
 
                                             <div className="text-left">
-                                                <button
-                                                    onClick={() => router.push("/users/forgot-password")}
-                                                    className="text-purple-600 hover:text-purple-700 text-sm"
+                                                <a
+                                                    href="/forgot-password"
+                                                    className="text-purple-600 hover:text-purple-700 hover:underline text-sm cursor-pointer transition-all duration-200"
                                                 >
                                                     Quên mật khẩu?
-                                                </button>
+                                                </a>
                                             </div>
 
                                             <button
