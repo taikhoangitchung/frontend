@@ -1,16 +1,19 @@
 "use client"
 
 import {useEffect, useState} from "react"
-import {Button} from "../../../components/ui/button"
-import {Input} from "../../../components/ui/input"
-import {Card, CardContent} from "../../../components/ui/card"
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "../../../components/ui/table"
-import UserService from "../../../services/UserService"
-import DeleteButton from "../../../components/DeleleButton";
+import {Button} from "../../components/ui/button"
+import {Input} from "../../components/ui/input"
+import {Card, CardContent} from "../../components/ui/card"
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "../../components/ui/table"
+import UserService from "../../services/UserService"
+import DialogConfirm from "../../components/DialogConfirm";
+import EmailService from "../../services/EmailService";
 import {toast} from "sonner";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const UserManager = () => {
     const [users, setUsers] = useState([])
+    const [open, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false)
     const [reload, setReload] = useState(false)
     const [page, setPage] = useState(1)
@@ -18,21 +21,42 @@ const UserManager = () => {
     const questionPerPage = 20
     const [keyName, setKeyName] = useState("");
     const [keyEmail, setKeyEmail] = useState("");
+    const [user, setUser] = useState(null);
+
+    async function handleDeleteUser() {
+        try {
+            setIsLoading(true);
+            await UserService.removeUser(user.id)
+            try {
+                await EmailService.sendMail(user.email,"Bạn đã bị xóa tài khoản rồi nhé ?","Thông Báo From QuizizzGym");
+            } catch (error) {
+                toast.error(error);
+            }
+
+            toast.success("Xóa người dùng thành công");
+            setReload(!reload);
+        } catch (error) {
+            toast.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     useEffect(() => {
-        setIsLoading(true)
-        if (keyName.trim() === "" && keyEmail.trim() === "") {
-            UserService.getAllExceptAdmin()
-                .then(res => handlePagination(res))
-                .catch(err => console.log(err))
-        } else {
-            UserService.searchFollowNameAndEmail(keyName, keyEmail)
-                .then(res => handlePagination(res))
-                .catch(err => console.log(err));
-        }
+            setIsLoading(true)
+            if (keyName.trim() === "" && keyEmail.trim() === "") {
+                UserService.getAllExceptAdmin()
+                    .then(res => handlePagination(res))
+                    .catch(err => console.log(err))
+            } else {
+                UserService.searchFollowNameAndEmail(keyName, keyEmail)
+                    .then(res => handlePagination(res))
+                    .catch(err => console.log(err));
+            }
 
-        setIsLoading(false)
-    }, [page, keyName, keyEmail, reload])
+            setIsLoading(false)
+        }, [page, keyName, keyEmail, reload]
+    )
 
     const handlePagination = (res) => {
         setTotalPage(Math.ceil(res.data.length / questionPerPage))
@@ -51,23 +75,24 @@ const UserManager = () => {
         setKeyEmail(e.target.value);
     }
 
-    const handleDeleteUser = (id) => {
-        UserService.removeUser(id)
-            .then(res => {
-                if (res.data) {
-                    toast.success(res.data);
-                    setReload(!reload);
-                }
-            })
-            .catch(err => toast(err.response.data));
+    const handleConfirm = (boolean) => {
+        if (boolean) handleDeleteUser()
     }
 
     const handlePrePage = () => setPage(page - 1);
 
     const handleNextPage = () => setPage(page + 1);
 
+    const handleOpenDialog = (user) => {
+        setUser(user)
+        setIsOpen(!open);
+    }
+
     return (
         <div className="flex min-h-screen bg-gray-50">
+
+            <DialogConfirm open={open} setIsOpen={setIsOpen} handleConfirm={handleConfirm}/>
+
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
 
@@ -97,6 +122,8 @@ const UserManager = () => {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow className="bg-gray-50 hover:bg-gray-50">
+                                                    <TableCell
+                                                        className="py-3 px-4 font-medium">Active</TableCell>
                                                     <TableHead
                                                         className="py-3 px-4 text-gray-700 font-medium">Email</TableHead>
                                                     <TableHead className="py-3 px-4 text-gray-700 font-medium">Tên hiển
@@ -104,7 +131,8 @@ const UserManager = () => {
                                                     <TableHead className="py-3 px-4 text-gray-700 font-medium">Ngày
                                                         tạo</TableHead>
                                                     <TableHead className="py-3 px-4 text-gray-700 font-medium">Lần truy
-                                                        cập cuối</TableHead>
+                                                        cập
+                                                        cuối</TableHead>
                                                     <TableHead className="py-3 px-4 text-gray-700 font-medium">Hành
                                                         động</TableHead>
                                                 </TableRow>
@@ -113,6 +141,12 @@ const UserManager = () => {
                                                 {users.map((user) => (
                                                     <TableRow key={user.id}
                                                               className="hover:bg-purple-50 border-b border-gray-100">
+                                                        <TableCell className="py-3 px-4 font-medium">
+                                                            {user.active
+                                                                ? <FontAwesomeIcon icon={"block-brick"}/>
+                                                                : <FontAwesomeIcon icon={"ticket-alt"}/>
+                                                            }
+                                                        </TableCell>
                                                         <TableCell
                                                             className="py-3 px-4 font-medium">{user.email}</TableCell>
                                                         <TableCell className="py-3 px-4">{user.username}</TableCell>
@@ -121,7 +155,8 @@ const UserManager = () => {
                                                         <TableCell
                                                             className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
                                                         <TableCell className="py-3 px-4 text-gray-600">
-                                                            <DeleteButton item={user} handleDelete={handleDeleteUser}/>
+                                                            <Button variant="outline" onClick={() => handleOpenDialog(user)}>
+                                                                {user.active ? "Block" : "Active"}</Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
