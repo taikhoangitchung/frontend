@@ -38,7 +38,7 @@ export default function DeleteButton({ item, handleDelete }) {
                 <AlertDialogFooter>
                     <AlertDialogCancel>Hủy</AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => handleDelete(item)}
                         className="bg-red-600 hover:bg-red-700 text-white"
                     >
                         Xóa
