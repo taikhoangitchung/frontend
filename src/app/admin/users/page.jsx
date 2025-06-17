@@ -1,11 +1,13 @@
 "use client"
 
 import {useEffect, useState} from "react"
-import {Button} from "../../components/ui/button"
-import {Input} from "../../components/ui/input"
-import {Card, CardContent} from "../../components/ui/card"
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "../../components/ui/table"
-import UserService from "../../services/UserService"
+import {Button} from "../../../components/ui/button"
+import {Input} from "../../../components/ui/input"
+import {Card, CardContent} from "../../../components/ui/card"
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "../../../components/ui/table"
+import UserService from "../../../services/UserService"
+import DeleteButton from "../../../components/DeleleButton";
+import {toast} from "sonner";
 
 const UserManager = () => {
     const [users, setUsers] = useState([])
@@ -30,7 +32,7 @@ const UserManager = () => {
         }
 
         setIsLoading(false)
-    }, [page,keyName,keyEmail,reload])
+    }, [page, keyName, keyEmail, reload])
 
     const handlePagination = (res) => {
         setTotalPage(Math.ceil(res.data.length / questionPerPage))
@@ -50,16 +52,14 @@ const UserManager = () => {
     }
 
     const handleDeleteUser = (id) => {
-        if (confirm(`Bạn có muốn xóa người dùng với id ${id}`)) {
-            UserService.removeUser(id)
-                .then(res => {
-                    if (res.data) {
-                        alert(`Xóa thành công user : ${id}`);
-                        setReload(!reload);
-                    }
-                })
-                .catch(err => alert(err));
-        }
+        UserService.removeUser(id)
+            .then(res => {
+                if (res.data) {
+                    toast.success(res.data);
+                    setReload(!reload);
+                }
+            })
+            .catch(err => toast(err.response.data));
     }
 
     const handlePrePage = () => setPage(page - 1);
@@ -81,8 +81,10 @@ const UserManager = () => {
                                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
                                     <h2 className="text-lg font-semibold">Danh sách người dùng</h2>
                                     <div className="flex items-center">
-                                        <Input placeholder="Tìm kiếm theo tên" className="w-64 h-9 mr-2" onChange={handleKeyName}/>
-                                        <Input placeholder="Tìm kiếm theo email" className="w-64 h-9 mr-2" onChange={handleKeyEmail}/>
+                                        <Input placeholder="Tìm kiếm theo tên" className="w-64 h-9 mr-2"
+                                               onChange={handleKeyName}/>
+                                        <Input placeholder="Tìm kiếm theo email" className="w-64 h-9 mr-2"
+                                               onChange={handleKeyEmail}/>
                                     </div>
                                 </div>
 
@@ -95,22 +97,31 @@ const UserManager = () => {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow className="bg-gray-50 hover:bg-gray-50">
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Email</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Tên hiển thị</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Ngày tạo</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Lần truy cập cuối</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Hành động</TableHead>
+                                                    <TableHead
+                                                        className="py-3 px-4 text-gray-700 font-medium">Email</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Tên hiển
+                                                        thị</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Ngày
+                                                        tạo</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Lần truy
+                                                        cập cuối</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Hành
+                                                        động</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {users.map((user) => (
-                                                    <TableRow key={user.id} className="hover:bg-purple-50 border-b border-gray-100">
-                                                        <TableCell className="py-3 px-4 font-medium">{user.email}</TableCell>
+                                                    <TableRow key={user.id}
+                                                              className="hover:bg-purple-50 border-b border-gray-100">
+                                                        <TableCell
+                                                            className="py-3 px-4 font-medium">{user.email}</TableCell>
                                                         <TableCell className="py-3 px-4">{user.username}</TableCell>
-                                                        <TableCell className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
-                                                        <TableCell className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
+                                                        <TableCell
+                                                            className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
+                                                        <TableCell
+                                                            className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
                                                         <TableCell className="py-3 px-4 text-gray-600">
-                                                            <Button onClick={() => handleDeleteUser(user.id)}>Delete</Button>
+                                                            <DeleteButton item={user} handleDelete={handleDeleteUser}/>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
@@ -118,7 +129,8 @@ const UserManager = () => {
                                         </Table>
 
                                         {/* Pagination */}
-                                        <div className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
+                                        <div
+                                            className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
                                             {page !== 1 && (
                                                 <Button
                                                     variant="outline"
