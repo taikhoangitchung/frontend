@@ -181,7 +181,7 @@ const Login = () => {
                                                     className="text-purple-600 hover:text-purple-700 text-sm"
                                                 >
                                                     Quên mật khẩu?
-                                                </a>
+                                                </button>
                                             </div>
 
                                             <button
