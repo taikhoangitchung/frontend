@@ -45,13 +45,7 @@ const Login = () => {
             const role = jwtDecode(token).role
             localStorage.setItem("id", userId)
             localStorage.setItem("role", role)
-            let nextPage = ""
-            if (role === "ADMIN") {
-                nextPage = "/admin"
-            } else {
-                nextPage = "/users/dashboard"
-            }
-            setTimeout(() => router.push(nextPage), 1500)
+            setTimeout(() => router.push("/"), 1500)
         } catch (err) {
             const errorMessage = err.response?.data || "Đăng nhập không thành công. Vui lòng kiểm tra email hoặc mật khẩu."
             toast.error(errorMessage, {autoClose: 3000})
@@ -66,7 +60,7 @@ const Login = () => {
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
             {/* Header */}
             {/* Main Content */}
-            <div className="flex items-start justify-center px-6 py-5">
+            <div className="flex items-start justify-center px-6 py-10">
                 <div
                     className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex"
                     style={{minHeight: "500px"}}
@@ -80,7 +74,7 @@ const Login = () => {
                                 <div className="space-y-6 mb-16">
                                     {/* Google Login Button */}
                                     <button
-                                        className="w-full flex items-center justify-between p-5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                        className="w-full flex items-center justify-between p-5 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
                                         onClick={() => {
                                             // Tạm thời chưa triển khai
                                             toast.info("Tính năng đăng nhập với Google sẽ sớm được triển khai")
@@ -95,7 +89,7 @@ const Login = () => {
 
                                     {/* Email Login Button */}
                                     <button
-                                        className="w-full flex items-center justify-between p-5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                        className="w-full flex items-center justify-between p-5 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
                                         onClick={() => setShowEmailForm(true)}
                                     >
                                         <div className="flex items-center">
@@ -111,7 +105,7 @@ const Login = () => {
                                     <button
                                         type="button"
                                         onClick={() => router.push("/register")}
-                                        className="text-purple-600 hover:text-purple-700 font-medium"
+                                        className="text-purple-600 hover:text-purple-700 hover:underline font-medium cursor-pointer transition-all duration-200"
                                     >
                                         Đăng ký
                                     </button>
@@ -122,7 +116,7 @@ const Login = () => {
                             <div className="max-w-md mx-auto py-1">
                                 <button
                                     onClick={() => setShowEmailForm(false)}
-                                    className="flex items-center text-purple-600 hover:text-purple-700 mb-6"
+                                    className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                                 >
                                     <FontAwesomeIcon icon={faArrowLeft} className="mr-2"/>
                                     Quay lại
@@ -166,7 +160,7 @@ const Login = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200"
                                                     >
                                                         <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye}/>
                                                     </button>
@@ -176,18 +170,18 @@ const Login = () => {
                                             </div>
 
                                             <div className="text-left">
-                                                <button
-                                                    onClick={() => router.push("/forgot-password")}
-                                                    className="text-purple-600 hover:text-purple-700 text-sm"
+                                                <a
+                                                    href="/forgot-password"
+                                                    className="text-purple-600 hover:text-purple-700 hover:underline text-sm cursor-pointer transition-all duration-200"
                                                 >
                                                     Quên mật khẩu?
-                                                </button>
+                                                </a>
                                             </div>
 
                                             <button
                                                 type="submit"
                                                 disabled={isSubmitting}
-                                                className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
                                             >
                                                 {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
                                             </button>
@@ -200,7 +194,7 @@ const Login = () => {
                                     <button
                                         type="button"
                                         onClick={() => router.push("/register")}
-                                        className="text-purple-600 hover:text-purple-700 font-medium"
+                                        className="text-purple-600 hover:text-purple-700 hover:underline font-medium cursor-pointer transition-all duration-200"
                                     >
                                         Đăng ký
                                     </button>
