@@ -1,163 +1,237 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import UserService from '../../../services/UserService';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react"
+import { Formik, Form, Field, ErrorMessage } from "formik"
+import * as Yup from "yup"
+import UserService from "../../../services/UserService"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faUser, faEnvelope, faArrowLeft, faCamera, faUpload } from "@fortawesome/free-solid-svg-icons"
 
 const EditProfile = () => {
-    const router = useRouter();
-    const [userEmail, setUserEmail] = useState(null);
-    const [avatarPreview, setAvatarPreview] = useState('');
-    const [initialUsername, setInitialUsername] = useState('');
-    const [loading, setLoading] = useState(true);
+    const router = useRouter()
+    const [userEmail, setUserEmail] = useState(null)
+    const [avatarPreview, setAvatarPreview] = useState("")
+    const [initialUsername, setInitialUsername] = useState("")
+    const [loading, setLoading] = useState(true)
+    const [isReady, setIsReady] = useState(false)
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedUserEmail = localStorage.getItem('currentUserEmail');
+        if (typeof window !== "undefined") {
+            const storedUserEmail = localStorage.getItem("currentUserEmail")
             if (!storedUserEmail) {
-                router.push('/login');
-                return;
+                router.push("/login")
+                return
             }
-            setUserEmail(storedUserEmail);
-            const storedUsername = localStorage.getItem('currentUserUsername') || '';
-            const defaultAvatar = 'http://localhost:8080/media/default-avatar.png';
-            setInitialUsername(storedUsername);
-            setAvatarPreview(defaultAvatar);
+            setUserEmail(storedUserEmail)
+            const storedUsername = localStorage.getItem("currentUserUsername") || ""
+            const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
+            setInitialUsername(storedUsername)
+            setAvatarPreview(defaultAvatar)
 
             UserService.getProfile(storedUserEmail)
-                .then(response => {
-                    const user = response.data;
-                    const username = user.username || storedUsername;
-                    const avatar = user.avatar || defaultAvatar;
-                    setInitialUsername(username);
-                    setAvatarPreview(`http://localhost:8080${avatar}`);
-                    localStorage.setItem('currentUserUsername', username);
-                    localStorage.setItem('currentUserAvatar', avatar);
+                .then((response) => {
+                    const user = response.data
+                    const username = user.username || storedUsername
+                    const avatar = user.avatar || defaultAvatar
+                    setInitialUsername(username)
+                    setAvatarPreview(`http://localhost:8080${avatar}`)
+                    localStorage.setItem("currentUserUsername", username)
+                    localStorage.setItem("currentUserAvatar", avatar)
                 })
-                .catch(err => {
-                    console.error('Lỗi khi lấy thông tin user:', err);
-                    setAvatarPreview(defaultAvatar);
+                .catch((err) => {
+                    console.error("Lỗi khi lấy thông tin user:", err)
+                    setAvatarPreview(defaultAvatar)
                 })
-                .finally(() => setLoading(false));
+                .finally(() => {
+                    setLoading(false)
+                    setIsReady(true)
+                })
         }
-    }, [router]);
+    }, [router])
 
     const validationSchema = Yup.object({
-        username: Yup.string()
-            .max(50, 'Tên hiển thị không được vượt quá 50 ký tự'),
+        username: Yup.string().max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
         avatar: Yup.mixed()
-            .test('fileSize', 'File quá lớn', (value) => !value || value.size <= 5 * 1024 * 1024)
-            .test('fileType', 'Chỉ hỗ trợ file ảnh', (value) => !value || ['image/jpeg', 'image/png', 'image/gif'].includes(value.type)),
-    });
+            .test("fileSize", "File quá lớn", (value) => !value || value.size <= 5 * 1024 * 1024)
+            .test(
+                "fileType",
+                "Chỉ hỗ trợ file ảnh",
+                (value) => !value || ["image/jpeg", "image/png", "image/gif"].includes(value.type),
+            ),
+    })
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
             const formData = new FormData();
-            formData.append('email', userEmail);
-            if (values.username) formData.append('username', values.username);
-            if (values.avatar) formData.append('avatar', values.avatar);
+            formData.append("email", userEmail);
+            if (values.username) formData.append("username", values.username); // Chỉ gửi nếu có username mới
+            if (values.avatar && values.avatar instanceof File) formData.append("avatar", values.avatar);
 
+            console.log("FormData being sent:", Object.fromEntries(formData)); // Kiểm tra log
             const response = await UserService.editProfile(formData);
             toast.success(response.data, { autoClose: 1500 });
-            if (values.avatar) {
-                const newAvatar = response.data.avatar || avatarPreview;
-                setAvatarPreview(newAvatar);
-                localStorage.setItem('currentUserAvatar', newAvatar);
-            }
             if (values.username) {
-                localStorage.setItem('currentUserUsername', values.username);
+                localStorage.setItem("currentUserUsername", values.username);
             }
-            setTimeout(() => router.push('/'), 1500);
+            setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
-            const errorMsg = err.response?.data || 'Cập nhật không thành công. Vui lòng kiểm tra lại file upload hoặc kết nối backend.';
+            const errorMsg = err.response?.data || "Cập nhật không thành công. Vui lòng kiểm tra lại kết nối backend.";
             toast.error(errorMsg, { autoClose: 3000 });
-            console.error('Lỗi submit:', err);
+            console.error("Lỗi submit:", err);
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleCancel = () => {
-        router.push('/');
-    };
+        router.back()
+    }
 
     const handleAvatarChange = (event, setFieldValue) => {
-        const file = event.currentTarget.files[0];
+        const file = event.currentTarget.files[0]
         if (file) {
-            setFieldValue('avatar', file);
-            const reader = new FileReader();
-            reader.onload = () => setAvatarPreview(reader.result);
-            reader.readAsDataURL(file);
+            setFieldValue("avatar", file)
+            const reader = new FileReader()
+            reader.onload = () => setAvatarPreview(reader.result)
+            reader.readAsDataURL(file)
         }
-    };
+    }
 
-    if (loading || !userEmail) {
-        return <div>Đang tải...</div>;
+    if (!isReady || loading || !userEmail) {
+        return null
     }
 
     return (
-        <div>
-            <h2>Cập nhật thông tin tài khoản</h2>
-            <Formik
-                initialValues={{ username: initialUsername, avatar: null }}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-            >
-                {({ isSubmitting, setFieldValue }) => (
-                    <Form>
-                        <div>
-                            <label>Email <span style={{ color: 'red' }}>*</span></label>
-                            <p>{userEmail}</p>
-                        </div>
-                        <div>
-                            <label>Tên hiển thị</label>
-                            <Field
-                                type="text"
-                                name="username"
-                                style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                            />
-                            <ErrorMessage name="username" component="p" className="error" />
-                        </div>
-                        <div>
-                            <label>Avatar</label>
-                            {avatarPreview && (
-                                <img src={avatarPreview} alt="Avatar" style={{ width: '100px', height: '100px', marginBottom: '10px' }} />
-                            )}
-                            <input
-                                type="file"
-                                name="avatar"
-                                accept="image/*"
-                                onChange={(event) => handleAvatarChange(event, setFieldValue)}
-                                style={{ marginBottom: '10px' }}
-                            />
-                            <ErrorMessage name="avatar" component="p" className="error" />
-                        </div>
-                        <button type="submit" disabled={isSubmitting}>
-                            Cập nhật
-                        </button>
-                        <button type="button" onClick={handleCancel} style={{ marginLeft: '10px', backgroundColor: '#fff', color: '#333', border: '1px solid #ccc' }}>
-                            Hủy
-                        </button>
-                    </Form>
-                )}
-            </Formik>
-            <ToastContainer
-                position="top-right"
-                autoClose={1500}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                closeButton={false}
-            />
-        </div>
-    );
-};
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
+            {/* Main Content */}
+            <div className="flex items-start justify-center px-6 py-10">
+                <div
+                    className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex"
+                    style={{ minHeight: "500px" }}
+                >
+                    {/* Left Panel - Edit Profile Form */}
+                    <div className="flex-1 p-5">
+                        <div className="max-w-md mx-auto py-1">
+                            <button
+                                onClick={() => router.back()}
+                                className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
+                            >
+                                <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                                Quay lại
+                            </button>
 
-export default EditProfile;
+                            <h1 className="text-2xl font-bold text-gray-900 mb-4">Cập nhật thông tin tài khoản</h1>
+
+                            <Formik
+                                initialValues={{ username: initialUsername, avatar: null }}
+                                validationSchema={validationSchema}
+                                onSubmit={handleSubmit}
+                            >
+                                {({ isSubmitting, setFieldValue }) => (
+                                    <Form className="space-y-6">
+                                        {/* Display Email */}
+                                        <div className="mb-5 p-4 bg-gray-50 rounded-lg border">
+                                            <div className="flex items-center">
+                                                <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 mr-3 text-gray-600" />
+                                                <div>
+                                                    <p className="text-sm text-gray-600">Email tài khoản</p>
+                                                    <p className="font-medium text-gray-900">{userEmail}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Avatar Section */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-3">Avatar</label>
+                                            <div className="flex items-center space-x-4">
+                                                <div className="relative">
+                                                    {avatarPreview && (
+                                                        <img
+                                                            src={avatarPreview || "/placeholder.svg"}
+                                                            alt="Avatar"
+                                                            className="w-20 h-20 rounded-full object-cover border-4 border-gray-200 shadow-md"
+                                                        />
+                                                    )}
+                                                    <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-2">
+                                                        <FontAwesomeIcon icon={faCamera} className="w-3 h-3 text-white" />
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:shadow-md transition-all duration-200">
+                                                        <FontAwesomeIcon icon={faUpload} className="w-4 h-4 mr-2 text-gray-600" />
+                                                        <span className="text-sm text-gray-700">Chọn ảnh mới</span>
+                                                        <input
+                                                            type="file"
+                                                            name="avatar"
+                                                            accept="image/*"
+                                                            onChange={(event) => handleAvatarChange(event, setFieldValue)}
+                                                            className="hidden"
+                                                        />
+                                                    </label>
+                                                    <p className="text-xs text-gray-500 mt-1">JPG, PNG, GIF tối đa 5MB</p>
+                                                </div>
+                                            </div>
+                                            <ErrorMessage name="avatar" component="p" className="text-red-500 text-sm mt-1" />
+                                        </div>
+
+                                        {/* Username */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Tên hiển thị</label>
+                                            <div className="relative">
+                                                <FontAwesomeIcon
+                                                    icon={faUser}
+                                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                                />
+                                                <Field
+                                                    type="text"
+                                                    name="username"
+                                                    placeholder="Nhập tên hiển thị"
+                                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                                />
+                                            </div>
+                                            <ErrorMessage name="username" component="p" className="text-red-500 text-sm mt-1" />
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex space-x-4">
+                                            <button
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                            >
+                                                {isSubmitting ? "Đang cập nhật..." : "Cập nhật"}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleCancel}
+                                                className="flex-1 bg-white text-gray-700 py-3 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 hover:shadow-md cursor-pointer transition-all duration-200"
+                                            >
+                                                Hủy
+                                            </button>
+                                        </div>
+                                    </Form>
+                                )}
+                            </Formik>
+                        </div>
+                    </div>
+
+                    {/* Right Panel - Hero Image */}
+                    <div className="flex-1 bg-gradient-to-br from-orange-100 to-blue-100 relative overflow-hidden">
+                        <img src="/photo-login.jpg" alt="QuizGym Hero" className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
+                            <div className="flex items-center mb-2">
+                                <span className="text-lg">Cá nhân hóa tài khoản</span>
+                                <span className="ml-2">✨</span>
+                            </div>
+                            <p className="text-sm opacity-90">Cập nhật thông tin để có trải nghiệm tốt nhất trên QuizGym</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default EditProfile
