@@ -1,6 +1,6 @@
 "use client"
 
-import {Bell, HelpCircle, ChevronDown, LogOut, User, Lock} from "lucide-react"
+import { Bell, HelpCircle, ChevronDown, LogOut, User, Lock } from 'lucide-react'
 
 import {
     DropdownMenu,
@@ -8,8 +8,8 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
-import {Button} from "../ui/button";
+} from "./ui/dropdown-menu"
+import {Button} from "./ui/button";
 import {useRouter} from "next/navigation";
 
 export function AppHeader() {
@@ -26,30 +26,11 @@ export function AppHeader() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-600 w-10 h-10 hover:bg-purple-100 hover:text-purple-600 rounded-full transition-all duration-150"
+                    className="text-gray-600 w-10 h-10 hover:bg-purple-100 hover:text-purple-600 rounded-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                     title="Thông báo"
                     aria-label="Thông báo"
                 >
                     <Bell className="w-6 h-6"/>
-                </Button>
-
-                {/* Nút Nhập mã */}
-                <Button
-                    variant="outline"
-                    className="text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150"
-                    title="Nhập mã để tham gia"
-                >
-                    Nhập mã
-                </Button>
-
-                {/* Nút Nhận trợ giúp */}
-                <Button
-                    variant="outline"
-                    className="text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400 hover:text-purple-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150"
-                    title="Liên hệ hỗ trợ"
-                >
-                    <HelpCircle className="w-5 h-5 mr-2"/>
-                    Nhận trợ giúp
                 </Button>
 
                 {/* Dropdown hồ sơ */}
@@ -57,7 +38,7 @@ export function AppHeader() {
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
-                            className="flex items-center gap-2 hover:bg-purple-50 rounded-lg transition-all duration-150 px-3 py-2"
+                            className="flex items-center gap-2 hover:bg-purple-50 rounded-lg cursor-pointer transition-all duration-200 disabled:cursor-not-allowed px-3 py-2"
                             aria-label="Menu hồ sơ"
                         >
                             <div className="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center">
@@ -80,8 +61,8 @@ export function AppHeader() {
                         <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
                             <User className="w-5 h-5 text-gray-600" />
                             <button
-                                onClick={() => router.push('/users/profile')}
-                                className="text-sm text-left w-full"
+                                onClick={() => router.push('/profile')}
+                                className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                             >
                                 Hồ sơ
                             </button>
@@ -90,8 +71,8 @@ export function AppHeader() {
                         <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg">
                             <Lock className="w-5 h-5 text-gray-600" />
                             <button
-                                onClick={() => router.push('/users/change-password')}
-                                className="text-sm text-left w-full"
+                                onClick={() => router.push('/change-password')}
+                                className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                             >
                                 Đổi mật khẩu
                             </button>
@@ -101,7 +82,7 @@ export function AppHeader() {
                             <LogOut className="w-5 h-5" />
                             <button
                                 onClick={handleLogout}
-                                className="text-sm text-left w-full"
+                                className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                             >
                                 Đăng xuất
                             </button>

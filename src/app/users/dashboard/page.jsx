@@ -1,6 +1,6 @@
 "use client"
 
-import HeaderUser from "../../../components/AppHeader/headerUser";
+import UserHeader from "../../../components/UserHeader";
 import {Card, CardContent} from "../../../components/ui/card";
 import {Input} from "../../../components/ui/input";
 import {Button} from "../../../components/ui/button";
@@ -15,7 +15,7 @@ export default function Page() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Header Component */}
-            <HeaderUser />
+            <UserHeader />
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 py-12">

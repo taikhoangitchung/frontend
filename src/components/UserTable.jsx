@@ -3,19 +3,19 @@
 import {useEffect, useState} from "react"
 import {toast} from "sonner";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import { faCheckCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import {faCheckCircle, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
+import {Search} from "lucide-react";
 
-import UserService from "../../../services/UserService";
-import EmailService from "../../../services/EmailService";
-import {Card, CardContent} from "../../../components/ui/card";
-import {Input} from "../../../components/ui/input";
-import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "../../../components/ui/table";
-import {Button} from "../../../components/ui/button";
-import DeleteButton from "../../../components/DeleleButton";
+import UserService from "../services/UserService";
+import EmailService from "../services/EmailService";
+import {Card, CardContent} from "./ui/card";
+import {Input} from "./ui/input";
+import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "./ui/table";
+import {Button} from "./ui/button";
+import DeleteButton from "./DeleleButton";
 
-const UserManager = () => {
+const UserTable = () => {
     const [users, setUsers] = useState([])
-    const [open, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false)
     const [reload, setReload] = useState(false)
     const [page, setPage] = useState(1)
@@ -27,9 +27,13 @@ const UserManager = () => {
     async function handleDeleteUser(user) {
         try {
             setIsLoading(true);
-            await UserService.removeUser(user.id)
+            await UserService.blockUser(user.id)
             try {
-                await EmailService.sendMail(user.email,"Bạn đã bị xóa tài khoản rồi nhé ?","Thông Báo From QuizizzGym");
+                await EmailService.sendMail({
+                    to: user.email,
+                    subject: "Thông báo từ Quizizz Gym",
+                    html: "Tài khoản của bạn đã bị khóa"
+                });
             } catch (error) {
                 toast.error(error);
             }
@@ -81,6 +85,7 @@ const UserManager = () => {
 
     return (
         <div className="flex min-h-screen bg-gray-50">
+
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
 
@@ -126,28 +131,44 @@ const UserManager = () => {
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {users.map((user) => (
-                                                    <TableRow key={user.id}
-                                                              className="hover:bg-purple-50 border-b border-gray-100">
-                                                        <TableCell className="py-3 px-4 font-medium">
-                                                            {user.active ? (
-                                                                <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
-                                                            ) : (
-                                                                <FontAwesomeIcon icon={faTimesCircle} className="text-red-500" />
-                                                            )}
-                                                        </TableCell>
-                                                        <TableCell
-                                                            className="py-3 px-4 font-medium">{user.email}</TableCell>
-                                                        <TableCell className="py-3 px-4">{user.username}</TableCell>
-                                                        <TableCell
-                                                            className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
-                                                        <TableCell
-                                                            className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
-                                                        <TableCell className="py-3 px-4 text-gray-600">
-                                                            <DeleteButton item={user} handleDelete={handleDeleteUser}/>
+                                                {!isLoading && users.length === 0 && (keyName || keyEmail) ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={6}>
+                                                            <div
+                                                                className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                                                <Search className="w-12 h-12 mb-4 opacity-50"/>
+                                                                <p>Không tìm thấy người dùng nào với từ khóa
+                                                                    "{keyName || keyEmail}"</p>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
-                                                ))}
+                                                ) : (
+                                                    users.map((user) => (
+                                                        <TableRow key={user.id}
+                                                                  className="hover:bg-purple-50 border-b border-gray-100">
+                                                            <TableCell className="py-3 px-4 font-medium">
+                                                                {user.active ? (
+                                                                    <FontAwesomeIcon icon={faCheckCircle}
+                                                                                     className="text-green-500"/>
+                                                                ) : (
+                                                                    <FontAwesomeIcon icon={faTimesCircle}
+                                                                                     className="text-red-500"/>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell
+                                                                className="py-3 px-4 font-medium">{user.email}</TableCell>
+                                                            <TableCell className="py-3 px-4">{user.username}</TableCell>
+                                                            <TableCell
+                                                                className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
+                                                            <TableCell
+                                                                className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
+                                                            <TableCell className="py-3 px-4 text-gray-600">
+                                                                <DeleteButton item={user}
+                                                                              handleDelete={handleDeleteUser}/>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                )}
                                             </TableBody>
                                         </Table>
 
@@ -190,6 +211,6 @@ const UserManager = () => {
     )
 }
 
-export default UserManager
+export default UserTable
 
 

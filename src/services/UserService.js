@@ -1,10 +1,29 @@
 import axiosInstance from "./config";
 
 class UserService {
-    static async removeUser(userId) {
+    static async blockUser(userId) {
         try {
             return await axiosInstance.patch(`/users/${userId}/block`);
         } catch (error) {
+            throw error;
+        }
+    }
+
+    static async checkToken(token) {
+        try {
+            return await axiosInstance.get(`/users/check-token/${token}`);
+        } catch (error) {
+            console.error(`Lỗi khi reset password`, error);
+            throw error;
+        }
+    }
+
+    static async resetPassword(email, password, token) {
+        try {
+            const param = {email: email, password: password, token: token};
+            return await axiosInstance.patch(`/users/reset-password`, param);
+        } catch (error) {
+            console.error(`Lỗi khi reset password`, error);
             throw error;
         }
     }
@@ -14,7 +33,7 @@ class UserService {
             const params = {};
             if (keyName && keyName.trim() !== "") params.keyName = keyName;
             if (keyEmail && keyEmail.trim() !== "") params.keyEmail = keyEmail;
-            return await axiosInstance.get("/users/search", { params });
+            return await axiosInstance.get("/users/search", {params});
         } catch (error) {
             console.error(`Lỗi khi tìm kiếm người dùng với keyName = ${keyName}, keyEmail = ${keyEmail}`, error);
             throw error;
@@ -57,7 +76,7 @@ class UserService {
 
     static async getProfile(email) {
         try {
-            return await axiosInstance.get("/users/profile", { params: { email } });
+            return await axiosInstance.get("/users/profile", {params: {email}});
         } catch (error) {
             console.error(`Lỗi khi lấy thông tin user với email: ${email}`, error);
             throw error;
@@ -67,7 +86,7 @@ class UserService {
     static async editProfile(formData) {
         try {
             return await axiosInstance.patch("/users/edit", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
+                headers: {"Content-Type": "multipart/form-data"},
             });
         } catch (error) {
             console.error("Lỗi khi cập nhật thông tin user", error);
