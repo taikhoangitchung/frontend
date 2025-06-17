@@ -1,20 +1,41 @@
 "use client"
 
-import {Plus, Home, FolderOpen, BarChart3, Users, Settings, Sparkles, Info, AlertTriangle} from "lucide-react"
+import {
+    Plus,
+    Home,
+    FolderOpen,
+    BarChart3,
+    Users,
+    Settings,
+    Sparkles,
+    Info,
+    AlertTriangle,
+    HelpCircle, Tags
+} from "lucide-react"
 import {Button} from "../ui/button";
 import Image from "next/image";
+import {useRouter} from "next/navigation";
 
 
 const menuItems = [
-    {title: "Khám phá", icon: Home, url: "#", active: false},
-    {title: "Thư viện", icon: FolderOpen, url: "#", active: false},
-    {title: "Báo cáo", icon: BarChart3, url: "#", active: false},
-    {title: "Các lớp học", icon: Users, url: "#", hasWarning: true, active: false},
-    {title: "Tùy chỉnh phù hợp", icon: Settings, url: "#", active: false},
-    {title: "Quizizz AI", icon: Sparkles, url: "#", active: false},
+    {title: "Quản lý người dùng", icon: Users, url: "/admin/users", active: false},
+    {title: "Quản lý câu hỏi", icon: HelpCircle, url: "/admin/questions", active: false},
+    {title: "Quản lý danh mục", icon: FolderOpen, url: "/admin/categories", active: false},
+    {title: "Quản lý thể loại", icon: Tags, url: "/admin/types", active: false},
+    {title: "Quản lý độ khó", icon: BarChart3, url: "/admin/difficulties", active: false},
 ]
 
+
+
 export function AppSidebar() {
+    const router = useRouter();
+    
+    const handleMenuClick = (url) => {
+        if (url !== "#") {
+            router.push(url);
+        }
+    };
+
     return (
         <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col shadow-sm">
             {/* Logo */}
@@ -43,10 +64,10 @@ export function AppSidebar() {
             <div className="flex-1 px-2">
                 <nav className="space-y-1">
                     {menuItems.map((item) => (
-                        <a
+                        <button
                             key={item.title}
-                            href={item.url}
-                            className={`flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg transition-all duration-150 ease-in-out transform hover:translate-x-1 ${
+                            onClick={() => handleMenuClick(item.url)}
+                            className={`w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg transition-all duration-150 ease-in-out transform hover:translate-x-1 ${
                                 item.active
                                     ? "bg-purple-100 text-purple-700 border-l-4 border-purple-500"
                                     : "hover:bg-purple-50 hover:text-purple-700 hover:border-l-4 hover:border-purple-500"
@@ -56,7 +77,7 @@ export function AppSidebar() {
                             <item.icon className="w-6 h-6 transition-colors duration-150"/>
                             <span className="text-base font-medium">{item.title}</span>
                             {item.hasWarning && <AlertTriangle className="w-5 h-5 ml-auto text-orange-500"/>}
-                        </a>
+                        </button>
                     ))}
                 </nav>
             </div>
