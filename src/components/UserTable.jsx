@@ -5,17 +5,16 @@ import {toast} from "sonner";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
-import UserService from "../../../services/UserService";
-import EmailService from "../../../services/EmailService";
-import {Card, CardContent} from "../../../components/ui/card";
-import {Input} from "../../../components/ui/input";
-import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "../../../components/ui/table";
-import {Button} from "../../../components/ui/button";
-import DeleteButton from "../../../components/DeleleButton";
+import UserService from "../services/UserService";
+import EmailService from "../services/EmailService";
+import {Card, CardContent} from "./ui/card";
+import {Input} from "./ui/input";
+import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "./ui/table";
+import {Button} from "./ui/button";
+import DeleteButton from "./DeleleButton";
 
-const UserManager = () => {
+const UserTable = () => {
     const [users, setUsers] = useState([])
-    const [open, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false)
     const [reload, setReload] = useState(false)
     const [page, setPage] = useState(1)
@@ -29,7 +28,7 @@ const UserManager = () => {
             setIsLoading(true);
             await UserService.removeUser(user.id)
             try {
-                await EmailService.sendMail(user.email,"Bạn đã bị xóa tài khoản rồi nhé ?","Thông Báo From QuizizzGym");
+                await EmailService.sendMail(user.email,"Bạn đã bị xóa tài khoản","Thông Báo từ QuizGym");
             } catch (error) {
                 toast.error(error);
             }
@@ -190,6 +189,6 @@ const UserManager = () => {
     )
 }
 
-export default UserManager
+export default UserTable
 
 
