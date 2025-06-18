@@ -54,7 +54,7 @@ const EditProfile = () => {
     const validationSchema = Yup.object({
         username: Yup.string().max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
         avatar: Yup.mixed()
-            .nullable() // Cho phép null
+            .nullable()
             .test("fileSize", "File quá lớn", (value) => !value || (value && value.size <= 5 * 1024 * 1024))
             .test(
                 "fileType",
@@ -67,17 +67,16 @@ const EditProfile = () => {
         try {
             const formData = new FormData();
             formData.append("email", userEmail);
-            if (values.username && values.username !== initialUsername) formData.append("username", values.username); // Chỉ gửi nếu thay đổi
+            if (values.username && values.username !== initialUsername) formData.append("username", values.username);
             if (values.avatar && values.avatar instanceof File) formData.append("avatar", values.avatar);
 
-            console.log("FormData being sent:", Object.fromEntries(formData)); // Kiểm tra log
+            console.log("FormData being sent:", Object.fromEntries(formData));
             const response = await UserService.editProfile(formData);
             toast.success(response.data, { autoClose: 1500 });
             if (values.username && values.username !== initialUsername) {
                 localStorage.setItem("currentUserUsername", values.username);
             }
-            // Chuyển trang từ từ thay vì reload
-            setTimeout(() => router.push("/profile"), 1500); // Delay 1.5 giây để người dùng thấy thông báo
+            setTimeout(() => router.push("/profile"), 1500);
         } catch (err) {
             const errorMsg = err.response?.data || "Cập nhật không thành công. Vui lòng kiểm tra lại kết nối backend.";
             toast.error(errorMsg, { autoClose: 3000 });
@@ -201,14 +200,14 @@ const EditProfile = () => {
                                             <button
                                                 type="submit"
                                                 disabled={isSubmitting}
-                                                className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                                className="flex-1 bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
                                             >
                                                 {isSubmitting ? "Đang cập nhật..." : "Cập nhật"}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={handleCancel}
-                                                className="flex-1 bg-white text-gray-700 py-3 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 hover:shadow-md cursor-pointer transition-all duration-200"
+                                                className="flex-1 bg-white text-gray-700 py-2 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 hover:shadow-md cursor-pointer transition-all duration-200"
                                             >
                                                 Hủy
                                             </button>
