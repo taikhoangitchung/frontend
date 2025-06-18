@@ -1,12 +1,9 @@
 "use client"
+import CreateQuestionForm from "../../../../components/CreateQuestionForm";
 
-import QuestionFormUI from "../../../../components/CreateOrEditQuestion"
 
-export default function CreateQuestion() {
+export default function Component() {
     return (
-        <QuestionFormUI
-            initialValues={null} // Dùng default trong formik
-            isEdit={false}
-        />
+        <CreateQuestionForm/>
     )
 }
