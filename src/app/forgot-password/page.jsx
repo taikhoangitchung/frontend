@@ -65,14 +65,18 @@ const ForgotPassword = () => {
                         <div className="max-w-md mx-auto py-1">
                             <button
                                 onClick={() => router.push("/login")}
+
                                 className="flex items-center text-purple-600 hover:text-purple-700 mb-6 cursor-pointer"
+
                             >
                                 <FontAwesomeIcon icon={faArrowLeft} className="mr-2"/>
                                 Quay lại
                             </button>
 
                             <h1 className="text-2xl font-bold text-gray-900 mb-2">
+
                                 Hãy nhập Email của bạn và truy cập trang lấy lại mật khẩu mà bạn nhận được trong Gmail
+
                             </h1>
 
                             <form onSubmit={formik.handleSubmit} className="space-y-6">
@@ -100,7 +104,9 @@ const ForgotPassword = () => {
 
                                 <Button
                                     type="submit"
+
                                     className="cursor-pointer w-full h-12 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+
                                 >
                                     Gửi
                                 </Button>

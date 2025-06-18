@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, HelpCircle, ChevronDown, LogOut, User, Lock } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User, Lock } from 'lucide-react'
 
 import {
     DropdownMenu,
