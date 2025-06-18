@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from "react"
 import {toast} from "sonner";
-import {Search} from "lucide-react";
+import {Loader2, Search} from "lucide-react";
 
 import UserService from "../services/UserService";
 import EmailService from "../services/EmailService";
@@ -64,7 +64,7 @@ const UserTable = () => {
             setIsLoading(true)
             if (!isActive) {
                 await UserService.blockUser(user.id)
-                await EmailService.sendMail({
+                await EmailService.sendAnnounce({
                     to: user.email,
                     subject: "Thông báo từ Quizizz Gym",
                     html: "Tài khoản của bạn đã bị khóa",
@@ -72,7 +72,7 @@ const UserTable = () => {
                 toast.error(`Đã khóa tài khoản ${user.email}`)
             } else {
                 await UserService.unblockUser(user.id)
-                await EmailService.sendMail({
+                await EmailService.sendAnnounce({
                     to: user.email,
                     subject: "Thông báo từ Quizizz Gym",
                     html: "Tài khoản của bạn đã được mở khóa",
@@ -112,8 +112,9 @@ const UserTable = () => {
                                 </div>
 
                                 {isLoading ? (
-                                    <div className="flex justify-center items-center h-64">
-                                        <div className="text-xl text-purple-700">Đang tải dữ liệu...</div>
+                                    <div className="flex justify-center items-center py-10">
+                                        <Loader2 className="h-6 w-6 animate-spin text-purple-600 mr-2" />
+                                        <span className="text-gray-600 text-sm">Đang tải danh sách người dùng...</span>
                                     </div>
                                 ) : (
                                     <>
