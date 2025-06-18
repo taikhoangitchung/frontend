@@ -101,6 +101,14 @@ class UserService {
             throw error;
         }
     }
+
+    static async unblockUser(id) {
+        try {
+            return await axiosInstance.patch(`/users/${id}/unblock`);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default UserService;

@@ -2,8 +2,6 @@
 
 import {useEffect, useState} from "react"
 import {toast} from "sonner";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCheckCircle, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 import {Search} from "lucide-react";
 
 import UserService from "../services/UserService";
@@ -12,7 +10,7 @@ import {Card, CardContent} from "./ui/card";
 import {Input} from "./ui/input";
 import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "./ui/table";
 import {Button} from "./ui/button";
-import DeleteButton from "./DeleleButton";
+import UserStatusSwitch from "./UserStatusSwitch";
 
 const UserTable = () => {
     const [users, setUsers] = useState([])
@@ -23,28 +21,6 @@ const UserTable = () => {
     const questionPerPage = 20
     const [keyName, setKeyName] = useState("");
     const [keyEmail, setKeyEmail] = useState("");
-
-    async function handleDeleteUser(user) {
-        try {
-            setIsLoading(true);
-            await UserService.blockUser(user.id)
-            try {
-                await EmailService.sendMail({
-                    to: user.email,
-                    subject: "Thông báo từ Quizizz Gym",
-                    html: "Tài khoản của bạn đã bị khóa"
-                });
-            } catch (error) {
-                toast.error(error);
-            }
-            toast.success("Xóa người dùng thành công");
-            setReload(!reload);
-        } catch (error) {
-            toast.error(error.response.data);
-        } finally {
-            setIsLoading(false);
-        }
-    }
 
     useEffect(() => {
             setIsLoading(true)
@@ -83,6 +59,35 @@ const UserTable = () => {
 
     const handleNextPage = () => setPage(page + 1);
 
+    async function handleToggleUserStatus(user, isActive) {
+        try {
+            setIsLoading(true)
+            if (!isActive) {
+                await UserService.blockUser(user.id)
+                await EmailService.sendMail({
+                    to: user.email,
+                    subject: "Thông báo từ Quizizz Gym",
+                    html: "Tài khoản của bạn đã bị khóa",
+                })
+                toast.error(`Đã khóa tài khoản ${user.email}`)
+            } else {
+                await UserService.unblockUser(user.id)
+                await EmailService.sendMail({
+                    to: user.email,
+                    subject: "Thông báo từ Quizizz Gym",
+                    html: "Tài khoản của bạn đã được mở khóa",
+                })
+                toast.success(`Đã mở khóa tài khoản ${user.email}`)
+            }
+            setReload(!reload)
+        } catch (error) {
+            toast.error(error?.response?.data || "Có lỗi xảy ra khi cập nhật trạng thái.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+
     return (
         <div className="flex min-h-screen bg-gray-50">
 
@@ -116,7 +121,8 @@ const UserTable = () => {
                                             <TableHeader>
                                                 <TableRow className="bg-gray-50 hover:bg-gray-50">
                                                     <TableCell
-                                                        className="py-3 px-4 font-medium">Active</TableCell>
+                                                        className="py-3 px-4 font-medium">ID
+                                                    </TableCell>
                                                     <TableHead
                                                         className="py-3 px-4 text-gray-700 font-medium">Email</TableHead>
                                                     <TableHead className="py-3 px-4 text-gray-700 font-medium">Tên hiển
@@ -126,8 +132,7 @@ const UserTable = () => {
                                                     <TableHead className="py-3 px-4 text-gray-700 font-medium">Lần truy
                                                         cập
                                                         cuối</TableHead>
-                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Hành
-                                                        động</TableHead>
+                                                    <TableHead className="py-3 px-4 text-gray-700 font-medium">Khóa/Mở khóa</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -147,13 +152,7 @@ const UserTable = () => {
                                                         <TableRow key={user.id}
                                                                   className="hover:bg-purple-50 border-b border-gray-100">
                                                             <TableCell className="py-3 px-4 font-medium">
-                                                                {user.active ? (
-                                                                    <FontAwesomeIcon icon={faCheckCircle}
-                                                                                     className="text-green-500"/>
-                                                                ) : (
-                                                                    <FontAwesomeIcon icon={faTimesCircle}
-                                                                                     className="text-red-500"/>
-                                                                )}
+                                                                {user.id}
                                                             </TableCell>
                                                             <TableCell
                                                                 className="py-3 px-4 font-medium">{user.email}</TableCell>
@@ -163,8 +162,7 @@ const UserTable = () => {
                                                             <TableCell
                                                                 className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
                                                             <TableCell className="py-3 px-4 text-gray-600">
-                                                                <DeleteButton item={user}
-                                                                              handleDelete={handleDeleteUser}/>
+                                                                <UserStatusSwitch user={user} onToggle={handleToggleUserStatus} />
                                                             </TableCell>
                                                         </TableRow>
                                                     ))
