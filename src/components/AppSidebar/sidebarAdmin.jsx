@@ -15,6 +15,7 @@ import {
 import {Button} from "../ui/button";
 import Image from "next/image";
 import {useRouter} from "next/navigation";
+import {toast} from "sonner";
 
 
 const menuItems = [
@@ -91,7 +92,7 @@ export function AppSidebar() {
                     <span>0/20 hoạt động được tạo ra</span>
                     <Info className="w-5 h-5"/>
                 </div>
-                <Button
+                <Button onClick={() => toast.info("Chức năng này đang được phát triển...")}
                     className="w-full bg-yellow-400 hover:bg-yellow-500 hover:shadow-xl hover:scale-105 text-black rounded-lg h-12 text-base font-semibold transition-all duration-200 ease-in-out"
                     aria-label="Nâng cấp tài khoản"
                 >

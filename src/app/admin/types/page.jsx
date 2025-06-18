@@ -6,12 +6,14 @@ import {useRouter} from "next/navigation"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons"
 import {Label} from "@radix-ui/react-label"
-import {Input} from "../../components/ui/input"
-import {Button} from "../../components/ui/button"
-import EmailService from "../../services/EmailService";
+
 import {toast} from "sonner";
-import EmailTemplate from "../../components/EmailTemplate";
+
 import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
+import EmailTemplate from "../../../components/EmailTemplate";
+import EmailService from "../../../services/EmailService";
+import {Input} from "../../../components/ui/input";
+import {Button} from "../../../components/ui/button";
 
 const ForgotPassword = () => {
     const router = useRouter()

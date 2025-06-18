@@ -11,7 +11,7 @@ import {toast} from "sonner";
 
 export default function Page() {
 
-    const username = localStorage.getItem("currentUserUsername");
+    const username = localStorage.getItem("currentUserUserName");
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Header Component */}

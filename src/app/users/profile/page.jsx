@@ -28,7 +28,7 @@ const Profile = () => {
             }
 
             // Set initial data from localStorage
-            const storedUsername = localStorage.getItem("currentUserUsername") || ""
+            const storedUsername = localStorage.getItem("currentUserUserName") || ""
             const storedAvatar = localStorage.getItem("currentUserAvatar") || ""
             const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
 

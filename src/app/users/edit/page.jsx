@@ -25,7 +25,7 @@ const EditProfile = () => {
                 return;
             }
             setUserEmail(storedUserEmail);
-            const storedUsername = localStorage.getItem("currentUserUsername") || "";
+            const storedUsername = localStorage.getItem("currentUserUserName") || "";
             const defaultAvatar = "http://localhost:8080/media/default-avatar.png";
             setInitialUsername(storedUsername);
             setAvatarPreview(defaultAvatar);
@@ -37,7 +37,7 @@ const EditProfile = () => {
                     const avatar = user.avatar || defaultAvatar;
                     setInitialUsername(username);
                     setAvatarPreview(`http://localhost:8080${avatar}`);
-                    localStorage.setItem("currentUserUsername", username);
+                    localStorage.setItem("currentUserUserName", username);
                     localStorage.setItem("currentUserAvatar", avatar);
                 })
                 .catch((err) => {
@@ -74,7 +74,7 @@ const EditProfile = () => {
             const response = await UserService.editProfile(formData);
             toast.success(response.data, { autoClose: 1500 });
             if (values.username && values.username !== initialUsername) {
-                localStorage.setItem("currentUserUsername", values.username);
+                localStorage.setItem("currentUserUserName", values.username);
             }
             setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
