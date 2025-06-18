@@ -28,9 +28,13 @@ const ForgotPassword = () => {
         onSubmit: (values) => {
             const token = crypto.randomUUID();
             localStorage.setItem("token_reset_password", token);
-            localStorage.setItem("email",values.email);
+            localStorage.setItem("email", values.email);
             const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
-                <EmailTemplate resetLink={`http://localhost:3000/users/reset-password`}/>
+                <EmailTemplate data={`http://localhost:3000/users/reset-password`}
+                               title={"Yêu cầu đặt lại mật khẩu"}
+                               description={"Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n" +
+                                            "          Nhấn nút bên dưới để tiến hành đặt lại mật khẩu:"}
+                               openButton={true}/>
             );
             const params = {
                 to: values.email,
@@ -61,16 +65,18 @@ const ForgotPassword = () => {
                         <div className="max-w-md mx-auto py-1">
                             <button
                                 onClick={() => router.push("/login")}
-                                className="flex items-center text-purple-600 hover:text-purple-700 mb-6"
+
+                                className="flex items-center text-purple-600 hover:text-purple-700 mb-6 cursor-pointer"
+
                             >
                                 <FontAwesomeIcon icon={faArrowLeft} className="mr-2"/>
                                 Quay lại
                             </button>
 
                             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                                Đừng lo lắng hãy nhập Email của bạn và truy cập trang lấy lại mật khẩu mà bạn nhận được
-                                trong gmail từ
-                                chúng tôi
+
+                                Hãy nhập Email của bạn và truy cập trang lấy lại mật khẩu mà bạn nhận được trong Gmail
+
                             </h1>
 
                             <form onSubmit={formik.handleSubmit} className="space-y-6">
@@ -98,7 +104,9 @@ const ForgotPassword = () => {
 
                                 <Button
                                     type="submit"
-                                    className="w-full h-12 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+
+                                    className="cursor-pointer w-full h-12 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+
                                 >
                                     Gửi
                                 </Button>

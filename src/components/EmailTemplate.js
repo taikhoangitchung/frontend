@@ -1,29 +1,26 @@
 import React from "react";
 
-const EmailTemplate = ({resetLink}) => {
+const EmailTemplate = ({data, title, description, openButton}) => {
     return (
         <html>
         <body>
         <div style={{fontFamily: "Arial", textAlign: "center", padding: 20}}>
-            <h2>Yêu cầu đặt lại mật khẩu</h2>
-            <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>
-            <p>Nhấn nút bên dưới để tiến hành đặt lại mật khẩu:</p>
+            <h2>{title}</h2>
+            <pre>{description}</pre>
 
             <div style={{marginTop: "30px"}}>
-                <a
-                    href={resetLink}
-                    style={{textDecoration: "none"}}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <button className={"bg-black text-white"}>Reset Password</button>
-                </a>
-
+                {openButton ? (
+                    <a
+                        href={data}
+                        style={{textDecoration: "none"}}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <button className={"bg-black text-white"}>Reset Password</button>
+                    </a>
+                ) : <p>{data}</p>
+                }
             </div>
-
-            <p style={{marginTop: "50px", color: "gray", fontSize: 14}}>
-                Nếu bạn không yêu cầu, vui lòng bỏ qua email này.
-            </p>
         </div>
         </body>
         </html>
