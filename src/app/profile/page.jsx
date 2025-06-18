@@ -14,7 +14,7 @@ const Profile = () => {
         username: "",
         avatar: "",
         quizCount: 0,
-        createdAt: null, // Thêm trạng thái cho createdAt
+        createdAt: null,
     })
     const [loading, setLoading] = useState(true)
     const [isReady, setIsReady] = useState(false)
@@ -27,7 +27,6 @@ const Profile = () => {
                 return
             }
 
-            // Set initial data from localStorage
             const storedUsername = localStorage.getItem("currentUserUsername") || ""
             const storedAvatar = localStorage.getItem("currentUserAvatar") || ""
             const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
@@ -39,7 +38,6 @@ const Profile = () => {
                 avatar: storedAvatar || defaultAvatar,
             }))
 
-            // Fetch complete profile data
             UserService.getProfile(storedUserEmail)
                 .then((response) => {
                     const user = response.data
@@ -48,7 +46,7 @@ const Profile = () => {
                         username: user.username || storedUsername || "Người dùng",
                         avatar: user.avatar ? `http://localhost:8080${user.avatar}` : defaultAvatar,
                         quizCount: user.quizCount || 0,
-                        createdAt: user.createdAt || null, // Lấy createdAt từ response
+                        createdAt: user.createdAt || null,
                     })
                 })
                 .catch((err) => {
@@ -63,17 +61,17 @@ const Profile = () => {
     }, [router])
 
     const formatDate = (dateString) => {
-        if (!dateString) return "Không xác định";
+        if (!dateString) return "Không xác định"
         try {
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
-            const year = date.getFullYear();
-            return `${day}-${month}-${year}`;
+            const date = new Date(dateString)
+            const day = String(date.getDate()).padStart(2, '0')
+            const month = String(date.getMonth() + 1).padStart(2, '0')
+            const year = date.getFullYear()
+            return `${day}-${month}-${year}`
         } catch (error) {
-            return "Không xác định";
+            return "Không xác định"
         }
-    };
+    }
 
     if (!isReady || loading) {
         return (
@@ -89,16 +87,16 @@ const Profile = () => {
             <div className="bg-white border-b border-gray-200">
                 <div className="max-w-6xl mx-auto px-6 py-8">
                     <div className="flex items-start justify-between">
-                        {/* Left side - Avatar and Name */}
+                        {/* Left side - Avatar, Name, and Edit Button */}
                         <div className="flex items-center space-x-6">
                             <img
                                 src={userInfo.avatar || "/placeholder.svg"}
                                 alt="Avatar"
-                                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+                                className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
                             />
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{userInfo.username}</h1>
-                                <div className="space-y-1">
+                                <div className="space-y-1 mb-4">
                                     <p className="text-gray-600 flex items-center">
                                         <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 mr-2" />
                                         {userInfo.email}
@@ -108,34 +106,40 @@ const Profile = () => {
                                         Tham gia: {formatDate(userInfo.createdAt)}
                                     </p>
                                 </div>
+                                <button
+                                    onClick={() => router.push("/profile/edit")}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded-lg cursor-pointer transition-colors text-sm"
+                                >
+                                    <FontAwesomeIcon icon={faEdit} className="w-4 h-4 text-gray-600" />
+                                    <span className="text-gray-700">Chỉnh sửa Hồ sơ</span>
+                                </button>
                             </div>
                         </div>
 
-                        {/* Right side - Edit button and Quiz count */}
-                        <div className="flex items-center space-x-6">
-                            <div className="text-center">
-                                <div className="text-4xl font-bold text-gray-900">{userInfo.quizCount}</div>
-                                <div className="text-sm text-gray-600 font-medium">QUIZ</div>
-                            </div>
+                        {/* Right side - Back to Dashboard Button */}
+                        <div className="flex items-center">
                             <button
-                                onClick={() => router.push("/profile/edit")}
-                                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                onClick={() => router.push("/users/dashboard")}
+                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 cursor-pointer transition-colors"
                             >
-                                <FontAwesomeIcon icon={faEdit} className="w-4 h-4 text-gray-600" />
-                                <span className="text-gray-700">Chỉnh sửa Hồ sơ</span>
+                                <span className="text-gray-700">Quay về trang chính</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Navigation Tabs */}
+            {/* Navigation Tabs and Quiz Count */}
             <div className="bg-white border-b border-gray-200">
-                <div className="max-w-6xl mx-auto px-6">
+                <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
                     <div className="flex space-x-8">
                         <button className="py-4 px-2 border-b-2 border-purple-600 text-purple-600 font-medium cursor-pointer">
                             Thư viện
                         </button>
+                    </div>
+                    <div className="text-center pt-0">
+                        <div className="text-3xl font-bold text-gray-900">{userInfo.quizCount}</div>
+                        <div className="text-sm text-gray-600 font-medium">QUIZ</div>
                     </div>
                 </div>
             </div>
@@ -162,7 +166,8 @@ const Profile = () => {
                         {/* Create Button */}
                         <button
                             onClick={() => router.push("/users/questions/create")}
-                            className="bg-purple-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:bg-purple-700 cursor-pointer transition-colors">
+                            className="bg-purple-600 text-white px-6 py-2 rounded-lg text-md font-medium hover:bg-purple-700 cursor-pointer transition-colors"
+                        >
                             Tạo Quiz Mới
                         </button>
                     </div>
