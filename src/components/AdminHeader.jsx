@@ -11,6 +11,7 @@ import {
 } from "./ui/dropdown-menu"
 import {Button} from "./ui/button";
 import {useRouter} from "next/navigation";
+import {toast} from "sonner";
 
 export function AppHeader() {
     const router = useRouter();
@@ -23,7 +24,7 @@ export function AppHeader() {
         <header className="h-16 border-b bg-white flex items-center justify-end px-6 shadow-sm">
             <div className="flex items-center gap-4">
                 {/* Nút thông báo */}
-                <Button
+                <Button onClick={() => toast.info("Chức năng này đang được phát triển...")}
                     variant="ghost"
                     size="icon"
                     className="text-gray-600 w-10 h-10 hover:bg-purple-100 hover:text-purple-600 rounded-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
