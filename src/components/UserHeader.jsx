@@ -89,47 +89,50 @@ export default function UserHeader() {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="flex items-center gap-2 hover:bg-purple-50 rounded-lg transition-all duration-200 px-3 py-2 cursor-pointer disabled:cursor-not-allowed"
+                                className="flex items-center gap-2 hover:bg-purple-100 rounded-lg cursor-pointer transition-all duration-200 disabled:cursor-not-allowed px-4 py-2"
                                 aria-label="Menu hồ sơ"
                             >
-                                <div className="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
                                     <span className="text-white font-semibold text-sm">{email[0].toUpperCase()}</span>
                                 </div>
-                                <ChevronDown className="w-5 h-5 text-gray-500" />
+                                <ChevronDown className="w-5 h-5 text-gray-500"/>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-64 p-2">
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-64 p-3 bg-white rounded-xl shadow-lg border border-gray-100 z-50"
+                        >
                             <div className="flex items-center gap-3 p-3 rounded-lg">
-                                <div className="w-9 h-9 bg-purple-500 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
                                     <span className="text-white font-semibold text-sm">{email[0].toUpperCase()}</span>
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-sm text-gray-500">{email}</div>
+                                    <div className="text-sm font-medium text-gray-700">{email}</div>
                                 </div>
                             </div>
 
-                            <DropdownMenuSeparator className="my-1" />
-                            <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg transition-all duration-200">
+                            <DropdownMenuSeparator className="my-2 bg-gray-100"/>
+                            <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg transition-colors duration-200">
                                 <User className="w-5 h-5 text-gray-600" />
                                 <button
-                                    onClick={() => router.push("/profile")}
+                                    onClick={() => router.push('/profile')}
                                     className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                 >
                                     Hồ sơ
                                 </button>
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg transition-all duration-200">
+                            <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 cursor-pointer rounded-lg transition-colors duration-200">
                                 <Lock className="w-5 h-5 text-gray-600" />
                                 <button
-                                    onClick={() => router.push("/change-password")}
+                                    onClick={() => router.push('/change-password')}
                                     className="text-sm text-left w-full cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                 >
                                     Đổi mật khẩu
                                 </button>
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem className="flex items-center gap-2 p-3 text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer rounded-lg transition-all duration-200">
+                            <DropdownMenuItem className="flex items-center gap-2 p-3 text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer rounded-lg transition-colors duration-200">
                                 <LogOut className="w-5 h-5" />
                                 <button
                                     onClick={handleLogout}
