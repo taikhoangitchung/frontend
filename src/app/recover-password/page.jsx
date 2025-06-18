@@ -1,18 +1,21 @@
 "use client"
 
 import {useEffect, useState} from "react"
-import {Eye, EyeOff, Lock} from "lucide-react"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "../../../components/ui/card";
+import {Eye, EyeOff, Lock, SendIcon} from "lucide-react"
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "../../components/ui/card";
 import {Label} from "@radix-ui/react-label";
-import {Input} from "../../../components/ui/input";
-import {Button} from "../../../components/ui/button";
+import {Input} from "../../components/ui/input";
+import {Button} from "../../components/ui/button";
 import {useFormik} from "formik";
 import * as Yup from "yup";
-import UserService from "../../../services/UserService";
+import UserService from "../../services/UserService";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
+import EmailService from "../../services/EmailService";
+import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
+import EmailTemplate from "../../components/EmailTemplate";
 
-export default function ResetPassword() {
+export default function RecoverPassword() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -46,28 +49,72 @@ export default function ResetPassword() {
         confirmPassword: Yup.string()
             .oneOf([Yup.ref('password'), null], 'Mật khẩu xác nhận không khớp')
             .required('Required'),
+        code: Yup.string()
+            .required("Required")
     });
 
     const formik = useFormik({
         initialValues: {
             password: '',
-            confirmPassword: ''
+            confirmPassword: '',
+            code: ''
         },
         validationSchema: ResetPasswordSchema,
         onSubmit: values => {
             const email = localStorage.getItem("email");
-            UserService.resetPassword(email, values.password, token)
-                .then(res => {
+            const code = localStorage.getItem("code")
+            const param = {email: email, password: values.password, token: token};
+
+            if (code !== values.code) {
+                toast.warning("Code không chính xác");
+                return;
+            }
+
+            UserService.checkDuplicatePassword(param)
+                .then(resp1 => {
+                    console.log(resp1);
+                    if (resp1.data.duplicate) {
+                        toast.warning(resp1.data.message);
+                    } else {
+                        return UserService.resetPassword(param);
+                    }
+                }).then(resp2 => {
+                if (resp2 !== undefined) {
+                    toast.success(resp2.data);
+                    localStorage.removeItem("token_reset_password");
+                    localStorage.removeItem("email");
+                    localStorage.removeItem("code");
                     router.push("/");
-                    toast.success(res.data);
-                })
-                .catch(error => toast.error(error.toString()));
+                }
+            }).catch(err => toast.error(err.toString()));
         },
     });
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
+
+    const sendCode = () => {
+        const code = crypto.randomUUID();
+        localStorage.setItem("code", code);
+        const email = localStorage.getItem("email");
+        const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
+            <EmailTemplate data={code}
+                           title={"Code Xác Nhận Lấy Lại Mật Khẩu"}
+                           description={""}
+                           openButton={false}/>
+        );
+        const params = {
+            to: email,
+            subject: "Code Reset Password",
+            html: htmlString
+        }
+        EmailService.sendCode(params)
+            .then(res => {
+                if (res !== undefined) toast.success(res.data);
+            })
+            .catch(err => toast.error(err.toString()))
+    }
 
     return (
         <div
@@ -112,7 +159,7 @@ export default function ResetPassword() {
                                             type="button"
                                             variant="ghost"
                                             size="icon"
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-purple-600"
+                                            className="cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-purple-600"
                                             onClick={togglePasswordVisibility}
                                         >
                                             {showPassword ? <EyeOff className="h-4 w-4"/> : <Eye className="h-4 w-4"/>}
@@ -143,7 +190,7 @@ export default function ResetPassword() {
                                             type="button"
                                             variant="ghost"
                                             size="icon"
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-purple-600"
+                                            className="cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-purple-600"
                                             onClick={toggleConfirmPasswordVisibility}
                                         >
                                             {showConfirmPassword ? <EyeOff className="h-4 w-4"/> :
@@ -162,6 +209,35 @@ export default function ResetPassword() {
                                     <ul className="list-disc list-inside space-y-1 ml-2">
                                         <li>6 ký tự</li>
                                     </ul>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="code" className="text-sm font-medium text-gray-700">
+                                        Mã xác nhận
+                                    </Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="code"
+                                            type={"text"}
+                                            value={formik.values.code}
+                                            onChange={formik.handleChange}
+                                            placeholder="Nhập lại mật khẩu mới"
+                                            className="pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
+                                            required
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-purple-600"
+                                            onClick={sendCode}
+                                        > <SendIcon className="h-4 w-4"/>
+                                            <span className="sr-only">Gửi Code</span>
+                                        </Button>
+                                    </div>
+                                    {formik.touched.code && formik.errors.code && (
+                                        <p className="text-red-500 text-sm mt-1">{formik.errors.code}</p>
+                                    )}
                                 </div>
 
                                 <Button
