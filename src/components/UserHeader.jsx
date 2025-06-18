@@ -50,11 +50,11 @@ export default function UserHeader() {
                         <Home className="h-4 w-4 mr-2" />
                         Trang chủ
                     </Button>
-                    <Button variant="ghost" className="text-gray-600 cursor-pointer transition-all duration-200">
+                    <Button variant="ghost" className="text-gray-600 cursor-pointer transition-all duration-200" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
                         <Activity className="h-4 w-4 mr-2" />
                         Hoạt động
                     </Button>
-                    <Button variant="ghost" className="text-gray-600 cursor-pointer transition-all duration-200">
+                    <Button variant="ghost" className="text-gray-600 cursor-pointer transition-all duration-200" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
                         <Users className="h-4 w-4 mr-2" />
                         Các lớp học
                     </Button>
