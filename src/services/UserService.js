@@ -3,7 +3,7 @@ import axiosInstance from "./config";
 class UserService {
     static async blockUser(userId) {
         try {
-            return await axiosInstance.patch(`/users/${userId}`);
+            return await axiosInstance.patch(`/users/${userId}/block`);
         } catch (error) {
             console.error(`Lỗi khi xóa user với id: ${userId}`, error);
             throw error;
@@ -19,9 +19,17 @@ class UserService {
         }
     }
 
-    static async resetPassword(email, password, token) {
+    static async checkDuplicatePassword(param) {
         try {
-            const param = {email: email, password: password, token: token};
+            return await axiosInstance.patch(`/users/check-duplicate`,param);
+        } catch (error) {
+            console.error(`Lỗi trùng mật khẩu cũ`, error);
+            throw error;
+        }
+    }
+
+    static async resetPassword(param) {
+        try {
             return await axiosInstance.patch(`/users/reset-password`, param);
         } catch (error) {
             console.error(`Lỗi khi reset password`, error);
