@@ -64,7 +64,7 @@ export default function RecoverPassword() {
         validationSchema: ResetPasswordSchema,
         onSubmit: values => {
             setIsSubmitting(true);
-            const email = localStorage.getItem("email");
+            const email = localStorage.getItem("currentUserEmail");
             const code = localStorage.getItem("code")
             const param = {email: email, password: values.password, token: token};
 
@@ -86,7 +86,7 @@ export default function RecoverPassword() {
                 if (resp2 !== undefined) {
                     toast.success(resp2.data);
                     localStorage.removeItem("token_recover_password");
-                    localStorage.removeItem("email");
+                    localStorage.removeItem("currentUserEmail");
                     localStorage.removeItem("code");
                     router.push("/");
                 }
@@ -116,18 +116,20 @@ export default function RecoverPassword() {
         );
         const params = {
             to: email,
-            subject: "Code Reset Password",
+            subject: "Code Recover Password",
             html: htmlString
         }
         EmailService.sendCode(params)
             .then(res => {
-                toast.success(res.data, {id: idLoading});
-                setIsSending(false);
+                if (res !== undefined) {
+                    toast.success(res.data, {id: idLoading})
+                    setIsSending(false);
+                }
             })
             .catch(err => {
-                toast.error(err.toString())
+                toast.error(err.toString(), {id: idLoading})
                 setIsSending(false);
-            })
+            });
     }
 
     return (
@@ -199,8 +201,8 @@ export default function RecoverPassword() {
                                             onChange={formik.handleChange}
                                             placeholder="Nhập lại mật khẩu mới"
                                             className="pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
-                                            required
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         <Button
                                             type="button"
@@ -237,10 +239,10 @@ export default function RecoverPassword() {
                                             type={"text"}
                                             value={formik.values.code}
                                             onChange={formik.handleChange}
-                                            placeholder={isSending ? "Code đang được gửi ..." : "Nhập Code"}
+                                            placeholder={isSending ? "Code đang được gửi đến email ... " : "Nhập code"}
                                             className="pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
-                                            required
                                             disabled={isSubmitting}
+                                            required
                                         />
                                         <Button
                                             type="button"
