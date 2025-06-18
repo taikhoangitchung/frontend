@@ -5,7 +5,6 @@ class UserService {
         try {
             return await axiosInstance.patch(`/users/${userId}/block`);
         } catch (error) {
-            console.error(`Lỗi khi xóa user với id: ${userId}`, error);
             throw error;
         }
     }
