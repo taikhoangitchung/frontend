@@ -19,14 +19,20 @@ const Profile = () => {
     })
     const [loading, setLoading] = useState(true)
     const [isReady, setIsReady] = useState(false)
+    const [userRole, setUserRole] = useState("")
 
     useEffect(() => {
         if (typeof window !== "undefined") {
             const storedUserEmail = localStorage.getItem("currentUserEmail")
-            if (!storedUserEmail) {
+            const storedToken = localStorage.getItem("token")
+            const storedRole = localStorage.getItem("userRole")
+
+            if (!storedUserEmail || !storedToken) {
                 router.push("/login")
                 return
             }
+
+            setUserRole(storedRole || "")
 
             const storedUsername = localStorage.getItem("currentUserUsername") || ""
             const storedAvatar = localStorage.getItem("currentUserAvatar") || ""
@@ -63,6 +69,21 @@ const Profile = () => {
                 })
         }
     }, [router])
+
+    const handleBackToDashboard = () => {
+        const roleFromStorage = localStorage.getItem("userRole") ||
+                               localStorage.getItem("role") ||
+                               localStorage.getItem("user_role")
+
+        // Kiểm tra role để chuyển hướng đúng trang
+        if (roleFromStorage === "ADMIN" || roleFromStorage === "admin") {
+            console.log("Redirecting to admin dashboard")
+            router.push("/admin/dashboard")
+        } else {
+            console.log("Redirecting to user dashboard")
+            router.push("/users/dashboard")
+        }
+    }
 
     const formatDate = (dateString) => {
         if (!dateString) return "Không xác định"
@@ -123,7 +144,7 @@ const Profile = () => {
                         {/* Right side - Back to Dashboard Button */}
                         <div className="flex items-center">
                             <button
-                                onClick={() => router.push("/users/dashboard")}
+                                onClick={handleBackToDashboard}
                                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 cursor-pointer transition-colors"
                             >
                                 <span className="text-gray-700">Quay về trang chính</span>
