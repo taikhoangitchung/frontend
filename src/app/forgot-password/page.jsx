@@ -12,9 +12,11 @@ import EmailService from "../../services/EmailService";
 import {toast} from "sonner";
 import EmailTemplate from "../../components/EmailTemplate";
 import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
+import {useState} from "react";
 
 const ForgotPassword = () => {
     const router = useRouter()
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const ForgotPasswordSchema = Yup.object({
         email: Yup.string().email("Email không hợp lệ").required("Email không được để trống"),
@@ -26,28 +28,34 @@ const ForgotPassword = () => {
         },
         validationSchema: ForgotPasswordSchema,
         onSubmit: (values) => {
+            setIsSubmitting(true);
+            const idLoading = toast.loading("Đang gửi thông tin về Email của bạn")
             const token = crypto.randomUUID();
-            localStorage.setItem("token_reset_password", token);
+            localStorage.setItem("token_recover_password", token);
             localStorage.setItem("email", values.email);
             const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
-                <EmailTemplate data={`http://localhost:3000/users/reset-password`}
+                <EmailTemplate data={`http://localhost:3000/recover-password`}
                                title={"Yêu cầu đặt lại mật khẩu"}
                                description={"Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n" +
-                                            "          Nhấn nút bên dưới để tiến hành đặt lại mật khẩu:"}
+                                   "          Nhấn nút bên dưới để tiến hành đặt lại mật khẩu:"}
                                openButton={true}/>
             );
             const params = {
                 to: values.email,
-                subject: "Reset Password",
+                subject: "Recover Password",
                 html: htmlString,
                 token: token
             }
             EmailService.sendMail(params)
-                .then(() => {
+                .then(res => {
+                    toast.success(res.data, {id: idLoading});
                     router.push("/");
-                    toast.success("Thông tin đã được gửi đến Gmail của bạn !");
+                    setIsSubmitting(false);
                 })
-                .catch(err => toast.error(err));
+                .catch(err => {
+                    toast.error(err)
+                    setIsSubmitting(false);
+                });
         },
     })
 
@@ -92,6 +100,7 @@ const ForgotPassword = () => {
                                             value={formik.values.email}
                                             onChange={formik.handleChange}
                                             onBlur={formik.handleBlur}
+                                            disabled={isSubmitting}
                                             placeholder="Email"
                                             className="pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
                                             required
@@ -104,11 +113,10 @@ const ForgotPassword = () => {
 
                                 <Button
                                     type="submit"
-
+                                    disabled={isSubmitting}
                                     className="cursor-pointer w-full h-12 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-
                                 >
-                                    Gửi
+                                    {isSubmitting ? "Đang gửi ..." : "Gửi"}
                                 </Button>
                             </form>
                         </div>

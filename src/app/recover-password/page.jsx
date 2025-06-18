@@ -21,11 +21,13 @@ export default function RecoverPassword() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(null);
     const [token, setToken] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSending, setIsSending] = useState(false);
 
     useEffect(() => {
         try {
             setIsLoading(true);
-            const token = localStorage.getItem("token_reset_password");
+            const token = localStorage.getItem("token_recover_password");
             setToken(token);
             UserService.checkToken(token)
                 .then(res => {
@@ -61,32 +63,37 @@ export default function RecoverPassword() {
         },
         validationSchema: ResetPasswordSchema,
         onSubmit: values => {
+            setIsSubmitting(true);
             const email = localStorage.getItem("email");
             const code = localStorage.getItem("code")
             const param = {email: email, password: values.password, token: token};
 
             if (code !== values.code) {
                 toast.warning("Code không chính xác");
+                setIsSubmitting(false);
                 return;
             }
 
             UserService.checkDuplicatePassword(param)
                 .then(resp1 => {
-                    console.log(resp1);
                     if (resp1.data.duplicate) {
                         toast.warning(resp1.data.message);
+                        setIsSubmitting(false);
                     } else {
-                        return UserService.resetPassword(param);
+                        return UserService.recoverPassword(param);
                     }
                 }).then(resp2 => {
                 if (resp2 !== undefined) {
                     toast.success(resp2.data);
-                    localStorage.removeItem("token_reset_password");
+                    localStorage.removeItem("token_recover_password");
                     localStorage.removeItem("email");
                     localStorage.removeItem("code");
                     router.push("/");
                 }
-            }).catch(err => toast.error(err.toString()));
+            }).catch(err => {
+                toast.error(err.toString())
+                setIsSubmitting(false);
+            });
         },
     });
 
@@ -95,6 +102,9 @@ export default function RecoverPassword() {
     const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
 
     const sendCode = () => {
+        setIsSending(true);
+        const idLoading = toast.loading("Code đang được gửi đến Email cảu bạn");
+
         const code = crypto.randomUUID();
         localStorage.setItem("code", code);
         const email = localStorage.getItem("email");
@@ -111,9 +121,13 @@ export default function RecoverPassword() {
         }
         EmailService.sendCode(params)
             .then(res => {
-                if (res !== undefined) toast.success(res.data);
+                toast.success(res.data, {id: idLoading});
+                setIsSending(false);
             })
-            .catch(err => toast.error(err.toString()))
+            .catch(err => {
+                toast.error(err.toString())
+                setIsSending(false);
+            })
     }
 
     return (
@@ -153,6 +167,7 @@ export default function RecoverPassword() {
                                             onChange={formik.handleChange}
                                             placeholder="Nhập mật khẩu mới"
                                             className="pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
+                                            disabled={isSubmitting}
                                             required
                                         />
                                         <Button
@@ -185,6 +200,7 @@ export default function RecoverPassword() {
                                             placeholder="Nhập lại mật khẩu mới"
                                             className="pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
                                             required
+                                            disabled={isSubmitting}
                                         />
                                         <Button
                                             type="button"
@@ -221,15 +237,17 @@ export default function RecoverPassword() {
                                             type={"text"}
                                             value={formik.values.code}
                                             onChange={formik.handleChange}
-                                            placeholder="Nhập lại mật khẩu mới"
+                                            placeholder={isSending ? "Code đang được gửi ..." : "Nhập Code"}
                                             className="pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
                                             required
+                                            disabled={isSubmitting}
                                         />
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="icon"
                                             className="cursor-pointer absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-gray-500 hover:text-purple-600"
+                                            disabled={isSending}
                                             onClick={sendCode}
                                         > <SendIcon className="h-4 w-4"/>
                                             <span className="sr-only">Gửi Code</span>
@@ -242,9 +260,10 @@ export default function RecoverPassword() {
 
                                 <Button
                                     type={"submit"}
-                                    className="w-full h-12 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                                    disabled={isSubmitting}
+                                    className="cursor-pointer w-full h-12 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                                 >
-                                    Đặt lại mật khẩu
+                                    {isSubmitting ? "Đang thực hiện ..." : "Đặt lại mật khẩu"}
                                 </Button>
                             </form>
                         </CardContent>

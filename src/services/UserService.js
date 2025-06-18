@@ -13,7 +13,7 @@ class UserService {
         try {
             return await axiosInstance.get(`/users/check-token/${token}`);
         } catch (error) {
-            console.error(`Lỗi khi reset password`, error);
+            console.error(`Lỗi khi check token`, error);
             throw error;
         }
     }
@@ -27,11 +27,11 @@ class UserService {
         }
     }
 
-    static async resetPassword(param) {
+    static async recoverPassword(param) {
         try {
-            return await axiosInstance.patch(`/users/reset-password`, param);
+            return await axiosInstance.patch(`/users/recover-password`, param);
         } catch (error) {
-            console.error(`Lỗi khi reset password`, error);
+            console.error(`Lỗi khi recover password`, error);
             throw error;
         }
     }
