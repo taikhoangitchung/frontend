@@ -4,9 +4,22 @@ import Image from 'next/image';
 
 import {useRouter} from "next/navigation";
 import {Button} from "./ui/button";
+import {Loader2} from "lucide-react";
+import {useState} from "react";
 
 export default function LandingPage() {
+    const [isLoading, setIsLoading] = useState(false)
     const router = useRouter();
+
+    const handleLogin = () => {
+        setIsLoading(true)
+        router.push("/login")
+    }
+
+    const handleRegister = () => {
+        setIsLoading(true)
+        router.push("/register")
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
@@ -77,17 +90,20 @@ export default function LandingPage() {
                         <Button
                             variant="outline"
                             className="border-purple-600 text-purple-600 hover:bg-purple-50"
-                            onClick={() => router.push("/login")}
+                            onClick={handleLogin}
+                            disabled={isLoading}
                         >
-                            Đăng nhập
+                            {isLoading ? <Loader2 className="animate-spin w-4 h-4 mr-2"/> : "Đăng nhập"}
                         </Button>
 
                         <Button
                             className="bg-purple-600 hover:bg-purple-700 text-white"
-                            onClick={() => router.push("/register")}
+                            onClick={handleRegister}
+                            disabled={isLoading}
                         >
-                            Đăng ký
+                            {isLoading ? <Loader2 className="animate-spin w-4 h-4 mr-2"/> : "Đăng ký"}
                         </Button>
+
                     </div>
                 </nav>
             </header>
