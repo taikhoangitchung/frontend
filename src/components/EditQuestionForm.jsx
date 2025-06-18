@@ -27,6 +27,7 @@ import TypeService from '../services/TypeService'
 import DifficultyService from '../services/DifficultyService'
 import {initialAnswers} from '../initvalues/answer'
 import {cn} from '../lib/utils'
+import {typeVietSub} from "../initvalues/typeVietsub";
 
 export default function EditQuestionForm() {
     const router = useRouter()
@@ -214,7 +215,7 @@ export default function EditQuestionForm() {
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {types.map((type) => (
                                 <SelectItem key={type.id} value={type.name}>
-                                    {type.name}
+                                    {typeVietSub(type.name)}
                                 </SelectItem>
                             ))}
                         </SelectContent>

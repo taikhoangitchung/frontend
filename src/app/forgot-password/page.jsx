@@ -116,7 +116,6 @@ const ForgotPassword = () => {
                                 >
                                     {isSubmitting ? "Đang gửi..." : "Gửi"}
                                 </Button>
-
                             </form>
                         </div>
                     </div>

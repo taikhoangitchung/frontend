@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import {Loader2} from "lucide-react"
 import {jwtDecode} from "jwt-decode"
 
-export default function AdminLayout({ children }) {
+export default function UserLayout({ children }) {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
 
@@ -20,7 +20,7 @@ export default function AdminLayout({ children }) {
             const decoded = jwtDecode(token)
             const role = decoded.role
 
-            if (role !== "ADMIN") {
+            if (role !== "USER") {
                 router.replace("/forbidden")
                 return
             }

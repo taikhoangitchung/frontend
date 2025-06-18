@@ -5,9 +5,12 @@ import {Card, CardContent} from "../../../components/ui/card";
 import {Input} from "../../../components/ui/input";
 import {Button} from "../../../components/ui/button";
 import { Badge, Edit, Users, Zap } from 'lucide-react';
-import {Avatar, AvatarImage, AvatarFallback} from "../../../components/ui/avatar";
+import {toast} from "sonner";
 
 export default function Page() {
+
+    const username = localStorage.getItem("currentUserUserName");
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Header Component */}
@@ -39,7 +42,7 @@ export default function Page() {
                                             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-blue-500/5 rounded-xl pointer-events-none"></div>
                                         </div>
 
-                                        <Button className="w-full h-16 text-xl font-semibold bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 rounded-xl">
+                                        <Button className="w-full h-16 text-xl font-semibold bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 rounded-xl" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
                                             <Zap className="h-6 w-6 mr-3" />
                                             Tham gia ngay
                                         </Button>
@@ -47,7 +50,7 @@ export default function Page() {
 
                                     <div className="mt-8 text-center">
                                         <p className="text-sm text-gray-500 mb-4">Hoặc</p>
-                                        <Button variant="outline" className="text-purple-600 border-purple-200 hover:bg-purple-50">
+                                        <Button variant="outline" className="text-purple-600 border-purple-200 hover:bg-purple-50" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
                                             <Users className="h-4 w-4 mr-2" />
                                             Tạo phòng mới
                                         </Button>
@@ -73,7 +76,7 @@ export default function Page() {
                                 {/* User greeting */}
                                 <div className="mb-6">
                                     <h3 className="text-lg font-medium text-white/90">Xin chào,</h3>
-                                    <h2 className="text-2xl font-bold text-white">Name</h2>
+                                    <h2 className="text-2xl font-bold text-white">{username}</h2>
                                 </div>
 
                                 {/* Stats */}

@@ -95,6 +95,7 @@ const Register = () => {
                                         <FontAwesomeIcon icon={faArrowLeft} className="rotate-180 text-gray-400" />
                                     </button>
                                 </div>
+
                                 <div className="text-center">
                                     <span className="text-gray-600">Đã có tài khoản? </span>
                                     <button
@@ -113,12 +114,12 @@ const Register = () => {
                                     onClick={() => setShowEmailForm(false)}
                                     className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                                 >
-                                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2"/>
                                     Quay lại
                                 </button>
                                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Đăng ký với email</h1>
                                 <Formik
-                                    initialValues={{ username: "", email: "", password: "", confirmPassword: "" }}
+                                    initialValues={{username: "", email: "", password: "", confirmPassword: ""}}
                                     validationSchema={validationSchema}
                                     onSubmit={handleSubmit}
                                 >
@@ -137,7 +138,8 @@ const Register = () => {
                                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                                                     />
                                                 </div>
-                                                <ErrorMessage name="username" component="p" className="text-red-500 text-sm mt-1" />
+                                                <ErrorMessage name="username" component="p"
+                                                              className="text-red-500 text-sm mt-1"/>
                                             </div>
                                             <div>
                                                 <div className="relative">
@@ -153,7 +155,8 @@ const Register = () => {
                                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                                                     />
                                                 </div>
-                                                <ErrorMessage name="email" component="p" className="text-red-500 text-sm mt-1" />
+                                                <ErrorMessage name="email" component="p"
+                                                              className="text-red-500 text-sm mt-1"/>
                                             </div>
                                             <div>
                                                 <div className="relative">
@@ -173,10 +176,11 @@ const Register = () => {
                                                         onClick={() => setShowPassword(!showPassword)}
                                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                     >
-                                                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                                                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye}/>
                                                     </button>
                                                 </div>
-                                                <ErrorMessage name="password" component="p" className="text-red-500 text-sm mt-1" />
+                                                <ErrorMessage name="password" component="p"
+                                                              className="text-red-500 text-sm mt-1"/>
                                             </div>
                                             <div>
                                                 <div className="relative">
@@ -196,15 +200,17 @@ const Register = () => {
                                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                     >
-                                                        <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                                                        <FontAwesomeIcon
+                                                            icon={showConfirmPassword ? faEyeSlash : faEye}/>
                                                     </button>
                                                 </div>
-                                                <ErrorMessage name="confirmPassword" component="p" className="text-red-500 text-sm mt-1" />
+                                                <ErrorMessage name="confirmPassword" component="p"
+                                                              className="text-red-500 text-sm mt-1"/>
                                             </div>
                                             <button
                                                 type="submit"
                                                 disabled={submitting}
-                                                className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                                className="w-full bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 mt-1"
                                             >
                                                 {submitting ? "Đang đăng ký..." : "Đăng ký"}
                                             </button>
@@ -214,8 +220,9 @@ const Register = () => {
                                 <div className="mt-4 text-center">
                                     <span className="text-gray-600">Đã có tài khoản? </span>
                                     <button
+                                        type="button"
                                         onClick={() => router.push("/login")}
-                                        className="bg-white text-purple-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 hover:shadow-md cursor-pointer transition-all duration-200"
+                                        className="text-purple-600 hover:text-purple-700 hover:underline font-medium cursor-pointer transition-all duration-200"
                                     >
                                         Đăng nhập
                                     </button>
@@ -226,10 +233,12 @@ const Register = () => {
 
                     {/* Right Panel */}
                     <div className="flex-1 bg-gradient-to-br from-orange-100 to-blue-100 relative overflow-hidden">
-                        <img src="/photo-login.jpg" alt="Quizizz Hero" className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
+                        <img src="/photo-login.jpg" alt="Quizizz Hero"
+                             className="absolute inset-0 w-full h-full object-cover"/>
+                        <div
+                            className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
                             <div className="flex items-center mb-2">
-                                <span className="text-lg">Thầy cô yêu chúng tôi</span>
+                            <span className="text-lg">Thầy cô yêu chúng tôi</span>
                                 <span className="ml-2">😍</span>
                             </div>
                             <p className="text-sm opacity-90">Tham gia cùng hơn 200 triệu nhà sư phạm và người học trên QuizGym</p>

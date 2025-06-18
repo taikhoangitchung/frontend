@@ -1,5 +1,4 @@
 import React from "react";
-import {Button} from "./ui/button";
 
 const EmailTemplate = ({data, title, description, openButton}) => {
     return (
