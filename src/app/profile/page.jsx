@@ -15,6 +15,7 @@ const Profile = () => {
         avatar: "",
         quizCount: 0,
         createdAt: null,
+        role: "" // Thêm role vào state
     })
     const [loading, setLoading] = useState(true)
     const [isReady, setIsReady] = useState(false)
@@ -29,6 +30,7 @@ const Profile = () => {
 
             const storedUsername = localStorage.getItem("currentUserUsername") || ""
             const storedAvatar = localStorage.getItem("currentUserAvatar") || ""
+            const storedRole = localStorage.getItem("role") || "" // Lấy role từ localStorage
             const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
 
             setUserInfo((prev) => ({
@@ -36,6 +38,7 @@ const Profile = () => {
                 email: storedUserEmail,
                 username: storedUsername,
                 avatar: storedAvatar || defaultAvatar,
+                role: storedRole // Gán role từ localStorage
             }))
 
             UserService.getProfile(storedUserEmail)
@@ -47,6 +50,7 @@ const Profile = () => {
                         avatar: user.avatar ? `http://localhost:8080${user.avatar}` : defaultAvatar,
                         quizCount: user.quizCount || 0,
                         createdAt: user.createdAt || null,
+                        role: user.role || storedRole // Ưu tiên role từ response, nếu không có thì dùng từ localStorage
                     })
                 })
                 .catch((err) => {
@@ -129,50 +133,54 @@ const Profile = () => {
                 </div>
             </div>
 
-            {/* Navigation Tabs and Quiz Count */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
-                    <div className="flex space-x-8">
-                        <button className="py-4 px-2 border-b-2 border-purple-600 text-purple-600 font-medium cursor-pointer">
-                            Thư viện
-                        </button>
-                    </div>
-                    <div className="text-center pt-0">
-                        <div className="text-3xl font-bold text-gray-900">{userInfo.quizCount}</div>
-                        <div className="text-sm text-gray-600 font-medium">QUIZ</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="max-w-6xl mx-auto px-6 py-16">
-                <div className="text-center">
-                    {/* Let's Create Section */}
-                    <div className="mb-12">
-                        <h2 className="text-5xl font-bold text-purple-400 mb-8" style={{ fontFamily: "Comic Sans MS, cursive" }}>
-                            LET'S
-                            <br />
-                            CREATE!
-                        </h2>
+            {/* Navigation Tabs and Quiz Count - Chỉ hiển thị nếu role khác ADMIN */}
+            {userInfo.role !== "ADMIN" && (
+                <>
+                    <div className="bg-white border-b border-gray-200">
+                        <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
+                            <div className="flex space-x-8">
+                                <button className="py-4 px-2 border-b-2 border-purple-600 text-purple-600 font-medium cursor-pointer">
+                                    Thư viện
+                                </button>
+                            </div>
+                            <div className="text-center pt-0">
+                                <div className="text-3xl font-bold text-gray-900">{userInfo.quizCount}</div>
+                                <div className="text-sm text-gray-600 font-medium">QUIZ</div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Description */}
-                    <div className="max-w-1xl mx-auto">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Tạo quiz hoặc bài học đầu tiên của bạn</h3>
-                        <p className="text-gray-600 mb-8">
-                            Lấy các câu hỏi từ thư viện Quizizz hoặc đặt câu hỏi của riêng bạn. Thật nhanh chóng và dễ dàng!
-                        </p>
+                    {/* Main Content - Chỉ hiển thị nếu role khác ADMIN */}
+                    <div className="max-w-6xl mx-auto px-6 py-16">
+                        <div className="text-center">
+                            {/* Let's Create Section */}
+                            <div className="mb-12">
+                                <h2 className="text-5xl font-bold text-purple-400 mb-8" style={{ fontFamily: "Comic Sans MS, cursive" }}>
+                                    LET'S
+                                    <br />
+                                    CREATE!
+                                </h2>
+                            </div>
 
-                        {/* Create Button */}
-                        <button
-                            onClick={() => router.push("/users/questions/create")}
-                            className="bg-purple-600 text-white px-6 py-2 rounded-lg text-md font-medium hover:bg-purple-700 cursor-pointer transition-colors"
-                        >
-                            Tạo Quiz Mới
-                        </button>
+                            {/* Description */}
+                            <div className="max-w-1xl mx-auto">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Tạo quiz hoặc bài học đầu tiên của bạn</h3>
+                                <p className="text-gray-600 mb-8">
+                                    Lấy các câu hỏi từ thư viện Quizizz hoặc đặt câu hỏi của riêng bạn. Thật nhanh chóng và dễ dàng!
+                                </p>
+
+                                {/* Create Button */}
+                                <button
+                                    onClick={() => router.push("/users/questions/create")}
+                                    className="bg-purple-600 text-white px-6 py-2 rounded-lg text-md font-medium hover:bg-purple-700 cursor-pointer transition-colors"
+                                >
+                                    Tạo Quiz Mới
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     )
 }
