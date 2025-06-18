@@ -5,12 +5,12 @@ export const initialAnswers = (type) => {
                 {
                     id: 1,
                     content: "",
-                    color: "from-green-400 to-green-600",
+                    color: "from-blue-400 to-blue-600",
                     correct: true,
                 }, {
                     id: 2,
                     content: "",
-                    color: "from-red-400 to-red-600",
+                    color: "from-orange-300 to-orange-500",
                     correct: false,
                 }
             ];
@@ -30,7 +30,7 @@ export const initialAnswers = (type) => {
                 }, {
                     id: 3,
                     content: "",
-                    color: "from-orange-400 to-orange-600"
+                    color: "from-orange-300 to-orange-500"
                     , correct: false
                 }, {
                     id: 4,

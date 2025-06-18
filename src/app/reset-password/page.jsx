@@ -2,13 +2,13 @@
 
 import {useEffect, useState} from "react"
 import {Eye, EyeOff, Lock} from "lucide-react"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "../../../components/ui/card";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "../../components/ui/card";
 import {Label} from "@radix-ui/react-label";
-import {Input} from "../../../components/ui/input";
-import {Button} from "../../../components/ui/button";
+import {Input} from "../../components/ui/input";
+import {Button} from "../../components/ui/button";
 import {useFormik} from "formik";
 import * as Yup from "yup";
-import UserService from "../../../services/UserService";
+import UserService from "../../services/UserService";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
 
