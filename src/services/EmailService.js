@@ -5,8 +5,7 @@ class EmailService {
         try {
             return await axiosInstance.post(`/email/send`,params);
         } catch (error) {
-            console.log(error);
-            return null;
+            return Promise.reject(error)
         }
     }
 
@@ -14,8 +13,7 @@ class EmailService {
         try {
             return await axiosInstance.post(`/email/send-announce`,params);
         } catch (error) {
-            console.log(error);
-            return null;
+            return Promise.reject(error)
         }
     }
 
@@ -23,8 +21,7 @@ class EmailService {
         try {
             return await axiosInstance.post(`/email/send-code`,params);
         } catch (error) {
-            console.log(error);
-            return null;
+            throw error
         }
     }
 }
