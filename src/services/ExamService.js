@@ -1,28 +1,15 @@
-import axiosInstance from "./config";
+import axiosInstance from "../services/config";
 
 class ExamService {
-    static async getUserHistory(userId, page = 0, size = 20, token) {
-        try {
-            return await axiosInstance.get(`/exams/history/user/${userId}`, {
-                params: { page, size },
-                headers: { Authorization: `Bearer ${token}` },
-            });
-        } catch (error) {
-            console.error("Lỗi khi lấy lịch sử thi:", error);
-            throw error;
-        }
+    static getByCategory(categoryId) {
+        return axiosInstance.get(`/exams/categories/${categoryId}/exams`);
     }
-
-    static async getExamHistoryDetail(userId, historyId, token) {
+    static async getToPlayById(id) {
         try {
-            return await axiosInstance.get(`/exams/history/${historyId}/user/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            return await axiosInstance.get(`/exams/${id}/play`);
         } catch (error) {
-            console.error("Lỗi khi lấy chi tiết lịch sử thi:", error);
-            throw error;
+            return Promise.reject(error);
         }
     }
 }
-
 export default ExamService;

@@ -2,112 +2,126 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import HistoryService from "../../../services/HistoryService";
+import { toast } from "sonner";
 
 const HistoryPage = () => {
     const router = useRouter();
-    const [history, setHistory] = useState([]);
-    const [page, setPage] = useState(0);
+    const [historyList, setHistoryList] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
-    const userId = localStorage.getItem("id");
 
     useEffect(() => {
+        const fetchHistory = async () => {
+            setLoading(true);
+            try {
+                const response = await HistoryService.getHistory(currentPage);
+                setHistoryList(response.data.content);
+                setTotalPages(response.data.totalPages);
+            } catch (error) {
+                toast.error("Không thể tải lịch sử bài thi");
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchHistory();
-    }, [page]);
+    }, [currentPage]);
 
-    const fetchHistory = async () => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.get(
-                `http://localhost:8080/exams/history/user/${userId}`,
-                {
-                    params: { page, size: 20 },
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-            setHistory(response.data.content);
-            setTotalPages(response.data.totalPages);
-        } catch (error) {
-            console.error("Error fetching history:", error);
-        } finally {
-            setLoading(false);
-        }
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
-    const handleViewDetail = (id) => {
-        router.push(`/users/history/${id}`);
-    };
-
-    if (loading) return <div>Đang tải...</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-500">Đang tải...</div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <h1 className="text-2xl font-bold mb-4">Lịch sử thi của bạn</h1>
-            <div className="bg-white p-4 rounded-lg shadow">
-                {history.length === 0 ? (
-                    <p>Chưa có lịch sử thi.</p>
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="max-w-6xl mx-auto px-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-8">Lịch sử bài thi</h1>
+                {historyList.length === 0 ? (
+                    <p className="text-gray-600">Bạn chưa thực hiện bài thi nào.</p>
                 ) : (
-                    <table className="w-full text-left">
-                        <thead>
-                        <tr className="border-b">
-                            <th className="p-2">Tên bài thi</th>
-                            <th className="p-2">Thời gian thi</th>
-                            <th className="p-2">Thời gian làm bài</th>
-                            <th className="p-2">Điểm</th>
-                            <th className="p-2">Lượt thi</th>
-                            <th className="p-2">Trạng thái</th>
-                            <th className="p-2">Hành động</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {history.map((item) => (
-                            <tr key={item.id} className="border-b">
-                                <td className="p-2">{item.title}</td> {/* Thay examName thành title */}
-                                <td className="p-2">
-                                    {item.finishedAt ? new Date(item.finishedAt).toLocaleString("vi-VN") : 'N/A'} {/* Thay completedAt thành finishedAt */}
-                                </td>
-                                <td className="p-2">{item.timeTaken} giây</td>
-                                <td className="p-2">{item.score}</td>
-                                <td className="p-2">{`Lượt thi ${item.attempts}`}</td>
-                                <td className="p-2">{item.passed ? "Đậu" : "Trượt"}</td>
-                                <td className="p-2">
+                    <>
+                        <div className="bg-white shadow rounded-lg overflow-hidden">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tên bài thi
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Thời gian thi
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Thời gian làm bài
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Điểm (%)
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Lượt thi
+                                    </th>
+                                    <th className="px-6 py-3"></th>
+                                </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                {historyList.map((history) => (
+                                    <tr key={history.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {history.examTitle}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {new Date(history.finishedAt).toLocaleString("vi-VN")}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {history.timeTakenFormatted}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {history.scorePercentage.toFixed(2)}%
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {history.attemptNumber}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                            <button
+                                                onClick={() => router.push(`/users/history/${history.id}`)}
+                                                className="text-purple-600 hover:text-purple-900"
+                                            >
+                                                Xem chi tiết
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="mt-4 flex justify-center">
+                            <nav className="inline-flex rounded-md shadow">
+                                {Array.from({ length: totalPages }, (_, i) => (
                                     <button
-                                        onClick={() => handleViewDetail(item.id)}
-                                        className="text-blue-500 hover:underline"
+                                        key={i}
+                                        onClick={() => handlePageChange(i)}
+                                        className={`px-4 py-2 border border-gray-300 text-sm font-medium ${
+                                            currentPage === i
+                                                ? "bg-purple-600 text-white"
+                                                : "bg-white text-gray-700 hover:bg-gray-50"
+                                        } ${i === 0 ? "rounded-l-md" : ""} ${
+                                            i === totalPages - 1 ? "rounded-r-md" : ""
+                                        }`}
                                     >
-                                        Xem chi tiết
+                                        {i + 1}
                                     </button>
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                                ))}
+                            </nav>
+                        </div>
+                    </>
                 )}
-                <div className="mt-4 flex justify-center space-x-2">
-                    <button
-                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                        disabled={page === 0}
-                        className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 flex items-center"
-                    >
-                        <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-                        Trước
-                    </button>
-                    <span>
-            Trang {page + 1} / {totalPages}
-          </span>
-                    <button
-                        onClick={() => setPage((prev) => (prev + 1 < totalPages ? prev + 1 : prev))}
-                        disabled={page + 1 >= totalPages}
-                        className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 flex items-center"
-                    >
-                        Sau
-                        <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
-                    </button>
-                </div>
             </div>
         </div>
     );

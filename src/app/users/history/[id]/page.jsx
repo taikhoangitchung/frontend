@@ -2,88 +2,95 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import axios from "axios";
+import HistoryService from "../../../../services/HistoryService";
+import { toast } from "sonner";
 
 const HistoryDetailPage = () => {
     const router = useRouter();
-    const { id } = useParams(); // id là historyId
+    const { id } = useParams();
     const [history, setHistory] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const userId = localStorage.getItem("id");
 
     useEffect(() => {
-        fetchHistoryDetail();
-    }, []);
-
-    const fetchHistoryDetail = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const token = localStorage.getItem("token");
-            const response = await axios.get(
-                `http://localhost:8080/exams/history/${id}/user/${userId}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-            setHistory(response.data);
-        } catch (error) {
-            console.error("Error fetching history detail:", error);
-            if (error.response) {
-                if (error.response.status === 403) {
-                    setError("Bạn không có quyền truy cập vào lần thi này.");
-                } else if (error.response.status === 404) {
-                    setError(error.response.data || "Không tìm thấy lần thi này.");
-                } else {
-                    setError("Đã xảy ra lỗi khi tải chi tiết lần thi.");
-                }
-            } else {
-                setError("Không thể kết nối đến máy chủ.");
+        const fetchHistoryDetail = async () => {
+            setLoading(true);
+            try {
+                const response = await HistoryService.getHistoryDetail(id);
+                setHistory(response.data);
+            } catch (error) {
+                toast.error("Không thể tải chi tiết bài thi");
+            } finally {
+                setLoading(false);
             }
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
+        if (id) fetchHistoryDetail();
+    }, [id]);
 
-    if (loading) return <div>Đang tải...</div>;
-    if (error) return <div className="p-6 text-red-500">{error}</div>;
-    if (!history) return null;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-500">Đang tải...</div>
+            </div>
+        );
+    }
+
+    if (!history) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-500">Không tìm thấy bài thi.</div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <h1 className="text-2xl font-bold mb-4">Chi tiết lần thi</h1>
-            <div className="bg-white p-4 rounded-lg shadow">
-                <p><strong>Tên bài thi:</strong> {history.title || 'N/A'}</p>
-                <p><strong>Thời gian thi:</strong> {history.finishedAt ? new Date(history.finishedAt).toLocaleString("vi-VN") : 'N/A'}</p>
-                <p><strong>Thời gian làm bài:</strong> {history.timeTaken} giây</p>
-                <p><strong>Điểm:</strong> {history.score}</p>
-                <p><strong>Lượt thi:</strong> {`Lượt thi ${history.attempts}`}</p>
-                <p><strong>Trạng thái:</strong> {history.passed ? "Đậu" : "Trượt"}</p>
-                <p><strong>Người làm:</strong> {history.username}</p>
-
-                {/* Lịch sử trả lời các câu hỏi */}
-                <div className="mt-4">
-                    <h2 className="text-xl font-semibold">Lịch sử trả lời</h2>
-                    {history.questions && history.questions.length > 0 ? (
-                        history.questions.map((question, index) => (
-                            <div key={index} className="mt-2 p-2 border rounded">
-                                <p><strong>{index + 1}. Câu hỏi:</strong> {question.id ? `Question ID: ${question.id}` : 'N/A'}</p>
-                                <p><strong>Đáp án đã chọn:</strong> {question.answerIds ? question.answerIds.join(', ') : 'N/A'}</p>
-                                {/* Thêm correctAnswerIds và score nếu có */}
-                            </div>
-                        ))
-                    ) : (
-                        <p>Không có lịch sử trả lời nào.</p>
-                    )}
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="max-w-6xl mx-auto px-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-8">Chi tiết bài thi</h1>
+                <div className="bg-white shadow rounded-lg p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">{history.examTitle}</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Người làm:</span> {history.username}
+                            </p>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Thời gian thi:</span>{" "}
+                                {new Date(history.finishedAt).toLocaleString("vi-VN")}
+                            </p>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Thời gian làm bài:</span>{" "}
+                                {history.timeTakenFormatted}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Điểm:</span> {history.scorePercentage.toFixed(2)}%
+                            </p>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Lượt thi:</span> {history.attemptNumber}
+                            </p>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Kết quả:</span>{" "}
+                                {history.passed ? "Đạt" : "Không Đạt"}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="mt-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Câu hỏi</h3>
+                        {/* Placeholder - Cần API bổ sung để lấy danh sách câu hỏi */}
+                        <div className="space-y-4">
+                            <p className="text-gray-600">Danh sách câu hỏi chưa được tích hợp.</p>
+                        </div>
+                    </div>
+                    <div className="mt-6">
+                        <button
+                            onClick={() => router.push("/users/history")}
+                            className="bg-purple-600 text-white px-6 py-2 rounded-lg text-md font-medium hover:bg-purple-700 cursor-pointer transition-colors"
+                        >
+                            Quay lại lịch sử
+                        </button>
+                    </div>
                 </div>
-
-                <button
-                    onClick={() => router.push("/users/history")}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                    Quay lại
-                </button>
             </div>
         </div>
     );
