@@ -58,23 +58,37 @@ const HistoryDetailPage = () => {
                 <p><strong>Thời gian thi:</strong> {new Date(history.completedAt).toLocaleString("vi-VN")}</p>
                 <p><strong>Thời gian làm bài:</strong> {history.timeTaken} giây</p>
                 <p><strong>Điểm:</strong> {history.score}</p>
-                <p><strong>Lượt thi:</strong> {`${history.attempts}`}</p>
+                <p><strong>Lượt thi:</strong> {`Lượt thi ${history.attempts}`}</p>
                 <p><strong>Trạng thái:</strong> {history.passed ? "Đậu" : "Trượt"}</p>
                 <p><strong>Người làm:</strong> {history.username}</p>
 
                 {/* Lịch sử trả lời các câu hỏi */}
                 <div className="mt-4">
                     <h2 className="text-xl font-semibold">Lịch sử trả lời</h2>
-                    {history.userAnswers && history.userAnswers.map((answer, index) => (
-                        <div key={index} className="mt-2 p-2 border rounded">
-                            <p><strong>{index + 1}. Câu hỏi:</strong> {answer.question.content}</p>
-                            <p><strong>Đáp án đúng:</strong> {answer.correct_answer_ids.split(',').map(id =>
-                                answer.question.answers.find(a => a.id === parseInt(id)).content).join(', ')}</p>
-                            <p><strong>Đáp án đã chọn:</strong> {answer.selected_answer_ids.split(',').map(id =>
-                                answer.question.answers.find(a => a.id === parseInt(id)).content).join(', ')}</p>
-                            <p><strong>Điểm:</strong> {answer.score}</p>
-                        </div>
-                    ))}
+                    {history.userAnswers && history.userAnswers.length > 0 ? (
+                        history.userAnswers.map((answer, index) => (
+                            <div key={index} className="mt-2 p-2 border rounded">
+                                <p><strong>{index + 1}. Câu hỏi:</strong> {answer.question ? answer.question.content : 'N/A'}</p>
+                                <p><strong>Đáp án đúng:</strong> {answer.correct_answer_ids
+                                    ? answer.correct_answer_ids.split(',').map(id =>
+                                        answer.question && answer.question.answers
+                                            ? answer.question.answers.find(a => a.id === parseInt(id)).content
+                                            : answer.answers.find(a => a.id === parseInt(id)).content || 'N/A'
+                                    ).join(', ')
+                                    : 'N/A'}</p>
+                                <p><strong>Đáp án đã chọn:</strong> {answer.selected_answer_ids
+                                    ? answer.selected_answer_ids.split(',').map(id =>
+                                        answer.question && answer.question.answers
+                                            ? answer.question.answers.find(a => a.id === parseInt(id)).content
+                                            : answer.answers.find(a => a.id === parseInt(id)).content || 'N/A'
+                                    ).join(', ')
+                                    : 'N/A'}</p>
+                                <p><strong>Điểm:</strong> {answer.score || 0}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p>Không có lịch sử trả lời nào hoặc dữ liệu chưa được nạp.</p>
+                    )}
                 </div>
 
                 <button
