@@ -6,7 +6,7 @@ import axios from "axios";
 
 const HistoryDetailPage = () => {
     const router = useRouter();
-    const { id } = useParams();
+    const { id } = useParams(); // id là historyId
     const [history, setHistory] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,7 +22,7 @@ const HistoryDetailPage = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-                `http://localhost:8080/exams/history/${id}/user/${userId}`,
+                `http://localhost:8080/exams/history/${id}/user/${userId}`, // Sử dụng historyId
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
