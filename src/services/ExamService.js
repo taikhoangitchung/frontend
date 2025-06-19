@@ -1,6 +1,9 @@
 import axiosInstance from "../services/config";
 
 class ExamService {
+    static getByCategory(categoryId) {
+        return axiosInstance.get(`/exams/categories/${categoryId}/exams`);
+    }
     static async getToPlayById(id) {
         try {
             return await axiosInstance.get(`/exams/${id}/play`);
@@ -9,5 +12,4 @@ class ExamService {
         }
     }
 }
-
 export default ExamService;

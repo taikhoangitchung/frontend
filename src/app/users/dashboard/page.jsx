@@ -6,6 +6,9 @@ import {Input} from "../../../components/ui/input";
 import {Button} from "../../../components/ui/button";
 import { Badge, Edit, Users, Zap } from 'lucide-react';
 import {toast} from "sonner";
+import CategoryCard from "../../../components/CategoryCard";
+
+
 
 export default function Page() {
 
@@ -65,13 +68,6 @@ export default function Page() {
                         <Card className="bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-600 border-0 relative overflow-hidden shadow-2xl" style={{ marginTop: '100px' }}>
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                             <CardContent className="p-6 relative">
-                                {/* Edit button */}
-                                <Button
-                                    size="icon"
-                                    className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm rounded-full h-10 w-10 transition-all duration-300"
-                                >
-                                    <Edit className="h-4 w-4" />
-                                </Button>
 
                                 {/* User greeting */}
                                 <div className="mb-6">
@@ -113,6 +109,9 @@ export default function Page() {
 
                     </div>
                 </div>
+
+                <CategoryCard/>
+
             </main>
         </div>
     )
