@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CategoryService from "../services/CategoryService";
 import ExamService from "../services/ExamService";
+import ExamForm from './ExamForm';
 
 function CategoryCard() {
     const [categories, setCategories] = useState([]);
@@ -8,11 +9,9 @@ function CategoryCard() {
     const [showForm, setShowForm] = useState({ visible: false, exam: null });
 
     useEffect(() => {
-        // Lấy danh sách category
         CategoryService.getAll()
             .then((response) => {
                 setCategories(response.data);
-                // Lấy exam cho từng category
                 response.data.forEach((category) => {
                     ExamService.getByCategory(category.id)
                         .then((res) => {
@@ -39,20 +38,8 @@ function CategoryCard() {
         setShowForm({ visible: false, exam: null });
     };
 
-    const handlePractice = () => {
-        alert(`Bắt đầu thực hành cho ${showForm.exam.title}`);
-        handleCloseForm();
-        // Thêm logic thực tế (ví dụ: navigate('/practice'))
-    };
-
-    const handlePlay = () => {
-        alert(`Thử đánh bài cho ${showForm.exam.title}`);
-        handleCloseForm();
-        // Thêm logic thực tế (ví dụ: navigate('/play'))
-    };
-
     return (
-        <div className="flex flex-col gap-8 p-4">
+        <div className="flex flex-col gap-8 p-4 relative">
             {categories.map((category) => (
                 <div key={category.id} className="mb-8">
                     <h2 className="text-xl font-semibold text-gray-800 pb-2">
@@ -81,7 +68,6 @@ function CategoryCard() {
                                     >
                                         {exam.playedTimes.toLocaleString()} lần chơi
                                     </div>
-                                    {/* Lớp phủ mờ khi hover */}
                                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                                 </div>
                                 <div className="p-4">
@@ -95,34 +81,12 @@ function CategoryCard() {
                 </div>
             ))}
 
-            {showForm.visible && showForm.exam && (
-                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
-                        <button
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                            onClick={handleCloseForm}
-                        >
-                            ✕
-                        </button>
-                        <h2 className="text-xl font-semibold mb-4 text-center">{showForm.exam.title}</h2>
-                        <p className="text-sm text-gray-600 mb-4 text-center">
-                            {showForm.exam.questionCount} câu hỏi | {showForm.exam.playedTimes.toLocaleString()} lần chơi
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <button
-                                className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300"
-                                onClick={handlePractice}
-                            >
-                                Thực hành
-                            </button>
-                            <button
-                                className="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition-colors duration-300"
-                                onClick={handlePlay}
-                            >
-                                Thử đánh bài
-                            </button>
-                        </div>
-                    </div>
+            {showForm.visible && (
+                <div
+                    className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
+                    onClick={handleCloseForm}
+                >
+                    <ExamForm exam={showForm.exam} onClose={handleCloseForm} />
                 </div>
             )}
         </div>
