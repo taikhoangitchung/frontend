@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowLeft, faArrowRight} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -68,11 +68,11 @@ const HistoryPage = () => {
                             <tr key={item.id} className="border-b">
                                 <td className="p-2">{item.examName}</td>
                                 <td className="p-2">
-                                    {new Date(item.completedAt).toLocaleString()}
+                                    {new Date(item.completedAt).toLocaleString("vi-VN")}
                                 </td>
                                 <td className="p-2">{item.timeTaken} giây</td>
                                 <td className="p-2">{item.score}</td>
-                                <td className="p-2">{item.attempts}</td>
+                                <td className="p-2">{`${item.attempts}`}</td>
                                 <td className="p-2">{item.passed ? "Đậu" : "Trượt"}</td>
                                 <td className="p-2">
                                     <button
@@ -87,23 +87,25 @@ const HistoryPage = () => {
                         </tbody>
                     </table>
                 )}
-                {/* Pagination */}
                 <div className="mt-4 flex justify-center space-x-2">
                     <button
                         onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                         disabled={page === 0}
                         className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 flex items-center"
                     >
-                        <FontAwesomeIcon icon={faArrowLeft} className="mr-2"/>
+                        <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
                         Trước
                     </button>
+                    <span>
+            Trang {page + 1} / {totalPages}
+          </span>
                     <button
                         onClick={() => setPage((prev) => (prev + 1 < totalPages ? prev + 1 : prev))}
                         disabled={page + 1 >= totalPages}
                         className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50 flex items-center"
                     >
                         Sau
-                        <FontAwesomeIcon icon={faArrowRight} className="ml-2"/>
+                        <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
                     </button>
                 </div>
             </div>

@@ -22,7 +22,7 @@ const HistoryDetailPage = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-                `http://localhost:8080/exams/history/${id}/user/${userId}`, // Sử dụng historyId
+                `http://localhost:8080/exams/history/${id}/user/${userId}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -58,8 +58,25 @@ const HistoryDetailPage = () => {
                 <p><strong>Thời gian thi:</strong> {new Date(history.completedAt).toLocaleString("vi-VN")}</p>
                 <p><strong>Thời gian làm bài:</strong> {history.timeTaken} giây</p>
                 <p><strong>Điểm:</strong> {history.score}</p>
-                <p><strong>Lượt thi:</strong> {`Lượt thi ${history.attempts}`}</p>
+                <p><strong>Lượt thi:</strong> {`${history.attempts}`}</p>
                 <p><strong>Trạng thái:</strong> {history.passed ? "Đậu" : "Trượt"}</p>
+                <p><strong>Người làm:</strong> {history.username}</p>
+
+                {/* Lịch sử trả lời các câu hỏi */}
+                <div className="mt-4">
+                    <h2 className="text-xl font-semibold">Lịch sử trả lời</h2>
+                    {history.userAnswers && history.userAnswers.map((answer, index) => (
+                        <div key={index} className="mt-2 p-2 border rounded">
+                            <p><strong>{index + 1}. Câu hỏi:</strong> {answer.question.content}</p>
+                            <p><strong>Đáp án đúng:</strong> {answer.correct_answer_ids.split(',').map(id =>
+                                answer.question.answers.find(a => a.id === parseInt(id)).content).join(', ')}</p>
+                            <p><strong>Đáp án đã chọn:</strong> {answer.selected_answer_ids.split(',').map(id =>
+                                answer.question.answers.find(a => a.id === parseInt(id)).content).join(', ')}</p>
+                            <p><strong>Điểm:</strong> {answer.score}</p>
+                        </div>
+                    ))}
+                </div>
+
                 <button
                     onClick={() => router.push("/users/history")}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
