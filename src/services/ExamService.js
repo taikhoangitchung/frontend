@@ -13,9 +13,9 @@ class ExamService {
         }
     }
 
-    static async getExamHistoryDetail(userId, examId, token) {
+    static async getExamHistoryDetail(userId, historyId, token) {
         try {
-            return await axiosInstance.get(`/exams/history/${examId}/user/${userId}`, {
+            return await axiosInstance.get(`/exams/history/${historyId}/user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
         } catch (error) {

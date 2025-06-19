@@ -66,13 +66,13 @@ const HistoryPage = () => {
                         <tbody>
                         {history.map((item) => (
                             <tr key={item.id} className="border-b">
-                                <td className="p-2">{item.examName}</td>
+                                <td className="p-2">{item.title}</td> {/* Thay examName thành title */}
                                 <td className="p-2">
-                                    {new Date(item.completedAt).toLocaleString("vi-VN")}
+                                    {item.finishedAt ? new Date(item.finishedAt).toLocaleString("vi-VN") : 'N/A'} {/* Thay completedAt thành finishedAt */}
                                 </td>
                                 <td className="p-2">{item.timeTaken} giây</td>
                                 <td className="p-2">{item.score}</td>
-                                <td className="p-2">{`${item.attempts}`}</td>
+                                <td className="p-2">{`Lượt thi ${item.attempts}`}</td>
                                 <td className="p-2">{item.passed ? "Đậu" : "Trượt"}</td>
                                 <td className="p-2">
                                     <button

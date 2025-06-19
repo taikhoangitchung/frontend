@@ -34,7 +34,7 @@ const HistoryDetailPage = () => {
                 if (error.response.status === 403) {
                     setError("Bạn không có quyền truy cập vào lần thi này.");
                 } else if (error.response.status === 404) {
-                    setError("Không tìm thấy lần thi này.");
+                    setError(error.response.data || "Không tìm thấy lần thi này.");
                 } else {
                     setError("Đã xảy ra lỗi khi tải chi tiết lần thi.");
                 }
@@ -54,8 +54,8 @@ const HistoryDetailPage = () => {
         <div className="min-h-screen bg-gray-50 p-6">
             <h1 className="text-2xl font-bold mb-4">Chi tiết lần thi</h1>
             <div className="bg-white p-4 rounded-lg shadow">
-                <p><strong>Tên bài thi:</strong> {history.examName}</p>
-                <p><strong>Thời gian thi:</strong> {new Date(history.completedAt).toLocaleString("vi-VN")}</p>
+                <p><strong>Tên bài thi:</strong> {history.title || 'N/A'}</p>
+                <p><strong>Thời gian thi:</strong> {history.finishedAt ? new Date(history.finishedAt).toLocaleString("vi-VN") : 'N/A'}</p>
                 <p><strong>Thời gian làm bài:</strong> {history.timeTaken} giây</p>
                 <p><strong>Điểm:</strong> {history.score}</p>
                 <p><strong>Lượt thi:</strong> {`Lượt thi ${history.attempts}`}</p>
@@ -65,29 +65,16 @@ const HistoryDetailPage = () => {
                 {/* Lịch sử trả lời các câu hỏi */}
                 <div className="mt-4">
                     <h2 className="text-xl font-semibold">Lịch sử trả lời</h2>
-                    {history.userAnswers && history.userAnswers.length > 0 ? (
-                        history.userAnswers.map((answer, index) => (
+                    {history.questions && history.questions.length > 0 ? (
+                        history.questions.map((question, index) => (
                             <div key={index} className="mt-2 p-2 border rounded">
-                                <p><strong>{index + 1}. Câu hỏi:</strong> {answer.question ? answer.question.content : 'N/A'}</p>
-                                <p><strong>Đáp án đúng:</strong> {answer.correct_answer_ids
-                                    ? answer.correct_answer_ids.split(',').map(id =>
-                                        answer.question && answer.question.answers
-                                            ? answer.question.answers.find(a => a.id === parseInt(id)).content
-                                            : answer.answers.find(a => a.id === parseInt(id)).content || 'N/A'
-                                    ).join(', ')
-                                    : 'N/A'}</p>
-                                <p><strong>Đáp án đã chọn:</strong> {answer.selected_answer_ids
-                                    ? answer.selected_answer_ids.split(',').map(id =>
-                                        answer.question && answer.question.answers
-                                            ? answer.question.answers.find(a => a.id === parseInt(id)).content
-                                            : answer.answers.find(a => a.id === parseInt(id)).content || 'N/A'
-                                    ).join(', ')
-                                    : 'N/A'}</p>
-                                <p><strong>Điểm:</strong> {answer.score || 0}</p>
+                                <p><strong>{index + 1}. Câu hỏi:</strong> {question.id ? `Question ID: ${question.id}` : 'N/A'}</p>
+                                <p><strong>Đáp án đã chọn:</strong> {question.answerIds ? question.answerIds.join(', ') : 'N/A'}</p>
+                                {/* Thêm correctAnswerIds và score nếu có */}
                             </div>
                         ))
                     ) : (
-                        <p>Không có lịch sử trả lời nào hoặc dữ liệu chưa được nạp.</p>
+                        <p>Không có lịch sử trả lời nào.</p>
                     )}
                 </div>
 
