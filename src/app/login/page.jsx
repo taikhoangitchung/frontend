@@ -38,7 +38,7 @@ const Login = () => {
         try {
             const response = await UserService.login(values)
             toast.success("Đăng nhập thành công", {autoClose: 1500})
-            localStorage.setItem("currentUserEmail", values.email)
+            localStorage.setItem("email", values.email)
             const token = response.data
             localStorage.setItem("token", token)
             const userId = jwtDecode(token).id
@@ -46,7 +46,7 @@ const Login = () => {
             const username = jwtDecode(token).username
             localStorage.setItem("id", userId)
             localStorage.setItem("role", role)
-            localStorage.setItem("currentUserUserName", username)
+            localStorage.setItem("username", username)
             let nextPage = ""
 
             if (role === "ADMIN") {
