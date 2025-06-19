@@ -15,7 +15,7 @@ import { toast } from "sonner"
 
 export default function UserHeader() {
     const router = useRouter()
-    const email = localStorage.getItem("currentUserEmail")
+    const email = localStorage.getItem("email")
     const handleLogout = () => {
         localStorage.clear()
         router.push("/login")
@@ -25,7 +25,7 @@ export default function UserHeader() {
             <div className="flex items-center justify-between max-w-7xl mx-auto">
                 {/* Logo */}
                 <div className="flex items-center space-x-4">
-                    <h1 className="text-2xl font-bold text-purple-600">QUIZIZZ</h1>
+                    <h1 className="text-2xl font-bold text-purple-600">QUIZGYM</h1>
                 </div>
 
                 {/* Search Bar */}
