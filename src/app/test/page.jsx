@@ -1,8 +1,8 @@
-import ConfirmDialog from "../../components/alerts-confirms/ConfirmDialog";
-import ExamDetailPanel from "../../components/exam/ExamDetailPanel";
+"use client"
 
-export default function (){
+export default function Test() {
     return (
-        <ExamDetailPanel/>
+        <>
+        </>
     )
 }
