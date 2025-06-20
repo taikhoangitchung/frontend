@@ -1,7 +1,8 @@
-import ConfirmDialog from "../../components/alerts-confirms/ConfirmDialog";
+"use client"
 
-export default function (){
+export default function Test() {
     return (
-        <ConfirmDialog/>
+        <>
+        </>
     )
 }

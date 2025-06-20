@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, Home, Activity, Users, CreditCard, Plus, Menu, LogOut, ChevronDown, User, Lock } from "lucide-react"
+import { Search, Home, Activity, FileQuestion, CreditCard, Plus, Menu, LogOut, ChevronDown, User, Lock, ScrollText } from "lucide-react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import {
@@ -54,17 +54,21 @@ export default function UserHeader() {
                         <Activity className="h-4 w-4 mr-2" />
                         Hoạt động
                     </Button>
-                    <Button variant="ghost" className="text-gray-600 cursor-pointer transition-all duration-200" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
-                        <Users className="h-4 w-4 mr-2" />
-                        Các lớp học
+                    <Button
+                        variant="ghost"
+                        className="text-gray-600 cursor-pointer transition-all duration-200 flex items-center"
+                        onClick={() => router.push("/users/exams")}
+                    >
+                        <ScrollText className="h-4 w-4 mr-2" />
+                        Thư viện Quiz
                     </Button>
                     <Button
                         variant="ghost"
                         className="text-gray-600 cursor-pointer transition-all duration-200"
-                        onClick={() => router.push("/users/questions/my")}
+                        onClick={() => router.push("/users/questions")}
                     >
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        Câu hỏi của tôi
+                        <FileQuestion className="h-4 w-4 mr-2" />
+                        Thư viện câu hỏi
                     </Button>
                 </nav>
 
@@ -72,7 +76,7 @@ export default function UserHeader() {
                 <div className="flex items-center space-x-3">
                     <Button
                         className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
-                        onClick={() => toast.info("Chức năng này đang được phát triển...")}
+                        onClick={() => router.push("/users/exams/create")}
                     >
                         <Plus className="h-4 w-4 mr-2" />
                         Tạo một bài quiz

@@ -4,7 +4,7 @@ import UserHeader from "../../../components/layout/UserHeader";
 import {Card, CardContent} from "../../../components/ui/card";
 import {Input} from "../../../components/ui/input";
 import {Button} from "../../../components/ui/button";
-import { Badge, Edit, Users, Zap } from 'lucide-react';
+import { Badge, Users, Zap } from 'lucide-react';
 import {toast} from "sonner";
 import CategoryCard from "../../../components/category/CategoryCard";
 
