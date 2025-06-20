@@ -24,6 +24,14 @@ class HistoryService {
             throw error;
         }
     }
+
+    static async getByExamId(id) {
+        try {
+            return await axiosInstance.get(`/histories/exams/${id}`);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default HistoryService;

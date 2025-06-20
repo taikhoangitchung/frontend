@@ -163,7 +163,7 @@ export default function EditQuestionForm() {
             console.log(payload)
             await QuestionService.update(id, payload)
             toast.success("Cập nhật câu hỏi thành công!")
-            router.push("/users/questions/my")
+            router.push("/users/questions")
         } catch (err) {
             toast.error(err.response?.data)
         } finally {
