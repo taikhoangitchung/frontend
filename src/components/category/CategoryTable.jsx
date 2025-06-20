@@ -3,15 +3,15 @@
 import {useEffect, useState} from "react"
 import {useRouter} from "next/navigation"
 import {toast} from "sonner"
-import {Card, CardContent, CardHeader} from "./ui/card"
-import {Button} from "./ui/button"
-import {Input} from "./ui/input"
-import {Separator} from "./ui/separator"
+import {Card, CardContent, CardHeader} from "../ui/card"
+import {Button} from "../ui/button"
+import {Input} from "../ui/input"
+import {Separator} from "../ui/separator"
 import {Pencil, Plus, Search, Grid3X3, Check} from "lucide-react"
-import CategoryService from "../services/CategoryService"
-import {Skeleton} from "./ui/skeleton";
+import CategoryService from "../../services/CategoryService"
+import {Skeleton} from "../ui/skeleton";
 
-import DeleteButton from "./DeleleButton";
+import DeleteButton from "../alerts-confirms/DeleleButton";
 
 const ITEMS_PER_PAGE = 10
 
@@ -46,9 +46,9 @@ const CategoryTable = () => {
         fetchCategories()
     }, [])
 
-    const handleDelete = async (category) => {
+    const handleDelete = async (id) => {
         try {
-            await CategoryService.delete(category.id)
+            await CategoryService.delete(id)
             toast.success("Xóa danh mục thành công.")
             await fetchCategories()
         } catch (err) {
@@ -65,7 +65,6 @@ const CategoryTable = () => {
         router.push(`/admin/categories/create`)
     }
 
-    // Filter categories based on search term
     const filteredCategories = searchTerm
         ? categories.filter(
             (cat) =>
@@ -83,7 +82,6 @@ const CategoryTable = () => {
         }
     }
 
-    // Reset to first page when search term changes
     useEffect(() => {
         setCurrentPage(1)
     }, [searchTerm])
@@ -146,7 +144,7 @@ const CategoryTable = () => {
                                     >
                                         <Pencil className="w-4 h-4"/>
                                     </Button>
-                                    <DeleteButton item={category} handleDelete={handleDelete}></DeleteButton>
+                                    <DeleteButton id={category.id} handleDelete={handleDelete}></DeleteButton>
                                 </div>
                             </div>
                         </CardHeader>

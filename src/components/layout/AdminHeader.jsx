@@ -8,14 +8,14 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "./ui/dropdown-menu"
-import {Button} from "./ui/button";
+} from "../ui/dropdown-menu"
+import {Button} from "../ui/button";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
 
 export function AppHeader() {
     const router = useRouter();
-    const email = localStorage.getItem("currentUserEmail");
+    const email = localStorage.getItem("email");
     const handleLogout = () => {
         localStorage.clear();
         router.push("/login");

@@ -1,5 +1,5 @@
 "use client"
-import CreateQuestionForm from "../../../../components/CreateQuestionForm";
+import CreateQuestionForm from "../../../../components/question/CreateQuestionForm";
 
 
 export default function Component() {
