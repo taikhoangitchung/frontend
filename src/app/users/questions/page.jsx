@@ -12,6 +12,8 @@ import {toast} from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import {typeVietSub} from "../../../util/typeVietsub";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../../../components/ui/select";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 
 export default function QuizInterface() {
     const router = useRouter()
@@ -111,10 +113,10 @@ export default function QuizInterface() {
 
                         <Button
                             onClick={() => router.push("/users/dashboard")}
-                            className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
-                            variant="outline"
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer transition-colors h-9 px-4 py-2"
                         >
-                            Quay về trang chính
+                            <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white"/>
+                            <span className="text-white"> Quay lại</span>
                         </Button>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import HistoryService from "../../../../services/HistoryService";
 import { toast } from "sonner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { Check, X } from "lucide-react";
 
 const HistoryDetailPage = () => {
     const router = useRouter();
@@ -18,9 +19,11 @@ const HistoryDetailPage = () => {
             setLoading(true);
             try {
                 const response = await HistoryService.getHistoryDetail(id);
+                console.log("Response data:", response.data); // Debug dữ liệu từ API
                 setHistory(response.data);
             } catch (error) {
                 toast.error("Không thể tải chi tiết bài thi");
+                console.error("Error fetching history detail:", error);
             } finally {
                 setLoading(false);
             }
@@ -66,7 +69,7 @@ const HistoryDetailPage = () => {
                 </div>
 
                 <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h2 className="text-2xl font-bold mb-4 text-purple-900">{history.examTitle}</h2>
+                    <h2 className="text-2xl font-medium mb-4 text-purple-800">{history.examTitle}</h2>
                     <div className="grid grid-cols-2 gap-4 mb-6">
                         <div>
                             <p className="text-gray-600">
@@ -95,42 +98,49 @@ const HistoryDetailPage = () => {
                     </div>
 
                     <div className="space-y-6">
-                        {history.questions && history.questions.length > 0 ? (
+                        {history.questions && Array.isArray(history.questions) && history.questions.length > 0 ? (
                             history.questions.map((question, index) => (
-                                <div key={index} className="bg-purple-50 p-4 rounded-xl shadow-sm border">
+                                <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                                     <p className="font-semibold mb-4 text-purple-800">
                                         {index + 1}. {question.content}
                                     </p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {question.answers.map((answer) => {
-                                            const isSelected = question.selectedAnswerIds?.includes(answer.id);
-                                            const isCorrect = answer.correct;
+                                        {question.answers && Array.isArray(question.answers) ? (
+                                            question.answers.map((answer) => {
+                                                const isSelected = question.selectedAnswerIds?.includes(answer.id);
+                                                const isCorrect = answer.correct;
+                                                const bgColor = isCorrect ? "bg-green-50" : isSelected ? "bg-red-50" : "bg-red-50 bg-opacity-20";
+                                                const borderColor = isCorrect ? "border-green-200" : isSelected ? "border-red-200" : "border-red-200";
+                                                const icon = isCorrect ?
+                                                    <Check className="w-4 h-4 text-green-600"/> : isSelected ?
+                                                        <X className="w-4 h-4 text-red-600"/> :
+                                                        <X className="w-4 h-4 text-red-400 opacity-50"/>;
+                                                const label = isSelected ? "Bạn chọn" : "";
 
-                                            const borderColor = isCorrect ? "border-green-500" : "border-red-400";
-                                            const bgColor = isCorrect ? "bg-green-50" : isSelected ? "bg-red-50" : "";
-                                            const label = isSelected ? "Bạn chọn" : "";
-
-                                            return (
-                                                <div
-                                                    key={answer.id}
-                                                    className={`relative border rounded-lg px-4 py-3 min-h-[4rem] ${borderColor} ${bgColor}`}
-                                                >
-                                                    {label && (
-                                                        <div
-                                                            className="absolute top-0 right-2 -translate-y-1/2 bg-white border border-purple-500 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded shadow-sm z-10">
-                                                            {label}
-                                                        </div>
-                                                    )}
-                                                    <span className="font-medium">{answer.content}</span>
-                                                </div>
-                                            );
-                                        })}
+                                                return (
+                                                    <div
+                                                        key={answer.id}
+                                                        className={`flex items-center gap-2 p-3 rounded-lg ${bgColor} ${borderColor} border border-gray-200 relative`}
+                                                    >
+                                                        {icon}
+                                                        <span className="text-sm">{answer.content}</span>
+                                                        {label && (
+                                                            <div
+                                                                className="absolute top-0 right-2 -translate-y-1/2 bg-white border border-purple-500 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded shadow-sm z-10">
+                                                                {label}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <p className="text-gray-600">Không có đáp án để hiển thị.</p>
+                                        )}
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-gray-600">Không có câu hỏi để hiển thị. Vui lòng kiểm tra dữ liệu trong
-                                bảng user_answer hoặc liên hệ admin.</p>
+                            <p className="text-gray-600">Không có câu hỏi để hiển thị. Vui lòng kiểm tra dữ liệu hoặc liên hệ admin.</p>
                         )}
                     </div>
                 </div>
