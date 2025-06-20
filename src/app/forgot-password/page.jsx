@@ -10,7 +10,7 @@ import {Input} from "../../components/ui/input"
 import {Button} from "../../components/ui/button"
 import EmailService from "../../services/EmailService";
 import {toast} from "sonner";
-import EmailTemplate from "../../components/EmailTemplate";
+import EmailTemplate from "../../util/emailTemplate";
 import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
 import {useState} from "react";
 

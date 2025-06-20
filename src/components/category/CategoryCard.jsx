@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import CategoryService from "../services/CategoryService";
-import ExamService from "../services/ExamService";
-import ExamForm from './ExamForm';
+import CategoryService from "../../services/CategoryService";
+import ExamService from "../../services/ExamService";
+import ExamForm from '../exam/ExamForm';
 
 function CategoryCard() {
     const [categories, setCategories] = useState([]);

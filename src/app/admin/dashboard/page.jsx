@@ -1,12 +1,12 @@
 'use client';
 
-import {AdminSidebar} from "../../../components/AdminSidebar";
-import {AppHeader} from "../../../components/AdminHeader";
-import UserTable from "../../../components/UserTable";
+import {AdminSidebar} from "../../../components/layout/AdminSidebar";
+import {AppHeader} from "../../../components/layout/AdminHeader";
+import UserTable from "../../../components/list/UserTable";
 import {useState} from "react";
-import CategoryTable from "../../../components/CategoryTable";
-import TypeTable from "../../../components/TypeTable";
-import DifficultyTable from "../../../components/DifficultyTable";
+import CategoryTable from "../../../components/category/CategoryTable";
+import TypeTable from "../../../components/list/TypeTable";
+import DifficultyTable from "../../../components/list/DifficultyTable";
 import {Users} from "lucide-react";
 
 export default function Page() {

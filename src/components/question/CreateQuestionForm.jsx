@@ -7,27 +7,27 @@ import {useRouter} from 'next/navigation'
 import {toast} from 'sonner'
 
 import {Loader2, Send, ArrowLeft} from 'lucide-react'
-import {Button} from './ui/button'
-import {Card} from './ui/card'
-import {Textarea} from './ui/textarea'
-import {Input} from './ui/input'
+import {Button} from '../ui/button'
+import {Card} from '../ui/card'
+import {Textarea} from '../ui/textarea'
+import {Input} from '../ui/input'
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue
-} from './ui/select'
-import {Checkbox} from './ui/checkbox'
-import {RadioGroup, RadioGroupItem} from './ui/radio-group'
+} from '../ui/select'
+import {Checkbox} from '../ui/checkbox'
+import {RadioGroup, RadioGroupItem} from '../ui/radio-group'
 
-import QuestionService from '../services/QuestionService'
-import CategoryService from '../services/CategoryService'
-import TypeService from '../services/TypeService'
-import DifficultyService from '../services/DifficultyService'
-import {initialAnswers} from '../initvalues/answer'
-import {cn} from '../lib/utils'
-import {typeVietSub} from "../initvalues/typeVietsub";
+import QuestionService from '../../services/QuestionService'
+import CategoryService from '../../services/CategoryService'
+import TypeService from '../../services/TypeService'
+import DifficultyService from '../../services/DifficultyService'
+import {initialAnswers} from '../../util/defaultAnswers'
+import {cn} from '../../lib/utils'
+import {typeVietSub} from "../../util/typeVietsub";
 
 export default function CreateQuestionForm() {
     const router = useRouter()

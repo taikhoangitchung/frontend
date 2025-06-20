@@ -13,7 +13,7 @@ import {toast} from "sonner";
 import {useRouter} from "next/navigation";
 import EmailService from "../../services/EmailService";
 import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
-import EmailTemplate from "../../components/EmailTemplate";
+import EmailTemplate from "../../util/emailTemplate";
 
 export default function RecoverPassword() {
     const router = useRouter();

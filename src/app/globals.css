@@ -1,5 +1,1 @@
 @import "tailwindcss";
-
-.alert-dialog-overlay {
-  @apply bg-black/30;
-}

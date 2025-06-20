@@ -1,21 +1,16 @@
 "use client"
 
 import {useState, useEffect, useRef} from "react"
-import {Button} from "./ui/button"
-import ExamService from "../services/ExamService"
+import {Button} from "../ui/button"
+import ExamService from "../../services/ExamService"
 import {useParams, useRouter} from "next/navigation"
 import {toast} from "sonner"
-import HistoryService from "../services/HistoryService"
-import {
-    AlertDialog, AlertDialogAction, AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription, AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle, AlertDialogTrigger
-} from "./ui/alert-dialog";
+import HistoryService from "../../services/HistoryService"
 import ExamResultPanel from "./ExamResultPanel";
+import ConfirmDialog from "../alerts-confirms/ConfirmDialog";
+import ExamDetailPanel from "./ExamDetailPanel";
 
-export default function PlayForm() {
+export default function PlayExamForm() {
     const {id} = useParams()
     const router = useRouter()
     const [questions, setQuestions] = useState([])
@@ -30,9 +25,10 @@ export default function PlayForm() {
     const [resultData, setResultData] = useState(null)
     const [countdown, setCountdown] = useState(3)
     const [ready, setReady] = useState(false)
+    const [reviewing, setReviewing] = useState(false)
+    const [userAnswers, setUserAnswers] = useState({})
 
     const timerRef = useRef(null)
-    const [userAnswers, setUserAnswers] = useState({})
     const currentQuestion = questions[questionIndex] || {}
     const isMultipleChoice = currentQuestion?.type?.name === "multiple"
 
@@ -157,7 +153,7 @@ export default function PlayForm() {
             }
 
             const response = await HistoryService.add(submissionData)
-
+            console.log(response.data)
             setSubmitted(true)
             setResultData(response.data)
             toast.success(isAutoSubmit ? "Hết thời gian! Tự động nộp bài thi..." : "Nộp bài thi thành công!")
@@ -236,44 +232,29 @@ export default function PlayForm() {
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <ExamResultPanel
                         result={resultData}
-                        onReview={() => toast.info("Chức năng xem chi tiết đang phát triển")}
+                        onReview={() => setReviewing(true)}
                         onReplay={handleReplay}
                     />
                 </div>
             )}
+
+            {reviewing && resultData && (
+                <div className="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+                    <ExamDetailPanel data={resultData} onClose={() => setReviewing(false)} />
+                </div>
+            )}
+
             <>
                 <div className="flex items-center justify-between">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button
-                                variant="outline"
-                                className="bg-purple-700/50 border-purple-600 text-white hover:bg-purple-600/50 rounded-full px-6"
-                                disabled={submitting}
-                            >
-                                Thoát ra
-                            </Button>
-                        </AlertDialogTrigger>
-
-                        <AlertDialogContent className="z-50 bg-white text-black shadow-2xl border border-gray-200">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Bạn có chắc chắn muốn thoát?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Nếu bạn thoát ra ngay bây giờ, bài làm sẽ không được lưu lại nếu chưa nộp.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                <AlertDialogAction
-                                    onClick={() => router.push("/users/dashboard")}
-                                    className="bg-red-600 hover:bg-red-700 text-white"
-                                >
-                                    Thoát ngay
-                                </AlertDialogAction>
-
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-
+                    <ConfirmDialog
+                        triggerLabel="Thoát ra"
+                        disabled={submitting}
+                        triggerClass="bg-purple-700/50 border-purple-600 text-white hover:bg-purple-600/50 rounded-full px-6"
+                        title="Bạn có chắc chắn muốn thoát?"
+                        description="Bài làm sẽ không được lưu lại nếu chưa nộp."
+                        actionLabel="Thoát ngay"
+                        onConfirm={() => router.push("/users/dashboard")}
+                    />
                     <div className="flex items-center gap-4">
                         <div className="bg-black/30 rounded-full px-4 py-2">
                             <span className={`font-semibold ${getTimerColor()}`}>⏰ {formatTime(timeLeft)}</span>
