@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import UserService from "../../services/UserService"
 import { toast } from "sonner"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faEdit, faEnvelope, faCalendarAlt } from "@fortawesome/free-solid-svg-icons"
+import {faEdit, faEnvelope, faCalendarAlt, faArrowLeft} from "@fortawesome/free-solid-svg-icons"
 
 const Profile = () => {
     const router = useRouter()
@@ -139,9 +139,10 @@ const Profile = () => {
                         <div className="flex items-center">
                             <button
                                 onClick={() => handleBackToDashboard()}
-                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 cursor-pointer transition-colors"
+                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer transition-colors h-9 px-4 py-2"
                             >
-                                <span className="text-gray-700">Quay về trang chính</span>
+                                <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white"/>
+                                <span className="text-white">Quay lại</span>
                             </button>
                         </div>
                     </div>
@@ -154,7 +155,8 @@ const Profile = () => {
                     <div className="bg-white border-b border-gray-200">
                         <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
                             <div className="flex space-x-8">
-                                <button className="py-4 px-2 border-b-2 border-purple-600 text-purple-600 font-medium cursor-pointer">
+                                <button
+                                    className="py-4 px-2 border-b-2 border-purple-600 text-purple-600 font-medium cursor-pointer">
                                     Thư viện
                                 </button>
                             </div>
