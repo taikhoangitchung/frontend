@@ -13,7 +13,6 @@ class HistoryService {
         try {
             return await axiosInstance.get("/histories");
         } catch (error) {
-            console.error("Lỗi khi lấy lịch sử bài thi:", error);
             throw error;
         }
     }
@@ -22,7 +21,14 @@ class HistoryService {
         try {
             return await axiosInstance.get(`/histories/${id}`);
         } catch (error) {
-            console.error(`Lỗi khi lấy chi tiết bài thi với id ${id}:`, error);
+            throw error;
+        }
+    }
+
+    static async getByExamId(id) {
+        try {
+            return await axiosInstance.get(`/histories/exams/${id}`);
+        } catch (error) {
             throw error;
         }
     }

@@ -142,7 +142,15 @@ export default function ExamManager() {
                                         className="mt-4 text-purple-700 border-purple-300 hover:bg-purple-50"
                                         onClick={() => router.push(`/exams/${exam.id}`)}
                                     >
-                                        Xem chi tiết
+                                        Xem chi tiết câu hỏi
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-4 text-purple-700 border-purple-300 hover:bg-purple-50"
+                                        onClick={() => router.push(`/users/exams/${exam.id}/history`)}
+                                    >
+                                        📊 Lịch sử
                                     </Button>
                                 </CardContent>
                             </div>
