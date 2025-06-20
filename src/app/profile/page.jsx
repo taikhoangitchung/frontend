@@ -54,7 +54,6 @@ const Profile = () => {
                     })
                 })
                 .catch((err) => {
-                    console.error("Lỗi khi lấy thông tin profile:", err)
                     toast.error("Không thể tải thông tin profile")
                 })
                 .finally(() => {
@@ -69,12 +68,9 @@ const Profile = () => {
             localStorage.getItem("role") ||
             localStorage.getItem("user_role")
 
-        // Kiểm tra role để chuyển hướng đúng trang
         if (roleFromStorage === "ADMIN" || roleFromStorage === "admin") {
-            console.log("Redirecting to admin dashboard")
             router.push("/admin/dashboard")
         } else {
-            console.log("Redirecting to user dashboard")
             router.push("/users/dashboard")
         }
     }

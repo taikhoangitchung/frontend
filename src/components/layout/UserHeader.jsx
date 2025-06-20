@@ -50,9 +50,12 @@ export default function UserHeader() {
                         <Home className="h-4 w-4 mr-2" />
                         Trang chủ
                     </Button>
-                    <Button variant="ghost" className="text-gray-600 cursor-pointer transition-all duration-200" onClick={() => toast.info("Chức năng này đang được phát triển...")}>
+                    <Button variant="ghost"
+                            className="text-gray-600 cursor-pointer transition-all duration-200"
+                            onClick={() => router.push("/users/histories")}
+                            >
                         <Activity className="h-4 w-4 mr-2" />
-                        Hoạt động
+                        Lịch sử thi
                     </Button>
                     <Button
                         variant="ghost"
