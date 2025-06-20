@@ -1,6 +1,14 @@
-import axiosInstance from "./config";
+import axiosInstance from "../services/config";
 
 class HistoryService {
+    static async add(submissionData) {
+        try {
+            return await axiosInstance.post('/histories', submissionData);
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
     static async getHistory(page = 0, size = 20) {
         try {
             return await axiosInstance.get("/histories", {
