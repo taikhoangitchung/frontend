@@ -9,11 +9,9 @@ class HistoryService {
         }
     }
 
-    static async getHistory(page = 0, size = 20) {
+    static async getHistory() {
         try {
-            return await axiosInstance.get("/histories", {
-                params: { page, size },
-            });
+            return await axiosInstance.get("/histories");
         } catch (error) {
             console.error("Lỗi khi lấy lịch sử bài thi:", error);
             throw error;
