@@ -5,12 +5,12 @@ import {Button} from "../../../../components/ui/button"
 import {Input} from "../../../../components/ui/input"
 import {Card, CardContent, CardHeader} from "../../../../components/ui/card"
 import {Separator} from "../../../../components/ui/separator"
-import {Search, Plus, Edit, X, Check, Grid3X3} from "lucide-react"
+import {Search, Plus, Edit, X, Check} from "lucide-react"
 import {useRouter} from "next/navigation";
 import QuestionService from "../../../../services/QuestionService";
 import {toast} from "sonner";
-import DeleteButton from "../../../../components/DeleleButton";
-import {typeVietSub} from "../../../../initvalues/typeVietsub";
+import DeleteButton from "../../../../components/alerts-confirms/DeleleButton";
+import {typeVietSub} from "../../../../util/typeVietsub";
 
 export default function QuizInterface() {
     const router = useRouter()
@@ -68,9 +68,9 @@ export default function QuizInterface() {
         router.push("/users/questions/create")
     }
 
-    async function handleDelete(question) {
+    async function handleDelete(id) {
         try {
-            const result = await QuestionService.delete(question.id);
+            const result = await QuestionService.delete(id);
             toast.success(result.data);
 
             const response = await QuestionService.getByUserId(userId);
@@ -128,7 +128,7 @@ export default function QuizInterface() {
                 {/* Questions Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <span className="text-lg font-medium">{questions.length} câu hỏi</span>
+                        <span className="text-lg font-medium">Danh sách câu hỏi (Tổng số: {questions.length})</span>
                     </div>
                     <Button
                         onClick={handleAddQuestion}
@@ -136,7 +136,7 @@ export default function QuizInterface() {
                         variant="outline"
                     >
                         <Plus className="w-4 h-4 mr-2"/>
-                        Thêm câu hỏi
+                        Tạo mới
                     </Button>
                 </div>
 
@@ -146,13 +146,10 @@ export default function QuizInterface() {
                         <CardHeader className="pb-3">
                             {/* Question Controls */}
                             <div className="flex items-center gap-4 text-sm">
-                                <Button variant="ghost" size="sm" className="p-1">
-                                    <Grid3X3 className="w-4 h-4"/>
-                                </Button>
 
                                 <div className="flex items-center gap-1">
                                     <Check className="w-4 h-4 text-green-600"/>
-                                    <span className="font-medium">{index + 1}. {typeVietSub(question.type)}</span>
+                                    <span className="font-medium">{index + 1} - {typeVietSub(question.type)}</span>
                                 </div>
 
                                 <div className="flex items-center gap-1 ml-auto">
@@ -164,18 +161,20 @@ export default function QuizInterface() {
                                     >
                                         <Edit className="w-4 h-4"/>
                                     </Button>
-                                    <DeleteButton item={question} handleDelete={handleDelete}/>
+                                    <DeleteButton id={question.id} handleDelete={handleDelete}/>
                                 </div>
                             </div>
                         </CardHeader>
 
                         <CardContent className="space-y-4">
                             {/* Question Text */}
+                            <div className="text-sm font-medium text-gray-600">Nội dung câu hỏi</div>
+
                             <div className="text-lg font-medium">{question.content}</div>
 
                             {/* Answer Choices */}
                             <div className="space-y-3">
-                                <div className="text-sm font-medium text-gray-600">Lựa chọn trả lời</div>
+                                <div className="text-sm font-medium text-gray-600">Các đáp án</div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     {question.answers.map((answer) => (
