@@ -9,12 +9,12 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 const HistoryPage = () => {
     const router = useRouter();
-    const [allHistories, setAllHistories] = useState([]); // Lưu toàn bộ lịch sử
-    const [historyList, setHistoryList] = useState([]); // Lưu lịch sử cho trang hiện tại
+    const [allHistories, setAllHistories] = useState([]);
+    const [historyList, setHistoryList] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("completed"); // completed, running, created
+    const [activeTab, setActiveTab] = useState("completed");
     const pageSize = 20; // 20 bài thi mỗi trang
 
     useEffect(() => {
@@ -55,10 +55,9 @@ const HistoryPage = () => {
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
-        setCurrentPage(0); // Reset về trang đầu khi đổi tab
+        setCurrentPage(0);
     };
 
-    // Hiệu ứng loading skeleton
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -77,15 +76,15 @@ const HistoryPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Lịch sử bài thi</h1>
+                    <h1 className="text-2xl font-semibold text-gray-900">Lịch sử bài thi</h1>
                     <button
                         onClick={() => router.push("/users/dashboard")}
                         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer transition-colors h-9 px-4 py-2"
                     >
-                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white" />
+                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white"/>
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
@@ -137,7 +136,6 @@ const HistoryPage = () => {
                     <p className="text-gray-600">Bạn chưa thực hiện bài thi nào.</p>
                 ) : (
                     <>
-                        {/* Quiz Cards Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                             {historyList.map((history) => (
                                 <div
@@ -152,7 +150,7 @@ const HistoryPage = () => {
                                             className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-90"
                                         />
                                         <div className="absolute top-2 left-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold border-none outline-none ring-0 shadow-none transition-colors group-hover:bg-white/90">
-                                            {history.totalQuestions || "N/A"} Qs
+                                            {history.totalQuestions || history.questions.length || "N/A"} Qs
                                         </div>
                                         <div className="absolute top-2 right-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold text-purple-700 border-none outline-none ring-0 shadow-none transition-colors group-hover:bg-white/90">
                                             Lượt thi {history.attemptNumber}
@@ -184,7 +182,6 @@ const HistoryPage = () => {
                             ))}
                         </div>
 
-                        {/* Pagination */}
                         <div className="mt-4 flex justify-center">
                             <nav className="inline-flex rounded-md shadow">
                                 {totalPages <= 3 || currentPage < 2 || currentPage >= totalPages - 2 ? (
