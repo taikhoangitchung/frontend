@@ -4,13 +4,13 @@ import {useEffect, useState} from "react"
 import {toast} from "sonner";
 import {Loader2, Search} from "lucide-react";
 
-import UserService from "../services/UserService";
-import EmailService from "../services/EmailService";
-import {Card, CardContent} from "./ui/card";
-import {Input} from "./ui/input";
-import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "./ui/table";
-import {Button} from "./ui/button";
-import UserStatusSwitch from "./UserStatusSwitch";
+import UserService from "../../services/UserService";
+import EmailService from "../../services/EmailService";
+import {Card, CardContent} from "../ui/card";
+import {Input} from "../ui/input";
+import {TableBody, TableCell, TableHead, TableHeader, TableRow, Table} from "../ui/table";
+import {Button} from "../ui/button";
+import UserStatusSwitch from "../alerts-confirms/UserStatusSwitch";
 
 const UserTable = () => {
     const [users, setUsers] = useState([])

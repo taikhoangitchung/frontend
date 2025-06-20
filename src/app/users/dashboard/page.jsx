@@ -1,18 +1,18 @@
 "use client"
 
-import UserHeader from "../../../components/UserHeader";
+import UserHeader from "../../../components/layout/UserHeader";
 import {Card, CardContent} from "../../../components/ui/card";
 import {Input} from "../../../components/ui/input";
 import {Button} from "../../../components/ui/button";
 import { Badge, Edit, Users, Zap } from 'lucide-react';
 import {toast} from "sonner";
-import CategoryCard from "../../../components/CategoryCard";
+import CategoryCard from "../../../components/category/CategoryCard";
 
 
 
 export default function Page() {
 
-    const username = localStorage.getItem("currentUserUserName");
+    const username = localStorage.getItem("username");
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">

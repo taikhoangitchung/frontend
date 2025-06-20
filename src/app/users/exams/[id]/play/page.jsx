@@ -1,9 +1,9 @@
 'use client'
 
-import PlayForm from "../../../../../components/PlayForm";
+import PlayExamForm from "../../../../../components/exam/PlayExamForm";
 
 export default function Component() {
     return (
-        <PlayForm></PlayForm>
+        <PlayExamForm></PlayExamForm>
     )
 }
