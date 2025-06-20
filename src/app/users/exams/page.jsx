@@ -108,16 +108,20 @@ export default function ExamManager() {
                                     <div className="text-xl font-bold text-purple-800">{exam.title}</div>
 
                                     <div className="absolute top-4 right-4 flex gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-8 w-8 border-gray-300 text-gray-600 hover:bg-gray-100"
-                                            onClick={() => router.push(`/exams/${exam.id}/edit`)}
-                                        >
-                                            <Edit className="w-4 h-4"/>
-                                        </Button>
+                                        {exam.playedTimes === 0 && (
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-8 w-8 border-gray-300 text-gray-600 hover:bg-gray-100"
+                                                    onClick={() => router.push(`/exams/${exam.id}/edit`)}
+                                                >
+                                                    <Edit className="w-4 h-4"/>
+                                                </Button>
 
-                                        <DeleteButton id={exam.id} handleDelete={handleDeleteExam}/>
+                                                <DeleteButton id={exam.id} handleDelete={handleDeleteExam}/>
+                                            </>
+                                        )}
                                     </div>
                                 </CardHeader>
 
