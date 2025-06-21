@@ -4,7 +4,7 @@ import { useRef } from "react"
 
 export default function ExamDetailPanel({ data, onClose }) {
     const panelRef = useRef(null)
-
+    console.log(data)
     const handleOverlayClick = (e) => {
         if (panelRef.current && !panelRef.current.contains(e.target)) {
             onClose()
@@ -23,15 +23,15 @@ export default function ExamDetailPanel({ data, onClose }) {
                 <h2 className="text-2xl font-bold mb-4 text-purple-900">Chi tiết bài làm</h2>
 
                 <div className="space-y-6">
-                    {data.questions.map((question, index) => (
-                        <div key={index} className="bg-purple-50 p-4 rounded-xl shadow-sm border">
+                    {data.map((question, index) => (
+                        <div key={question.id} className="bg-purple-50 p-4 rounded-xl shadow-sm border">
                             <p className="font-semibold mb-4 text-purple-800">
                                 {index + 1}. {question.content}
                             </p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {question.answers.map((answer) => {
-                                    const isSelected = question.selectedAnswerIds?.includes(answer.id)
+                                    const isSelected = question.selectedAnswerIds.includes(answer.id)
                                     const isCorrect = answer.correct
 
                                     const borderColor = isCorrect ? "border-green-500" : "border-red-400"
@@ -47,7 +47,6 @@ export default function ExamDetailPanel({ data, onClose }) {
                                                     Bạn chọn
                                                 </div>
                                             )}
-
                                             <span className="font-medium">{answer.content}</span>
                                         </div>
                                     )

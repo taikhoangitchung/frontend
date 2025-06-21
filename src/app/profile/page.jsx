@@ -22,15 +22,15 @@ const Profile = () => {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const storedUserEmail = localStorage.getItem("currentUserEmail")
+            const storedUserEmail = localStorage.getItem("email")
             if (!storedUserEmail) {
                 router.push("/login")
                 return
             }
 
-            const storedUsername = localStorage.getItem("currentUserUsername") || ""
-            const storedAvatar = localStorage.getItem("currentUserAvatar") || ""
-            const storedRole = localStorage.getItem("role") || "" // Lấy role từ localStorage
+            const storedUsername = localStorage.getItem("username") || ""
+            const storedAvatar = localStorage.getItem("avatar") || ""
+            const storedRole = localStorage.getItem("role") || ""
             const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
 
             setUserInfo((prev) => ({
@@ -38,7 +38,7 @@ const Profile = () => {
                 email: storedUserEmail,
                 username: storedUsername,
                 avatar: storedAvatar || defaultAvatar,
-                role: storedRole // Gán role từ localStorage
+                role: storedRole
             }))
 
             UserService.getProfile(storedUserEmail)
@@ -64,11 +64,8 @@ const Profile = () => {
     }, [router])
 
     const handleBackToDashboard = () => {
-        const roleFromStorage = localStorage.getItem("userRole") ||
-            localStorage.getItem("role") ||
-            localStorage.getItem("user_role")
-
-        if (roleFromStorage === "ADMIN" || roleFromStorage === "admin") {
+        const roleFromStorage = localStorage.getItem("role")
+        if (roleFromStorage === "ADMIN") {
             router.push("/admin/dashboard")
         } else {
             router.push("/users/dashboard")
@@ -184,7 +181,7 @@ const Profile = () => {
 
                                 {/* Create Button */}
                                 <button
-                                    onClick={() => router.push("/users/questions/create")}
+                                    onClick={() => router.push("/users/exams/create")}
                                     className="bg-purple-600 text-white px-6 py-2 rounded-lg text-md font-medium hover:bg-purple-700 cursor-pointer transition-colors"
                                 >
                                     Tạo Quiz Mới

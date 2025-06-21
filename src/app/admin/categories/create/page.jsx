@@ -11,7 +11,7 @@ import { Textarea } from "../../../../components/ui/textarea"
 import { Button } from "../../../../components/ui/button"
 import { Separator } from "../../../../components/ui/separator"
 import { toast } from "sonner"
-import { ArrowLeft, Plus, FileText, AlignLeft, Save, X } from "lucide-react"
+import { ArrowLeft, Plus, FileText, AlignLeft, Save, X, ListChecks } from "lucide-react"
 import CategoryService from "../../../../services/CategoryService"
 
 export default function CreateCategoryForm() {
@@ -80,6 +80,7 @@ export default function CreateCategoryForm() {
                                         Tên danh mục
                                     </Label>
                                     <span className="text-red-500">*</span>
+                                    <span className="text-gray-400 text-xs">(Trường bắt buộc)</span>
                                 </div>
                                 <Input
                                     id="name"
@@ -125,7 +126,6 @@ export default function CreateCategoryForm() {
                         {/* Action Buttons */}
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-500">
-                                <span className="text-red-500">*</span> Trường bắt buộc
                             </div>
 
                             <div className="flex gap-3">
@@ -161,24 +161,22 @@ export default function CreateCategoryForm() {
                         <span className="text-sm font-medium text-gray-600">Xem trước</span>
                     </div>
                 </CardHeader>
+
                 <CardContent className="space-y-3">
-                    <div className="space-y-2">
-                        <div className="text-lg font-medium">{formik.values.name || "Tên danh mục"}</div>
+                    <div className="flex items-center justify-between">
+                        <div className="text-lg font-semibold text-purple-800">
+                            {formik.values.name || "Tên danh mục"}
+                        </div>
                     </div>
 
-                    {/* Preview as card like in the list */}
-                    <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-                        <div className="space-y-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <div className="flex items-center gap-2 p-2 rounded border bg-blue-50 border-blue-200">
-                                    <span className="text-xs font-medium">Mô tả:</span>
-                                    <span className="text-xs">{formik.values.description || "—"}</span>
-                                </div>
-                                <div className="flex items-center gap-2 p-2 rounded border bg-green-50 border-green-200">
-                                    <span className="text-xs font-medium">Số câu hỏi:</span>
-                                    <span className="text-xs font-semibold">0</span>
-                                </div>
-                            </div>
+                    <div className="space-y-2 mt-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                            <FileText className="w-4 h-4 text-blue-500" />
+                            <span>{formik.values.description || "—"}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                            <ListChecks className="w-4 h-4 text-green-600" />
+                            <span className="font-semibold">0 câu hỏi</span>
                         </div>
                     </div>
                 </CardContent>

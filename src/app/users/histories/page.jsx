@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {useState, useEffect} from "react";
+import {useRouter} from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
-import { toast } from "sonner";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import {toast} from "sonner";
+import {ArrowLeft, Timer, CheckCircle, Pencil, XCircle} from "lucide-react";
+import formatTime from "../../../util/formatTime";
+
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -15,7 +16,7 @@ const HistoryPage = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("completed");
-    const pageSize = 20; // 20 bài thi mỗi trang
+    const pageSize = 20;
 
     useEffect(() => {
         if (activeTab !== "completed") {
@@ -79,12 +80,12 @@ const HistoryPage = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-2xl font-semibold text-gray-900">Lịch sử bài thi</h1>
+                    <h1 className="text-2xl font-semibold text-gray-900">Lịch sử thi của tôi</h1>
                     <button
                         onClick={() => router.push("/users/dashboard")}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer transition-colors h-9 px-4 py-2"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white"/>
+                        <ArrowLeft className="w-4 h-4"/>
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
@@ -100,9 +101,10 @@ const HistoryPage = () => {
                                     : "text-gray-500 hover:text-gray-700"
                             }`}
                         >
-                            <span className="mr-2">⏳</span>
+                            <Timer size={16} className="inline-block mr-2"/>
                             Đang chạy
                         </button>
+
                         <button
                             onClick={() => handleTabChange("completed")}
                             className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
@@ -111,9 +113,10 @@ const HistoryPage = () => {
                                     : "text-gray-500 hover:text-gray-700"
                             }`}
                         >
-                            <span className="mr-2">✅</span>
+                            <CheckCircle size={16} className="inline-block mr-2"/>
                             Hoàn thành
                         </button>
+
                         <button
                             onClick={() => handleTabChange("created")}
                             className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
@@ -122,7 +125,7 @@ const HistoryPage = () => {
                                     : "text-gray-500 hover:text-gray-700"
                             }`}
                         >
-                            <span className="mr-2">📝</span>
+                            <Pencil size={16} className="inline-block mr-2"/>
                             Tạo
                         </button>
                     </div>
@@ -140,7 +143,7 @@ const HistoryPage = () => {
                             {historyList.map((history) => (
                                 <div
                                     key={history.id}
-                                    className="bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-102 relative overflow-hidden cursor-pointer"
+                                    className="bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden cursor-pointer"
                                     onClick={() => router.push(`/users/histories/${history.id}`)}
                                 >
                                     <div className="w-full h-32 rounded-t-xl overflow-hidden relative group">
@@ -149,33 +152,54 @@ const HistoryPage = () => {
                                             alt={history.examTitle}
                                             className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-90"
                                         />
-                                        <div className="absolute top-2 left-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold border-none outline-none ring-0 shadow-none transition-colors group-hover:bg-white/90">
-                                            {history.totalQuestions || history.questions.length || "N/A"} Qs
+
+                                        <div
+                                            className="absolute top-2 right-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold text-purple-700 outline-none transition-colors group-hover:bg-white/90">
+                                            Lượt thi {history.attemptTime}
                                         </div>
-                                        <div className="absolute top-2 right-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold text-purple-700 border-none outline-none ring-0 shadow-none transition-colors group-hover:bg-white/90">
-                                            Lượt thi {history.attemptNumber}
-                                        </div>
-                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                                        <div
+                                            className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                                     </div>
 
                                     <div className="p-4">
-                                        <div className="text-center text-base font-semibold text-gray-800 hover:text-gray-900 transition-colors duration-300 mb-4 h-12 flex items-center justify-center">
-                                            <span className="line-clamp-2 leading-tight">{history.examTitle}</span>
+                                        <div
+                                            className="text-center text-base font-semibold text-gray-800 hover:text-gray-900 transition-colors duration-300 mb-4 h-12 flex items-center justify-center">
+                                            <span
+                                                className="line-clamp-2 overflow-hidden text-ellipsis text-wrap">{history.examTitle}</span>
                                         </div>
 
                                         <div className="mb-4">
                                             <div
                                                 className={`w-full h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                                                    history.scorePercentage === 100 ? "bg-[#5de2a5]" : "bg-[#e2be5d]"
+                                                    history.score === 100 ? "bg-[#5de2a5]" : "bg-[#e2be5d]"
                                                 }`}
                                             >
-                                                Độ chính xác {history.scorePercentage.toFixed(0)}%
+                                                Độ chính xác: {history.score.toFixed(1)}%
                                             </div>
                                         </div>
 
                                         <div className="flex justify-between text-sm text-gray-500">
                                             <span>Ngày thi:</span>
-                                            <span>{new Date(history.finishedAt).toLocaleDateString("vi-VN")}</span>
+                                            <span>{new Date(history.finishedAt).toLocaleString("vi-VN")}</span>
+                                        </div>
+
+                                        <div className="flex justify-between text-sm text-gray-500">
+                                            <span>Thời gian làm bài:</span>
+                                            <span>{formatTime(history.timeTaken)}</span>
+                                        </div>
+
+                                        <div className={`text-sm font-semibold mt-2 flex items-center gap-1 ${history.passed ? "text-green-600" : "text-red-600"}`}>
+                                            {history.passed ? (
+                                                <>
+                                                    <CheckCircle className="w-4 h-4" />
+                                                    Đạt
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <XCircle className="w-4 h-4" />
+                                                    Không đạt
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -194,7 +218,7 @@ const HistoryPage = () => {
                                                 Trước
                                             </button>
                                         )}
-                                        {Array.from({ length: totalPages }, (_, i) => i).map((page) => (
+                                        {Array.from({length: totalPages}, (_, i) => i).map((page) => (
                                             <button
                                                 key={page}
                                                 onClick={() => handlePageChange(page)}
@@ -225,7 +249,7 @@ const HistoryPage = () => {
                                             Trước
                                         </button>
                                         {Array.from(
-                                            { length: Math.min(5, totalPages) },
+                                            {length: Math.min(5, totalPages)},
                                             (_, i) => currentPage - 2 + i
                                         )
                                             .filter((page) => page >= 0 && page < totalPages)
@@ -255,26 +279,6 @@ const HistoryPage = () => {
                     </>
                 )}
             </div>
-
-            <style jsx>{`
-                .line-clamp-2 {
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-                .hover\\:scale-102:hover {
-                    transform: scale(1.02);
-                }
-                .animate-pulse {
-                    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                }
-                @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.6; }
-                }
-            `}</style>
         </div>
     );
 };
