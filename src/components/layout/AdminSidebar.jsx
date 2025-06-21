@@ -14,8 +14,9 @@ export function AdminSidebar({ onSelectMenu }) {
     return (
         <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col shadow-sm">
             {/* Logo */}
-            <div className="flex items-center">
-                <Image
+            <div className="flex items-center justify-center py-4">
+
+            <Image
                     src="/logo.png"
                     alt="QuizGym Logo"
                     width={120}
@@ -23,6 +24,7 @@ export function AdminSidebar({ onSelectMenu }) {
                     priority
                 />
             </div>
+
 
             {/* Menu điều hướng */}
             <div className="flex-1 px-2">

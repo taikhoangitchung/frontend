@@ -7,15 +7,14 @@ import {Card, CardContent, CardHeader} from "../ui/card"
 import {Button} from "../ui/button"
 import {Input} from "../ui/input"
 import {Separator} from "../ui/separator"
-import {Pencil, Plus, Search, Grid3X3, Check} from "lucide-react"
+import {Pencil, Plus, Search, FileText, ListCheck} from "lucide-react"
 import CategoryService from "../../services/CategoryService"
-import {Skeleton} from "../ui/skeleton";
-
-import DeleteButton from "../alerts-confirms/DeleleButton";
+import {Skeleton} from "../ui/skeleton"
+import DeleteButton from "../alerts-confirms/DeleleButton"
 
 const ITEMS_PER_PAGE = 10
 
-const CategoryTable = () => {
+const CategoryTable = ({viewMode = "ADMIN"}) => {
     const [categories, setCategories] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
     const [searchTerm, setSearchTerm] = useState("")
@@ -26,16 +25,18 @@ const CategoryTable = () => {
         setLoading(true)
         try {
             const res = await CategoryService.getAll()
-            const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name, "vi", {sensitivity: "base"}))
+            const sorted = res.data.sort((a, b) =>
+                a.name.localeCompare(b.name, "vi", {sensitivity: "base"})
+            )
             setCategories(sorted)
         } catch (error) {
             if (error.response?.status === 403) {
-                router.push("/forbidden");
+                router.push("/forbidden")
             } else if (error.response?.status === 401) {
                 toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...")
                 setTimeout(() => {
-                    router.push("/login");
-                }, 2500);
+                    router.push("/login")
+                }, 2500)
             }
         } finally {
             setLoading(false)
@@ -69,12 +70,15 @@ const CategoryTable = () => {
         ? categories.filter(
             (cat) =>
                 cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (cat.description && cat.description.toLowerCase().includes(searchTerm.toLowerCase())),
+                (cat.description && cat.description.toLowerCase().includes(searchTerm.toLowerCase()))
         )
         : categories
 
     const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE)
-    const paginatedCategories = filteredCategories.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+    const paginatedCategories = filteredCategories.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    )
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
@@ -110,70 +114,60 @@ const CategoryTable = () => {
             <div className="space-y-4">
                 {/* Categories Header */}
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg font-medium">Tổng số: {filteredCategories.length}</span>
-                    </div>
-                    <Button
-                        onClick={handleCreate}
-                        className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
-                        variant="outline"
-                    >
-                        <Plus className="w-4 h-4 mr-2"/>
-                        Thêm danh mục
-                    </Button>
+                    <div className="text-lg font-medium">Tổng số: {filteredCategories.length}</div>
+                    {viewMode === "ADMIN" && (
+                        <Button
+                            onClick={handleCreate}
+                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
+                            variant="outline"
+                        >
+                            <Plus className="w-4 h-4 mr-2"/>
+                            Thêm danh mục
+                        </Button>
+                    )}
                 </div>
 
                 {/* Category Cards */}
                 {paginatedCategories.map((category, index) => (
-                    <Card key={category.id} className="border border-gray-200">
-                        <CardHeader className="pb-3">
-                            {/* Category Controls */}
-                            <div className="flex items-center gap-4 text-sm">
+                    <Card key={category.id} className="border border-gray-200 px-4 py-3">
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
+                                    {index + 1}. {category.name}
+                                </h2>
 
-                                <div className="flex items-center gap-1">
-                                    <Check className="w-4 h-4 text-green-600"/>
-                                    <span className="font-medium">ID: {category.id}</span>
-                                </div>
-
-                                <div className="flex items-center gap-1 ml-auto">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="p-1 text-primary"
-                                        onClick={() => handleEdit(category.id)}
-                                    >
-                                        <Pencil className="w-4 h-4"/>
-                                    </Button>
-                                    <DeleteButton id={category.id} handleDelete={handleDelete}></DeleteButton>
-                                </div>
+                                {viewMode === "ADMIN" && (
+                                    <div className="flex gap-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="p-1 text-primary"
+                                            onClick={() => handleEdit(category.id)}
+                                        >
+                                            <Pencil className="w-5 h-5" />
+                                        </Button>
+                                        <DeleteButton id={category.id} handleDelete={handleDelete} />
+                                    </div>
+                                )}
                             </div>
-                        </CardHeader>
 
-                        <CardContent className="space-y-4">
-                            {/* Category Name */}
-                            <div className="text-lg font-medium capitalize">{category.name}</div>
-
-                            {/* Category Details */}
-                            <div className="space-y-3">
-                                <div className="text-sm font-medium text-gray-600">Thông tin chi tiết</div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div
-                                        className="flex items-center gap-2 p-3 rounded-lg border bg-blue-50 border-blue-200">
-                                        <span className="text-sm font-medium">Mô tả:</span>
-                                        <span className="text-sm">{category.description || "—"}</span>
-                                    </div>
-                                    <div
-                                        className="flex items-center gap-2 p-3 rounded-lg border bg-green-50 border-green-200">
-                                        <span className="text-sm font-medium">Số câu hỏi:</span>
-                                        <span className="text-sm font-semibold">{category.questionCount || 0}</span>
-                                    </div>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-sm text-gray-700">
+                                    <FileText className="w-4 h-4 text-blue-500" />
+                                    <span>{category.description || "—"}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-700">
+                                    <ListCheck className="w-4 h-4 text-green-600" />
+                                    <span className="font-semibold">{category.questionCount || 0} câu hỏi</span>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
+
                 ))}
             </div>
 
+            {/* Loading */}
             {loading && (
                 <div className="space-y-4">
                     {Array.from({length: ITEMS_PER_PAGE}).map((_, idx) => (
@@ -199,7 +193,7 @@ const CategoryTable = () => {
                 </div>
             )}
 
-            {/* Empty State */}
+            {/* No results */}
             {!loading && paginatedCategories.length === 0 && searchTerm && (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                     <Search className="w-12 h-12 mb-4 opacity-50"/>
@@ -207,10 +201,8 @@ const CategoryTable = () => {
                 </div>
             )}
 
-            {/* Empty State - No categories */}
             {!loading && categories.length === 0 && !searchTerm && (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                    <Grid3X3 className="w-12 h-12 mb-4 opacity-50"/>
                     <p>Danh sách trống!</p>
                 </div>
             )}

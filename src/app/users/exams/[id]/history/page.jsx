@@ -4,7 +4,16 @@ import {useEffect, useState} from "react"
 import {useParams, useRouter} from "next/navigation"
 import HistoryService from "../../../../../services/HistoryService"
 import {Button} from "../../../../../components/ui/button"
-import {Loader2} from "lucide-react"
+import {
+    Loader2,
+    BarChart2,
+    Clock,
+    User,
+    Award,
+    CheckCircle,
+    XCircle,
+} from "lucide-react";
+
 
 export default function ExamHistoryPage() {
     const {id} = useParams()
@@ -37,8 +46,9 @@ export default function ExamHistoryPage() {
     return (
         <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-purple-900">
-                    📊 Lịch sử bài thi: <span className="text-gray-800">"{histories[0]?.title || '...'}"</span>
+                <h1 className="text-3xl font-bold text-purple-900 flex items-center gap-2">
+                    <BarChart2 className="w-6 h-6 text-purple-700" />
+                    Lịch sử bài thi: <span className="text-gray-800">"{histories[0]?.title || '...'}"</span>
                 </h1>
                 <Button
                     variant="outline"
@@ -50,21 +60,32 @@ export default function ExamHistoryPage() {
             </div>
 
             {histories.length === 0 ? (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center text-gray-500 text-lg">
-                    ❌ Chưa có học viên nào tham gia bài thi này.
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center text-gray-500 text-lg flex flex-col items-center gap-3">
+                    <XCircle className="w-8 h-8 text-gray-400" />
+                    Chưa có học viên nào tham gia bài thi này.
                 </div>
+
             ) : (
                 <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-md">
                     <table className="w-full text-base text-left bg-white">
                         <thead className="bg-purple-100 text-purple-800 text-lg font-semibold">
                         <tr>
                             <th className="p-4 border-b border-gray-200 text-center">#</th>
-                            <th className="p-4 border-b border-gray-200">🕒 Thời gian thi</th>
-                            <th className="p-4 border-b border-gray-200">👤 Học viên</th>
-                            <th className="p-4 border-b border-gray-200">🏆 Điểm</th>
-                            <th className="p-4 border-b border-gray-200">✅ Câu đúng / Tổng</th>
+                            <th className="p-4 border-b border-gray-200">
+                                <div className="flex items-center gap-1"><Clock className="w-5 h-5" /> Thời gian thi</div>
+                            </th>
+                            <th className="p-4 border-b border-gray-200">
+                                <div className="flex items-center gap-1"><User className="w-5 h-5" /> Học viên</div>
+                            </th>
+                            <th className="p-4 border-b border-gray-200">
+                                <div className="flex items-center gap-1"><Award className="w-5 h-5" /> Điểm</div>
+                            </th>
+                            <th className="p-4 border-b border-gray-200">
+                                <div className="flex items-center gap-1"><CheckCircle className="w-5 h-5" /> Câu đúng / Tổng</div>
+                            </th>
                         </tr>
                         </thead>
+
                         <tbody className="text-gray-700 font-medium">
                         {histories.map((h, index) => (
                             <tr key={index} className="even:bg-gray-50 hover:bg-gray-100 transition">

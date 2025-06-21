@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
 import { toast } from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
-import { typeVietSub } from "../../../util/typeVietsub";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
@@ -89,32 +88,35 @@ export default function QuizInterface() {
     return (
         <div className="min-h-screen bg-gray-50 py-6">
             <div className="max-w-6xl mx-auto px-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold text-gray-900">Tìm kiếm câu hỏi</h1>
-                    <div className="flex items-center gap-3">
-                        <Select value={ownerFilter} onValueChange={(value) => {
-                            setOwnerFilter(value);
-                            setPage(1);
-                        }}>
-                            <SelectTrigger className="w-32 h-9 border border-gray-300 rounded-md bg-white text-sm">
+                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <h1 className="text-2xl font-semibold text-gray-900">Tìm kiếm câu hỏi</h1>
+                        <Select
+                            value={ownerFilter}
+                            onValueChange={(value) => {
+                                setOwnerFilter(value);
+                                setPage(1);
+                            }}
+                        >
+                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
                                 <SelectValue placeholder="Lọc theo tác giả" />
                             </SelectTrigger>
-                            <SelectContent className="z-50 bg-white border border-gray-200 rounded-md shadow-md">
+                            <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
                                 <SelectItem value="all">Tất cả</SelectItem>
                                 <SelectItem value="mine">Của tôi</SelectItem>
-                                <SelectItem value="others">Người khác</SelectItem>
+                                <SelectItem value="others">Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button
-                            onClick={() => router.push("/users/dashboard")}
-                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer transition-colors h-9 px-4 py-2"
-                        >
-                            <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white" />
-                            <span className="text-white">Quay lại</span>
-                        </Button>
                     </div>
-                </div>
 
+                    <Button
+                        onClick={() => router.push("/users/dashboard")}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
+                    >
+                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white" />
+                        <span className="text-white">Quay lại</span>
+                    </Button>
+                </div>
                 <div className="relative w-full mb-4">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
@@ -145,28 +147,26 @@ export default function QuizInterface() {
 
                     {questions.map((question, index) => (
                         <Card key={question.id} className="border border-gray-200 hover:cursor-pointer">
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center gap-4 text-sm">
-                                    <div className="flex items-center gap-1">
-                                        <Check className="w-4 h-4 text-green-600" />
-                                        <span className="font-medium">{index + 1} - {typeVietSub(question.type.name)}</span>
-                                    </div>
-                                    <div className="ml-auto flex gap-1">
+                            <CardHeader className="pb-0">
+                                <div className="flex items-start justify-between">
+                                    <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
+                                        {index + 1}. {question.content}
+                                    </h2>
+                                    <div className="flex gap-1">
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             className="p-1"
                                             onClick={() => router.push(`/users/questions/${question.id}/edit`)}
                                         >
-                                            <Edit className="w-4 h-4" />
+                                            <Edit className="w-6 h-6" />
                                         </Button>
                                         <DeleteButton id={question.id} handleDelete={handleDelete} />
                                     </div>
                                 </div>
                             </CardHeader>
 
-                            <CardContent className="space-y-4">
-                                <h2 className="text-2xl font-bold mb-4 text-purple-800">{index + 1}. {question.content}</h2>
+                            <CardContent className="space-y-4 mt-2">
                                 <div className="text-sm text-gray-500">
                                     Người tạo: <span className="font-semibold text-gray-700">{question.user.username}</span>
                                 </div>
@@ -174,8 +174,10 @@ export default function QuizInterface() {
                                     {question.answers.map((answer) => (
                                         <div
                                             key={answer.id}
-                                            className={`flex items-center gap-2 p-3 rounded-lg border border-gray-200 ${
-                                                answer.correct ? "bg-green-50 border-green-200" : "bg-red-50 bg-opacity-20 border-red-200"
+                                            className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                                answer.correct
+                                                    ? "bg-green-50 border-green-200"
+                                                    : "bg-red-50 bg-opacity-20 border-red-200"
                                             } hover:cursor-pointer`}
                                         >
                                             {answer.correct ? (
