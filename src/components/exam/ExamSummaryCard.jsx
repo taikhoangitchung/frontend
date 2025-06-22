@@ -75,8 +75,8 @@ export default function ExamSummaryCard({search}) {
                         <h2 className="text-xl font-semibold text-gray-800 pb-2">
                             {category.name}
                         </h2>
-                        <div className="flex gap-4 overflow-x-auto scrollbar-hidden">
-                            {filteredExams.map((exam, index) => {
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        {filteredExams.map((exam, index) => {
                                 const icon = index === 0
                                     ? <Crown className="w-4 h-4 text-yellow-500"/>
                                     : index === 1
@@ -92,7 +92,7 @@ export default function ExamSummaryCard({search}) {
                                 return (
                                     <div
                                         key={exam.id}
-                                        className="w-64 min-w-[16rem] bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-105 relative overflow-hidden cursor-pointer"
+                                        className="w-full bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-105 relative overflow-hidden cursor-pointer"
                                         onClick={() => handleCardClick(exam)}
                                     >
                                         <div className="w-full h-32 rounded-t-xl overflow-hidden relative group">

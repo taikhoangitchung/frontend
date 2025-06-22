@@ -15,6 +15,9 @@ import { useState } from "react"
 
 export default function ConfirmDialog({
                                           trigger = null,
+                                          triggerLabel = "",
+                                          triggerClass = "bg-red-600 text-white px-4 py-2 rounded",
+                                          disabled = false,
                                           open: controlledOpen,
                                           setOpen: setControlledOpen,
                                           title = "Bạn có chắc chắn?",
@@ -35,6 +38,14 @@ export default function ConfirmDialog({
             {trigger && (
                 <AlertDialogTrigger asChild>
                     {trigger}
+                </AlertDialogTrigger>
+            )}
+
+            {!trigger && triggerLabel && (
+                <AlertDialogTrigger asChild>
+                    <button disabled={disabled} className={triggerClass}>
+                        {triggerLabel}
+                    </button>
                 </AlertDialogTrigger>
             )}
 

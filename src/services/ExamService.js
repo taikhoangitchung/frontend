@@ -1,4 +1,4 @@
-import axiosInstance from "../services/config";
+import axiosInstance from "../config/axiosConfig";
 
 class ExamService {
     static async exist(title) {
@@ -28,7 +28,7 @@ class ExamService {
             return Promise.reject(error);
         }
     }
-    static async getAllMine() {
+    static async getAll() {
         try {
             return await axiosInstance.get(`/exams`);
         } catch (error) {
