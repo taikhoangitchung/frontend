@@ -702,12 +702,12 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
-import { Input } from "../../../../components/ui/input"
-import { Label } from "../../../../components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
-import { Badge } from "../../../../components/ui/badge"
+import {useEffect, useState} from "react"
+import {Input} from "../../../../components/ui/input"
+import {Label} from "../../../../components/ui/label"
+import {Card, CardContent, CardHeader, CardTitle} from "../../../../components/ui/card"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../../../../components/ui/select"
+import {Badge} from "../../../../components/ui/badge"
 import {
     ArrowLeft,
     BookOpen,
@@ -729,17 +729,16 @@ import {
     User,
     Zap,
 } from "lucide-react"
-import { Button } from "../../../../components/ui/button"
-import { FaFireAlt } from "react-icons/fa"
+import {Button} from "../../../../components/ui/button"
+import {FaFireAlt} from "react-icons/fa"
 import CategoryService from "../../../../services/CategoryService"
 import DifficultyService from "../../../../services/DifficultyService"
-import { useFormik } from "formik"
+import {useFormik} from "formik"
 import * as Yup from "yup"
-import { toast } from "sonner"
+import {toast} from "sonner"
 import QuestionService from "../../../../services/QuestionService"
 import ExamService from "../../../../services/ExamService"
-import { useRouter } from "next/navigation"
-import {CiCircleQuestion} from "react-icons/ci";
+import {useRouter} from "next/navigation"
 import {FaCircleQuestion} from "react-icons/fa6";
 
 const questionLimits = [
@@ -765,19 +764,14 @@ export default function CreateExam({ id }) {
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
 
     const ExamSchema = Yup.object({
-        title: Yup.string().required("Title không được để trống"),
+        title: Yup.string().required("Tiêu đề không được để trống"),
         difficultyId: Yup.number().test("not-default", "Hãy chọn một độ khó", (value) => value !== -1),
         categoryId: Yup.number().test("not-default", "Hãy chọn một thể loại", (value) => value !== -1),
         passScore: Yup.number()
-            .min(0, "Tỉ lệ số câu đúng để đạt không thể âm")
+            .min(1, "Tỉ lệ số câu đúng để đạt không thể âm")
             .max(100, "Tỉ lệ số câu đúng để đạt không thể lớn hơn 100%"),
-        questions: Yup.array()
-            .of(
-                Yup.object().shape({
-                    id: Yup.number().required(),
-                }),
-            )
-            .min(1, "Cần ít nhất 1 câu hỏi"),
+        duration: Yup.number()
+            .min(1,"Thời gian không thê quá ngắn")
     })
 
     const formik = useFormik({
@@ -795,7 +789,7 @@ export default function CreateExam({ id }) {
         onSubmit: (values) => {
             if (values.questions.length === 0) {
                 toast.warning("Hãy thêm ít nhất 1 câu hỏi")
-                return
+                return;
             }
 
             setIsSubmitting(true)
@@ -943,7 +937,6 @@ export default function CreateExam({ id }) {
         formik.setFieldValue("questions", [...formik.values.questions.filter((q) => q.id !== id)])
     }
 
-    // Question Card Component for reuse
     const QuestionCard = ({ question, index, showRemove = false, onRemove, onToggleSelect, displayAdded }) => {
         const added = formik.values.questions.find((q) => q.id === question.id) !== undefined
         const isExpanded = expandedQuestions.has(question.id) && added === displayAdded
@@ -1017,7 +1010,7 @@ export default function CreateExam({ id }) {
                                 }}
                                 variant="ghost"
                                 size="sm"
-                                className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1"
+                                className="cursor-pointer text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1"
                                 title={isExpanded ? "Thu gọn" : "Xem đáp án"}
                             >
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -1030,7 +1023,7 @@ export default function CreateExam({ id }) {
                                     }}
                                     variant="ghost"
                                     size="sm"
-                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1"
+                                    className="cursor-pointer text-red-500 hover:text-red-700 hover:bg-red-50 p-1"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -1078,7 +1071,7 @@ export default function CreateExam({ id }) {
                     <Button
                         onClick={() => router.back()}
                         variant="outline"
-                        className="bg-white text-gray-700 border-gray-300 hover:bg-gray-50 flex items-center gap-2"
+                        className="cursor-pointer bg-white text-gray-700 border-gray-300 hover:bg-gray-50 flex items-center gap-2"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Quay lại
@@ -1195,6 +1188,9 @@ export default function CreateExam({ id }) {
                                             onChange={(e) => formik.setFieldValue("duration", Number(e.target.value))}
                                             className="border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 focus:bg-white h-10"
                                         />
+                                        {formik.touched.duration && formik.errors.duration && (
+                                            <div className="text-red-500 text-sm mt-1">{formik.errors.duration}</div>
+                                        )}
                                     </div>
 
                                     <div className="space-y-2">
@@ -1283,7 +1279,7 @@ export default function CreateExam({ id }) {
                             <Button
                                 type={"submit"}
                                 onClick={formik.handleSubmit}
-                                className="bg-purple-600 hover:bg-purple-700 text-white px-12 py-4 text-xl font-bold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300"
+                                className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-12 py-4 text-xl font-bold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300"
                                 disabled={isSubmitting}
                             >
                                 <Sparkles className="h-6 w-6 mr-2" />
