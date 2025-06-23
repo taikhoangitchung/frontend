@@ -9,13 +9,14 @@ import {toast} from "sonner";
 import ExamSummaryCard from "../../../components/exam/ExamSummaryCard";
 import {useEffect, useState} from "react";
 import HistoryService from "../../../services/HistoryService";
-
+import ExamPrePlayCard from "../../../components/exam/ExamPrePlayCard";
 
 export default function Page() {
     const [searchTerm, setSearchTerm] = useState("");
     const username = localStorage.getItem("username");
     const [playedCount, setPlayedCount] = useState(0);
     const [accuracy, setAccuracy] = useState(0);
+    const [selectedExam, setSelectedExam] = useState(null);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -36,13 +37,17 @@ export default function Page() {
         fetchStats();
     }, []);
 
+    const handleCloseModal = () => {
+        setSelectedExam(null);
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Header Component */}
             <UserHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 py-12">
+            <main className="max-w-7xl mx-auto px-4 py-12 relative z-10">
                 <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                     {/* Left - Join Quiz */}
                     <div className="flex-1 flex flex-col">
@@ -113,8 +118,16 @@ export default function Page() {
                         </Card>
                     </div>
                 </div>
-                <ExamSummaryCard search={searchTerm} />
+                <ExamSummaryCard search={searchTerm} onExamClick={setSelectedExam}/>
             </main>
+            {selectedExam && (
+                <div
+                    className="fixed inset-0 bg-opacity-5 backdrop-blur-xs flex items-center justify-center z-50"
+                    onClick={handleCloseModal}
+                >
+                    <ExamPrePlayCard exam={selectedExam} onClose={handleCloseModal}/>
+                </div>
+            )}
         </div>
     )
 }

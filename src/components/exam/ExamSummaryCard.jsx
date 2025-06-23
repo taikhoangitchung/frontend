@@ -1,14 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import CategoryService from "../../services/CategoryService";
 import ExamService from "../../services/ExamService";
-import ExamPrePlayCard from './ExamPrePlayCard';
-import {Crown, Star, Search} from "lucide-react";
+import { Crown, Star, Search } from "lucide-react";
 
-
-export default function ExamSummaryCard({search}) {
+export default function ExamSummaryCard({ search, onExamClick }) {
     const [categories, setCategories] = useState([]);
     const [examsByCategory, setExamsByCategory] = useState({});
-    const [showForm, setShowForm] = useState({visible: false, exam: null});
 
     useEffect(() => {
         CategoryService.getAll()
@@ -32,14 +29,6 @@ export default function ExamSummaryCard({search}) {
             });
     }, []);
 
-    const handleCardClick = (exam) => {
-        setShowForm({visible: true, exam});
-    };
-
-    const handleCloseForm = () => {
-        setShowForm({visible: false, exam: null});
-    };
-
     const allFilteredExamsEmpty = categories.every((category) => {
         const lowerSearch = search?.toLowerCase() || "";
         const isCategoryMatch = category.name.toLowerCase().includes(lowerSearch);
@@ -51,7 +40,7 @@ export default function ExamSummaryCard({search}) {
     });
 
     return (
-        <div className="flex flex-col gap-8 px-4 pb-12">
+        <>
             {allFilteredExamsEmpty ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                     <Search className="w-12 h-12 mb-4 text-purple-400"/>
@@ -92,8 +81,8 @@ export default function ExamSummaryCard({search}) {
                                 return (
                                     <div
                                         key={exam.id}
-                                        className="w-64 min-w-[16rem] bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-105 relative overflow-hidden cursor-pointer"
-                                        onClick={() => handleCardClick(exam)}
+                                        className="w-64 min-w-[16rem] bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl relative overflow-hidden cursor-pointer"
+                                        onClick={() => onExamClick(exam)}
                                     >
                                         <div className="w-full h-32 rounded-t-xl overflow-hidden relative group">
                                             <img
@@ -129,14 +118,6 @@ export default function ExamSummaryCard({search}) {
                     </div>
                 );
             }))}
-            {showForm.visible && (
-                <div
-                    className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
-                    onClick={handleCloseForm}
-                >
-                    <ExamPrePlayCard exam={showForm.exam} onClose={handleCloseForm}/>
-                </div>
-            )}
-        </div>
-    )
+        </>
+    );
 }
