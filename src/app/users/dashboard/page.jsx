@@ -11,7 +11,6 @@ import {useEffect, useState} from "react";
 import HistoryService from "../../../services/HistoryService";
 import {useRouter} from "next/navigation";
 import RoomService from "../../../services/RoomService";
-import {useKickSocket} from "../../../config/socketConfig";
 
 export default function Page() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -71,12 +70,12 @@ export default function Page() {
                                 <div className="space-y-5 max-w-md w-full mx-auto">
                                     <Input
                                         placeholder="Nhập mã quiz để vào phòng thi"
-                                        className="h-14 text-lg text-center font-mono border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 rounded-xl uppercase transition-all"
+                                        className="h-14 text-lg text-center font-mono border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 rounded-xl uppercase cursor-pointer transition-all duration-200"
                                         maxLength={8}
                                         onChange={handleInput}
                                     />
                                     <Button
-                                        className="w-full h-14 text-lg font-medium bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl shadow transition-transform hover:scale-105"
+                                        className="w-full h-14 text-lg font-medium bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl shadow cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                         onClick={handleJoinRoom}
                                     >
                                         <Zap className="w-5 h-5 mr-2"/>
@@ -87,7 +86,7 @@ export default function Page() {
                                         <p className="text-sm text-gray-400 mb-2">Hoặc</p>
                                         <Button
                                             variant="outline"
-                                            className="text-purple-600 border border-purple-200 hover:bg-purple-50 text-sm font-medium rounded-lg"
+                                            className="text-purple-600 border border-purple-200 hover:bg-purple-50 text-sm font-medium rounded-lg cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                             onClick={() => router.push("/users/exams")}
                                         >
                                             <DoorOpen className="w-4 h-4 mr-2"/>
