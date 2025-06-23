@@ -8,6 +8,22 @@ class HistoryService {
             return Promise.reject(error);
         }
     }
+
+    static async getHistory() {
+        try {
+            return await axiosInstance.get("/histories");
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getHistoryDetail(id) {
+        try {
+            return await axiosInstance.get(`/histories/${id}`);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default HistoryService;

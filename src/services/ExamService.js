@@ -44,6 +44,17 @@ class ExamService {
             return Promise.reject(error);
         }
     }
+    static async getAllMine() {
+        try {
+            return await axiosInstance.get(`/exams`);
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
+    static async delete(id) {
+
+    }
 }
 
 export default ExamService;

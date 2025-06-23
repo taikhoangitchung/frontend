@@ -19,7 +19,7 @@ const ChangePassword = () => {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const storedUserEmail = localStorage.getItem("currentUserEmail")
+            const storedUserEmail = localStorage.getItem("email")
             if (!storedUserEmail) {
                 router.push("/login")
                 return

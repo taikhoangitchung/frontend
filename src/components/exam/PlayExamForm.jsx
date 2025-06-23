@@ -6,9 +6,11 @@ import ExamService from "../../services/ExamService"
 import {useParams, useRouter} from "next/navigation"
 import {toast} from "sonner"
 import HistoryService from "../../services/HistoryService"
-import ExamResultPanel from "./ExamResultPanel";
+import ExamResultSummary from "./ExamResultSummary";
 import ConfirmDialog from "../alerts-confirms/ConfirmDialog";
 import ExamDetailPanel from "./ExamDetailPanel";
+import formatTime from "../../util/formatTime";
+import mergedQuestions from "../../util/mergeQuestion";
 
 export default function PlayExamForm() {
     const {id} = useParams()
@@ -23,6 +25,7 @@ export default function PlayExamForm() {
     const [timeLeft, setTimeLeft] = useState(0)
     const [timeSpent, setTimeSpent] = useState(0)
     const [resultData, setResultData] = useState(null)
+    const [detailData, setDetailData] = useState(null)
     const [countdown, setCountdown] = useState(3)
     const [ready, setReady] = useState(false)
     const [reviewing, setReviewing] = useState(false)
@@ -117,7 +120,7 @@ export default function PlayExamForm() {
         setTimeSpent(0)
         setIsTimeUp(false)
         setSubmitting(false)
-
+        setReviewing(false);
         setReady(false)
         setCountdown(3)
 
@@ -146,29 +149,24 @@ export default function PlayExamForm() {
         try {
             const submissionData = {
                 examId: id,
-                userId: localStorage.getItem("id"),
-                questions: questions.map((q, i) => ({id: q.id, answerIds: userAnswers[i] || []})),
-                finishedAt: new Date().toISOString().slice(0, 19),
                 timeTaken: timeSpent,
+                finishedAt: new Date().toISOString().replace("Z", "").split(".")[0],
+                choices: questions.map((q, i) => ({
+                    questionId: q.id,
+                    answerIds: userAnswers[i] || []
+                }))
             }
 
             const response = await HistoryService.add(submissionData)
-            console.log(response.data)
             setSubmitted(true)
             setResultData(response.data)
+            setDetailData(mergedQuestions(response))
             toast.success(isAutoSubmit ? "Hết thời gian! Tự động nộp bài thi..." : "Nộp bài thi thành công!")
         } catch (error) {
             toast.error("Có lỗi xảy ra khi nộp bài thi!")
             setSubmitting(false)
             if (isAutoSubmit) setIsTimeUp(false)
         }
-    }
-
-
-    const formatTime = (seconds) => {
-        const minutes = Math.floor((seconds % 3600) / 60)
-        const secs = seconds % 60
-        return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
     }
 
     const getQuestionButtonStyle = (index) => {
@@ -228,9 +226,9 @@ export default function PlayExamForm() {
                     BẮT ĐẦU!
                 </div>
             )}
-            {submitted && resultData && (
+            {submitted && resultData && !reviewing && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <ExamResultPanel
+                    <ExamResultSummary
                         result={resultData}
                         onReview={() => setReviewing(true)}
                         onReplay={handleReplay}
@@ -238,10 +236,8 @@ export default function PlayExamForm() {
                 </div>
             )}
 
-            {reviewing && resultData && (
-                <div className="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-                    <ExamDetailPanel data={resultData} onClose={() => setReviewing(false)} />
-                </div>
+            {reviewing && detailData && (
+                <ExamDetailPanel data={detailData} onClose={() => setReviewing(false)} />
             )}
 
             <>

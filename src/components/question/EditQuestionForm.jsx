@@ -163,7 +163,7 @@ export default function EditQuestionForm() {
             console.log(payload)
             await QuestionService.update(id, payload)
             toast.success("Cập nhật câu hỏi thành công!")
-            router.push("/users/questions/my")
+            router.push("/users/questions")
         } catch (err) {
             toast.error(err.response?.data)
         } finally {
@@ -186,7 +186,7 @@ export default function EditQuestionForm() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => router.push("/users/questions/my")}
+                        onClick={() => router.push("/users/questions")}
                         className="p-2 text-white hover:bg-white/10"
                     >
                         <ArrowLeft className="w-4 h-4" />

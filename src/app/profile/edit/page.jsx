@@ -19,13 +19,13 @@ const EditProfile = () => {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const storedUserEmail = localStorage.getItem("currentUserEmail");
+            const storedUserEmail = localStorage.getItem("email");
             if (!storedUserEmail) {
                 router.push("/login");
                 return;
             }
             setUserEmail(storedUserEmail);
-            const storedUsername = localStorage.getItem("currentUserUsername") || "";
+            const storedUsername = localStorage.getItem("username") || "";
             const defaultAvatar = "http://localhost:8080/media/default-avatar.png";
             setInitialUsername(storedUsername);
             setAvatarPreview(defaultAvatar);
@@ -37,8 +37,8 @@ const EditProfile = () => {
                     const avatar = user.avatar || defaultAvatar;
                     setInitialUsername(username);
                     setAvatarPreview(`http://localhost:8080${avatar}`);
-                    localStorage.setItem("currentUserUsername", username);
-                    localStorage.setItem("currentUserAvatar", avatar);
+                    localStorage.setItem("username", username);
+                    localStorage.setItem("avatar", avatar);
                 })
                 .catch((err) => {
                     console.error("Lỗi khi lấy thông tin user:", err);
@@ -70,17 +70,15 @@ const EditProfile = () => {
             if (values.username && values.username !== initialUsername) formData.append("username", values.username);
             if (values.avatar && values.avatar instanceof File) formData.append("avatar", values.avatar);
 
-            console.log("FormData being sent:", Object.fromEntries(formData));
             const response = await UserService.editProfile(formData);
             toast.success(response.data, { autoClose: 1500 });
             if (values.username && values.username !== initialUsername) {
-                localStorage.setItem("currentUserUsername", values.username);
+                localStorage.setItem("username", values.username);
             }
             setTimeout(() => router.push("/profile"), 1500);
         } catch (err) {
-            const errorMsg = err.response?.data || "Cập nhật không thành công. Vui lòng kiểm tra lại kết nối backend.";
+            const errorMsg = err.response?.data || "Cập nhật không thành công";
             toast.error(errorMsg, { autoClose: 3000 });
-            console.error("Lỗi submit:", err);
         } finally {
             setSubmitting(false);
         }

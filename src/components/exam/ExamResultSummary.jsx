@@ -5,7 +5,7 @@ import { Button } from "../ui/button"
 import {useParams, useRouter} from "next/navigation";
 import { RotateCcw, Search,FileText } from "lucide-react"
 
-export default function ExamResultPanel({ result, onReview, onReplay }) {
+export default function ExamResultSummary({ result, onReview, onReplay }) {
     const router = useRouter()
     const [username, setUsername] = useState("")
     const {id} = useParams()
@@ -43,7 +43,7 @@ export default function ExamResultPanel({ result, onReview, onReplay }) {
 
                     <div className="bg-purple-700 p-4 rounded-xl text-center">
                         <p className="text-purple-200 text-xs mb-1">Điểm số</p>
-                        <p className="font-bold text-xl text-white">{result.score}</p>
+                        <p className="font-bold text-xl text-white">{result.score.toFixed(1)}</p>
                     </div>
 
                     <div className="bg-cyan-700 p-4 rounded-xl text-center">
