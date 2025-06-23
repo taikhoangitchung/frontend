@@ -1,4 +1,4 @@
-import axiosInstance from "./config";
+import axiosInstance from "../config/axiosConfig";
 
 class EmailService {
     static async sendMail(params) {

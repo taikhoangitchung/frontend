@@ -244,8 +244,8 @@ export default function PlayExamForm() {
                 <div className="flex items-center justify-between">
                     <ConfirmDialog
                         triggerLabel="Thoát ra"
+                        triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
                         disabled={submitting}
-                        triggerClass="bg-purple-700/50 border-purple-600 text-white hover:bg-purple-600/50 rounded-full px-6"
                         title="Bạn có chắc chắn muốn thoát?"
                         description="Bài làm sẽ không được lưu lại nếu chưa nộp."
                         actionLabel="Thoát ngay"
