@@ -76,7 +76,7 @@ export default function ExamSummaryCard({search}) {
                             {category.name}
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        {filteredExams.map((exam, index) => {
+                            {filteredExams.map((exam, index) => {
                                 const icon = index === 0
                                     ? <Crown className="w-4 h-4 text-yellow-500"/>
                                     : index === 1
@@ -131,7 +131,7 @@ export default function ExamSummaryCard({search}) {
             }))}
             {showForm.visible && (
                 <div
-                    className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
+                    className="fixed inset-0 bg-opacity-5 backdrop-blur-xs flex items-center justify-center z-50"
                     onClick={handleCloseForm}
                 >
                     <ExamPrePlayCard exam={showForm.exam} onClose={handleCloseForm}/>
