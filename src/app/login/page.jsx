@@ -9,6 +9,7 @@ import {toast} from "sonner"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faEye, faEyeSlash, faEnvelope, faArrowLeft, faLock} from "@fortawesome/free-solid-svg-icons"
 import {jwtDecode} from "jwt-decode";
+import {useKickSocket} from "../../config/socketConfig";
 
 const Login = () => {
     const router = useRouter()
@@ -54,6 +55,19 @@ const Login = () => {
                 nextPage = "/admin/dashboard"
             } else {
                 nextPage = "/users/dashboard"
+                useKickSocket({
+                    username,
+                    onKick:(data) => {
+                        if (data === "KICK") {
+                            localStorage.removeItem("id");
+                            localStorage.removeItem("email");
+                            localStorage.removeItem("username");
+                            localStorage.removeItem("token");
+                            localStorage.removeItem("role");
+                            router.push("/");
+                        }
+                    }
+                });
             }
             setTimeout(() => router.push(nextPage), 1500)
         } catch (err) {

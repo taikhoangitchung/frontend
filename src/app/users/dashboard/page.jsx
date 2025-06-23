@@ -11,7 +11,7 @@ import {useEffect, useState} from "react";
 import HistoryService from "../../../services/HistoryService";
 import {useRouter} from "next/navigation";
 import RoomService from "../../../services/RoomService";
-
+import {useKickSocket} from "../../../config/socketConfig";
 
 export default function Page() {
     const [searchTerm, setSearchTerm] = useState("");
