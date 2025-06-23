@@ -11,24 +11,24 @@ export default function UserLayout({ children }) {
 
     useEffect(() => {
         const token = localStorage.getItem("token")
-        // if (!token) {
-        //     router.replace("/forbidden")
-        //     return
-        // }
+        if (!token) {
+            router.replace("/forbidden")
+            return
+        }
 
-        // try {
-        //     const decoded = jwtDecode(token)
-        //     const role = decoded.role
-        //
-        //     if (role !== "USER") {
-        //         router.replace("/forbidden")
-        //         return
-        //     }
-        // } catch (e) {
-        //     console.error("Invalid token:", e)
-        //     router.replace("/forbidden")
-        //     return
-        // }
+        try {
+            const decoded = jwtDecode(token)
+            const role = decoded.role
+
+            if (role !== "USER") {
+                router.replace("/forbidden")
+                return
+            }
+        } catch (e) {
+            console.error("Invalid token:", e)
+            router.replace("/forbidden")
+            return
+        }
 
         setLoading(false)
     }, [])
