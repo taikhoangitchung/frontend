@@ -16,7 +16,7 @@ const EmailTemplate = ({data, title, description, openButton}) => {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        <button className={"bg-black text-white"}>Reset Password</button>
+                        <button className={"bg-black text-white"}>{title}</button>
                     </a>
                 ) : <p>{data}</p>
                 }

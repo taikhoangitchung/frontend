@@ -82,6 +82,22 @@ class UserService {
         }
     }
 
+    static async findId(email) {
+        try {
+            return await axiosInstance.get("/users/find-id", {params: {email}});
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async confirmEmail(email) {
+        try {
+            return await axiosInstance.get("/users/confirm", {params: {email}});
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async getProfile(email) {
         try {
             return await axiosInstance.get("/users/profile", {params: {email}});

@@ -9,6 +9,7 @@ import {toast} from "sonner"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {faEye, faEyeSlash, faEnvelope, faArrowLeft, faLock} from "@fortawesome/free-solid-svg-icons"
 import {jwtDecode} from "jwt-decode";
+import {useKickSocket} from "../../config/socketConfig";
 
 const Login = () => {
     const router = useRouter()
@@ -23,7 +24,6 @@ const Login = () => {
             if (autoLogin) {
                 const {email, password} = JSON.parse(autoLogin)
                 setInitialValues({email, password})
-                localStorage.removeItem("autoLogin")
             }
             setIsReady(true)
         }
@@ -44,6 +44,8 @@ const Login = () => {
             const userId = jwtDecode(token).id
             const role = jwtDecode(token).role
             const username = jwtDecode(token).username
+
+            localStorage.removeItem("autoLogin")
             localStorage.setItem("id", userId)
             localStorage.setItem("role", role)
             localStorage.setItem("username", username)
@@ -53,6 +55,19 @@ const Login = () => {
                 nextPage = "/admin/dashboard"
             } else {
                 nextPage = "/users/dashboard"
+                useKickSocket({
+                    username,
+                    onKick:(data) => {
+                        if (data === "KICK") {
+                            localStorage.removeItem("id");
+                            localStorage.removeItem("email");
+                            localStorage.removeItem("username");
+                            localStorage.removeItem("token");
+                            localStorage.removeItem("role");
+                            router.push("/");
+                        }
+                    }
+                });
             }
             setTimeout(() => router.push(nextPage), 1500)
         } catch (err) {
