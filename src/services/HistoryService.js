@@ -1,4 +1,4 @@
-import axiosInstance from "../services/config";
+import axiosInstance from "../config/axiosConfig";
 
 class HistoryService {
     static async add(submissionData) {
@@ -9,9 +9,17 @@ class HistoryService {
         }
     }
 
-    static async getHistory() {
+    static async getAll() {
         try {
             return await axiosInstance.get("/histories");
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getSummaryByExamId(examId) {
+        try {
+            return await axiosInstance.get(`/histories/exams/${examId}`);
         } catch (error) {
             throw error;
         }

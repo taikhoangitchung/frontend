@@ -4,7 +4,7 @@ import {Toaster} from "sonner";
 
 export const metadata = {
     title: "Quiz App",
-    description: "A quiz application built with Next.js and Material-UI",
+    description: "A quiz application.....",
 };
 
 export default function RootLayout({children}) {

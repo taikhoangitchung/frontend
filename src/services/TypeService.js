@@ -1,4 +1,4 @@
-import axiosInstance from "../services/config";
+import axiosInstance from "../config/axiosConfig";
 
 class TypeService {
     static async getAll() {

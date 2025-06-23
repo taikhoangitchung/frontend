@@ -1,4 +1,4 @@
-import axiosInstance from "./config";
+import axiosInstance from "../config/axiosConfig";
 
 class UserService {
     static async blockUser(userId) {

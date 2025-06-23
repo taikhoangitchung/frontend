@@ -29,7 +29,7 @@ const HistoryPage = () => {
         const fetchHistory = async () => {
             setLoading(true);
             try {
-                const response = await HistoryService.getHistory();
+                const response = await HistoryService.getAll();
                 const histories = response.data;
                 setAllHistories(histories);
                 setTotalPages(Math.ceil(histories.length / pageSize));

@@ -4,23 +4,9 @@ import Image from 'next/image';
 
 import {useRouter} from "next/navigation";
 import {Button} from "../components/ui/button";
-import {Loader2} from "lucide-react";
-import {useState} from "react";
 
 export default function LandingPage() {
-    const [isLoading, setIsLoading] = useState(false)
     const router = useRouter();
-
-    const handleLogin = () => {
-        setIsLoading(true)
-        router.push("/login")
-    }
-
-    const handleRegister = () => {
-        setIsLoading(true)
-        router.push("/register")
-    }
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
             {/* Background decorative elements */}
@@ -46,7 +32,7 @@ export default function LandingPage() {
                             src="/logo.png"
                             alt="QuizGym Logo"
                             width={120}
-                            height={0}
+                            height={40}
                             priority
                         />
                     </div>
@@ -90,14 +76,14 @@ export default function LandingPage() {
                         <Button
                             variant="outline"
                             className="cursor-pointer border-purple-600 text-purple-600 hover:bg-purple-50"
-                            onClick={handleLogin}
+                            onClick={()=>router.push("/login")}
                         >
                              Đăng nhập
                         </Button>
 
                         <Button
                             className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white"
-                            onClick={handleRegister}
+                            onClick={()=>router.push("/register")}
                         >
                             Đăng ký
                         </Button>
