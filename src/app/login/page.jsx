@@ -23,7 +23,6 @@ const Login = () => {
             if (autoLogin) {
                 const {email, password} = JSON.parse(autoLogin)
                 setInitialValues({email, password})
-                localStorage.removeItem("autoLogin")
             }
             setIsReady(true)
         }
@@ -44,6 +43,8 @@ const Login = () => {
             const userId = jwtDecode(token).id
             const role = jwtDecode(token).role
             const username = jwtDecode(token).username
+
+            localStorage.removeItem("autoLogin")
             localStorage.setItem("id", userId)
             localStorage.setItem("role", role)
             localStorage.setItem("username", username)

@@ -8,6 +8,9 @@ import UserService from "../../services/UserService"
 import { toast } from "sonner"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEye, faEyeSlash, faEnvelope, faArrowLeft, faLock, faUser } from "@fortawesome/free-solid-svg-icons"
+import EmailService from "../../services/EmailService";
+import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
+import EmailTemplate from "../../util/emailTemplate";
 
 const Register = () => {
     const router = useRouter()
@@ -40,17 +43,33 @@ const Register = () => {
         localStorage.removeItem("token")
         try {
             const response = await UserService.register(values)
-            console.log(response)
             toast.success(response.data, { autoClose: 1500 })
+
+            const token = crypto.randomUUID();
+            localStorage.setItem("token_confirm_email", token);
+            const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
+                <EmailTemplate data={`http://localhost:3000/confirm`}
+                               title={"Mở Khóa Tài Khoản"}
+                               description={"Nhấn nút bên dưới để xác nhận"}
+                               openButton={true}/>
+            );
+            const params = {
+                to: values.email,
+                subject: "Mở Khóa Tài Khoản",
+                html: htmlString,
+                token: token
+            }
+
+            const responseConfirm = await EmailService.sendMail(params);
+            toast.success(responseConfirm.data);
+
             setTimeout(() => {
                 localStorage.setItem("autoLogin", JSON.stringify({ email: values.email, password: values.password }))
-                localStorage.setItem("currentUserEmail", values.email)
                 router.push("/login")
             }, 1500)
         } catch (error) {
             const errorMessage = error.response?.data || "Đăng ký thất bại. Vui lòng thử lại."
             toast.error(errorMessage, { autoClose: 3000 })
-            console.error("Lỗi đăng ký:", error)
         } finally {
             setSubmitting(false)
         }
