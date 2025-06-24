@@ -103,7 +103,6 @@ const Login = () => {
             } else {
                 nextPage = "/users/dashboard"
 
-                // 👉 Gọi useKickSocket ở đây
                 useKickSocket({
                     username,
                     onKick: (data) => {

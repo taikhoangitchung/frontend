@@ -10,6 +10,7 @@ import { Input } from "../ui/input"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow, Table } from "../ui/table"
 import { Button } from "../ui/button"
 import UserStatusSwitch from "../alerts-confirms/UserStatusSwitch"
+import {formatDate} from "../../util/formatDate";
 
 const UserTable = () => {
     const [users, setUsers] = useState([])
@@ -18,22 +19,23 @@ const UserTable = () => {
     const [page, setPage] = useState(1)
     const [totalPage, setTotalPage] = useState(1)
     const questionPerPage = 20
-    const [keyName, setKeyName] = useState("")
-    const [keyEmail, setKeyEmail] = useState("")
+    const [searchTerm, setSearchTerm] = useState("")
+
     const [isLoadingPagination, setIsLoadingPagination] = useState({
         prevPage: false,
         nextPage: false
     })
 
+// ✅ API call
     useEffect(() => {
         setIsLoading(true)
         const fetchUsers = async () => {
             try {
                 let res
-                if (keyName.trim() === "" && keyEmail.trim() === "") {
+                if (searchTerm.trim() === "") {
                     res = await UserService.getAllExceptAdmin()
                 } else {
-                    res = await UserService.searchFollowNameAndEmail(keyName, keyEmail)
+                    res = await UserService.searchFollowNameAndEmail(searchTerm, searchTerm)
                 }
                 handlePagination(res)
             } catch (err) {
@@ -44,7 +46,8 @@ const UserTable = () => {
             }
         }
         fetchUsers()
-    }, [page, keyName, keyEmail, reload])
+    }, [page, searchTerm, reload])
+
 
     const handlePagination = (res) => {
         setTotalPage(Math.ceil(res.data.length / questionPerPage))
@@ -52,16 +55,6 @@ const UserTable = () => {
         const end = start + questionPerPage
         const thisPageItems = res.data.slice(start, end)
         setUsers([...thisPageItems])
-    }
-
-    const handleKeyName = (e) => {
-        setIsLoading(true)
-        setKeyName(e.target.value)
-    }
-
-    const handleKeyEmail = (e) => {
-        setIsLoading(true)
-        setKeyEmail(e.target.value)
     }
 
     const handlePrePage = () => {
@@ -122,14 +115,12 @@ const UserTable = () => {
                                     <h2 className="text-lg font-semibold">Danh sách người dùng</h2>
                                     <div className="flex items-center">
                                         <Input
-                                            placeholder="Tìm kiếm theo tên"
+                                            placeholder="Tìm kiếm theo tên hoặc email"
                                             className="w-64 h-9 mr-2 cursor-pointer transition-all duration-200"
-                                            onChange={handleKeyName}
-                                        />
-                                        <Input
-                                            placeholder="Tìm kiếm theo email"
-                                            className="w-64 h-9 mr-2 cursor-pointer transition-all duration-200"
-                                            onChange={handleKeyEmail}
+                                            onChange={(e) => {
+                                                setIsLoading(true)
+                                                setSearchTerm(e.target.value)
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -153,12 +144,12 @@ const UserTable = () => {
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {!isLoading && users.length === 0 && (keyName || keyEmail) ? (
+                                                {!isLoading && users.length === 0 && (searchTerm) ? (
                                                     <TableRow>
                                                         <TableCell colSpan={6}>
                                                             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                                                                 <Search className="w-12 h-12 mb-4 opacity-50" />
-                                                                <p>Không tìm thấy người dùng nào với từ khóa "{keyName || keyEmail}"</p>
+                                                                <p>Không tìm thấy người dùng nào với từ khóa "{searchTerm}"</p>
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
@@ -168,8 +159,8 @@ const UserTable = () => {
                                                             <TableCell className="py-3 px-4 font-medium">{user.id}</TableCell>
                                                             <TableCell className="py-3 px-4 font-medium">{user.email}</TableCell>
                                                             <TableCell className="py-3 px-4">{user.username}</TableCell>
-                                                            <TableCell className="py-3 px-4 text-gray-600">{user.createAt}</TableCell>
-                                                            <TableCell className="py-3 px-4 text-gray-600">{user.lastLogin}</TableCell>
+                                                            <TableCell className="py-3 px-4 text-gray-600">{formatDate(user.createAt)}</TableCell>
+                                                            <TableCell className="py-3 px-4 text-gray-600">{formatDate(user.lastLogin)}</TableCell>
                                                             <TableCell className="py-3 px-4 text-gray-600">
                                                                 <UserStatusSwitch user={user} onToggle={handleToggleUserStatus} />
                                                             </TableCell>

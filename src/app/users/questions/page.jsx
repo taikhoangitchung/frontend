@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
@@ -10,7 +10,13 @@ import { useRouter } from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
 import { toast } from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../../../components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
@@ -19,69 +25,69 @@ export default function QuizInterface() {
     const [searchTerm, setSearchTerm] = useState("");
     const [ownerFilter, setOwnerFilter] = useState("all");
     const [questions, setQuestions] = useState([]);
+    const [allFilteredQuestions, setAllFilteredQuestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPage, setTotalPage] = useState(1);
     const questionPerPage = 20;
 
-    useEffect(() => {
-        const fetchQuestions = async () => {
-            setLoading(true);
-            try {
-                const userId = parseInt(localStorage.getItem("id"));
-                const res = await QuestionService.getAll();
-                console.log(res);
+    const fetchQuestions = useCallback(async () => {
+        setLoading(true);
+        try {
+            const userId = parseInt(localStorage.getItem("id"));
+            const res = await QuestionService.getAll();
 
-                const filtered = res.data.filter((q) => {
-                    const matchesSearch =
-                        q.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        q.answers.some((a) => a.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                        q.user.username?.toLowerCase().includes(searchTerm.toLowerCase());
+            const filtered = res.data.filter((q) => {
+                const matchesSearch =
+                    q.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    q.answers.some((a) =>
+                        a.content.toLowerCase().includes(searchTerm.toLowerCase())
+                    ) ||
+                    q.user.username?.toLowerCase().includes(searchTerm.toLowerCase());
 
-                    const matchesOwner =
-                        ownerFilter === "all"
-                            ? true
-                            : ownerFilter === "mine"
-                                ? q.user.id === userId
-                                : q.user.id !== userId;
+                const matchesOwner =
+                    ownerFilter === "all"
+                        ? true
+                        : ownerFilter === "mine"
+                            ? q.user.id === userId
+                            : q.user.id !== userId;
 
-                    return matchesSearch && matchesOwner;
-                });
+                return matchesSearch && matchesOwner;
+            });
 
-                setTotalPage(Math.ceil(filtered.length / questionPerPage));
-                const start = (page - 1) * questionPerPage;
-                const end = start + questionPerPage;
-                setQuestions(filtered.slice(start, end));
-            } catch (error) {
-                if (error.response?.status === 403) {
-                    router.push("/forbidden");
-                } else if (error.response?.status === 401) {
-                    toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...");
-                    setTimeout(() => router.push("/login"), 2500);
-                }
-            } finally {
-                setLoading(false);
+            setAllFilteredQuestions(filtered);
+            const total = Math.ceil(filtered.length / questionPerPage);
+            setTotalPage(total);
+            const start = (page - 1) * questionPerPage;
+            const end = start + questionPerPage;
+            setQuestions(filtered.slice(start, end));
+        } catch (error) {
+            if (error.response?.status === 403) {
+                router.push("/forbidden");
+            } else if (error.response?.status === 401) {
+                toast.error(
+                    "Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập..."
+                );
+                setTimeout(() => router.push("/login"), 2500);
             }
-        };
+        } finally {
+            setLoading(false);
+        }
+    }, [searchTerm, ownerFilter, page]);
 
+    useEffect(() => {
         fetchQuestions();
-    }, [searchTerm, page, ownerFilter]);
-
-    const handlePagination = (data) => {
-        setTotalPage(Math.ceil(data.length / questionPerPage));
-        const start = (page - 1) * questionPerPage;
-        const end = start + questionPerPage;
-        setQuestions(data.slice(start, end));
-    };
+    }, [fetchQuestions]);
 
     const handleDelete = async (id) => {
         try {
             const result = await QuestionService.delete(id);
             toast.success(result.data);
-            setPage(1);
-            fetchQuestions();
+            setPage(1); // reset về trang đầu sau khi xóa
         } catch (error) {
             toast.error(error.response?.data || "Xoá thất bại");
+        } finally {
+            fetchQuestions(); // gọi lại để cập nhật danh sách
         }
     };
 
@@ -90,7 +96,9 @@ export default function QuizInterface() {
             <div className="max-w-6xl mx-auto px-6">
                 <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                     <div className="flex items-center gap-3 flex-wrap">
-                        <h1 className="text-2xl font-semibold text-gray-900">Tìm kiếm câu hỏi</h1>
+                        <h1 className="text-2xl font-semibold text-gray-900">
+                            Tìm kiếm câu hỏi
+                        </h1>
                         <Select
                             value={ownerFilter}
                             onValueChange={(value) => {
@@ -111,12 +119,13 @@ export default function QuizInterface() {
 
                     <Button
                         onClick={() => router.push("/users/dashboard")}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
+                        className="bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 h-9 px-4 py-2"
                     >
-                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white" />
-                        <span className="text-white">Quay lại</span>
+                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 mr-2" />
+                        <span>Quay lại</span>
                     </Button>
                 </div>
+
                 <div className="relative w-full mb-4">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
@@ -134,7 +143,9 @@ export default function QuizInterface() {
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-lg font-medium">Danh sách câu hỏi (Tổng: {questions.length})</span>
+            <span className="text-lg font-medium">
+              Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
+            </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
                             className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
@@ -146,18 +157,24 @@ export default function QuizInterface() {
                     </div>
 
                     {questions.map((question, index) => (
-                        <Card key={question.id} className="border border-gray-200 hover:cursor-pointer">
+                        <Card
+                            key={question.id}
+                            className="border border-gray-200 hover:cursor-pointer"
+                        >
                             <CardHeader className="pb-0">
                                 <div className="flex items-start justify-between">
                                     <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
-                                        {index + 1}. {question.content}
+                                        {index + 1 + (page - 1) * questionPerPage}.{" "}
+                                        {question.content}
                                     </h2>
                                     <div className="flex gap-1">
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             className="p-1"
-                                            onClick={() => router.push(`/users/questions/${question.id}/edit`)}
+                                            onClick={() =>
+                                                router.push(`/users/questions/${question.id}/edit`)
+                                            }
                                         >
                                             <Edit className="w-6 h-6" />
                                         </Button>
@@ -168,7 +185,10 @@ export default function QuizInterface() {
 
                             <CardContent className="space-y-4 mt-2">
                                 <div className="text-sm text-gray-500">
-                                    Người tạo: <span className="font-semibold text-gray-700">{question.user.username}</span>
+                                    Người tạo:{" "}
+                                    <span className="font-semibold text-gray-700">
+                    {question.user.username}
+                  </span>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {question.answers.map((answer) => (
@@ -178,7 +198,7 @@ export default function QuizInterface() {
                                                 answer.correct
                                                     ? "bg-green-50 border-green-200"
                                                     : "bg-red-50 bg-opacity-20 border-red-200"
-                                            } hover:cursor-pointer`}
+                                            }`}
                                         >
                                             {answer.correct ? (
                                                 <Check className="w-4 h-4 text-green-600" />
@@ -200,7 +220,9 @@ export default function QuizInterface() {
                             Trang trước
                         </Button>
                     )}
-                    <Button className="text-blue-700" disabled>{page}/{totalPage}</Button>
+                    <Button className="text-blue-700" disabled>
+                        {page}/{totalPage}
+                    </Button>
                     {page < totalPage && (
                         <Button variant="outline" onClick={() => setPage(page + 1)} className="text-sm">
                             Trang sau
@@ -209,7 +231,9 @@ export default function QuizInterface() {
                 </div>
 
                 {loading && (
-                    <div className="flex justify-center py-8 text-gray-500">Đang tải câu hỏi...</div>
+                    <div className="flex justify-center py-8 text-gray-500">
+                        Đang tải câu hỏi...
+                    </div>
                 )}
                 {!loading && questions.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-500">

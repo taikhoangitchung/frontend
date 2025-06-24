@@ -139,7 +139,7 @@ export default function ExamManager() {
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-medium">Danh sách bài thi (Tổng: {totalExams})</span>
                         <Button
-                            onClick={() => router.push("/exams/create")}
+                            onClick={() => router.push("/users/exams/create")}
                             className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
                             variant="outline"
                         >
