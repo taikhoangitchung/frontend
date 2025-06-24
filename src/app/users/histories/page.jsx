@@ -146,7 +146,7 @@ const HistoryPage = () => {
                                     className="bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden cursor-pointer"
                                     onClick={() => router.push(`/users/histories/${history.id}`)}
                                 >
-                                    <div className="w-full h-32 rounded-t-xl overflow-hidden relative group">
+                                    <div className="w-full h-40 rounded-t-xl overflow-hidden relative group">
                                         <img
                                             src="/cardquiz.png"
                                             alt={history.examTitle}

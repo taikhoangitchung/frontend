@@ -198,7 +198,7 @@ const EditProfile = () => {
                                             <button
                                                 type="submit"
                                                 disabled={isSubmitting}
-                                                className="flex-1 bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
+                                                className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
                                             >
                                                 {isSubmitting ? "Đang cập nhật..." : "Cập nhật"}
                                             </button>
