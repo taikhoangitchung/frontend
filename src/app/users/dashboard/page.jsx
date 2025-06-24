@@ -106,7 +106,7 @@ export default function Page() {
                                 <div>
                                     <div className="mb-6 flex items-baseline gap-2">
                                         <h3 className="text-base font-medium text-white/90">Xin chào,</h3>
-                                        <h2 className="text-xl font-bold text-white truncate max-w-[180px]">{username}</h2>
+                                        <h2 className="text-xl font-bold text-white">{username}</h2>
                                     </div>
 
                                     <div
