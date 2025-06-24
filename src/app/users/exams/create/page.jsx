@@ -86,12 +86,14 @@ export default function CreateExam({id}) {
         },
         validationSchema: ExamSchema,
         onSubmit: (values) => {
-            if (values.questions.length === 0) {
-                toast.warning("Hãy thêm ít nhất 1 câu hỏi")
-                return;
-            } else if (values.questions.length < values.questionLimit) {
-                toast.warning("hãy thêm đủ số lượng câu hỏi")
-                return;
+            if (values.questionLimit < Math.max(...questionLimits.map(limit => limit.value))) {
+                if (values.questions.length === 0) {
+                    toast.warning("Hãy thêm ít nhất 1 câu hỏi")
+                    return;
+                } else if (values.questions.length < values.questionLimit) {
+                    toast.warning("hãy thêm đủ số lượng câu hỏi")
+                    return;
+                }
             }
 
             setIsSubmitting(true)
@@ -644,7 +646,7 @@ export default function CreateExam({id}) {
                                                         Câu hỏi của người khác
                                                     </div>
                                                 </SelectItem>
-                                                <SelectItem value={"999"}>
+                                                <SelectItem value={"-999"}>
                                                     <div className="flex items-center gap-2">
                                                         <User className="h-4 w-4"/>
                                                         Tất cả
