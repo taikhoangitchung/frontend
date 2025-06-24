@@ -1,3 +1,4 @@
+// UserHeader.jsx
 "use client"
 
 import {
@@ -27,10 +28,16 @@ import {
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import UserService from "../../services/UserService" // Import UserService
 
 export default function UserHeader({ searchTerm, setSearchTerm }) {
     const router = useRouter()
     const [email, setEmail] = useState("")
+    const [userInfo, setUserInfo] = useState({
+        email: "",
+        username: "",
+        avatar: "",
+    })
     const [isLoading, setIsLoading] = useState({
         createQuiz: false,
         menu: false,
@@ -46,6 +53,32 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
     useEffect(() => {
         const savedEmail = localStorage.getItem("email")
         if (savedEmail) setEmail(savedEmail)
+
+        // Lấy thông tin avatar từ localStorage hoặc API
+        const storedUsername = localStorage.getItem("username") || ""
+        const storedAvatar = localStorage.getItem("avatar") || ""
+        const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
+
+        setUserInfo({
+            email: savedEmail,
+            username: storedUsername,
+            avatar: storedAvatar || defaultAvatar,
+        })
+
+        // Gọi API để lấy thông tin profile (giống profile.jsx)
+        if (savedEmail) {
+            UserService.getProfile(savedEmail)
+                .then((response) => {
+                    const user = response.data
+                    setUserInfo(prev => ({
+                        ...prev,
+                        avatar: user.avatar ? `http://localhost:8080${user.avatar}` : defaultAvatar,
+                    }))
+                })
+                .catch((err) => {
+                    console.error("Lỗi khi tải avatar:", err)
+                })
+        }
     }, [])
 
     const handleNavigation = async (key, path) => {
@@ -205,25 +238,29 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                                 disabled={isLoading.profile || isLoading.changePassword || isLoading.logout}
                             >
                                 <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <span className="text-white font-semibold text-sm">
-                                        {email?.[0]?.toUpperCase()}
-                                    </span>
+                                    <img
+                                        src={userInfo.avatar || "/placeholder.svg"}
+                                        alt="User Avatar"
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
                                 </div>
                                 <ChevronDown className="w-5 h-5 text-gray-500" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="end"
-                            className="w-64 p-3 bg-white rounded-xl shadow-lg border border-gray-100 z-50"
+                            className="w-64 p-3 bg-white rounded-xl shadow-lg z-50 border-none"
                         >
                             <div className="flex items-center gap-3 p-3">
                                 <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <span className="text-white font-semibold text-sm">
-                                        {email?.[0]?.toUpperCase()}
-                                    </span>
+                                    <img
+                                        src={userInfo.avatar || "/placeholder.svg"}
+                                        alt="User Avatar"
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-sm font-medium text-gray-700">{email}</div>
+                                    <div className="text-sm font-medium text-gray-700">{userInfo.email}</div>
                                 </div>
                             </div>
 

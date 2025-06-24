@@ -66,12 +66,15 @@ const Login = () => {
 
     const validationSchema = Yup.object({
         email: Yup.string()
-            .email("Email không hợp lệ")
+            .matches(
+                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                "Email không hợp lệ"
+            )
             .required("Email không được để trống"),
         password: Yup.string()
             .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
             .required("Mật khẩu không được để trống"),
-    })
+    });
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
