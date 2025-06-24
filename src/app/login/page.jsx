@@ -105,15 +105,11 @@ const Login = () => {
                     username,
                     onKick: (data) => {
                         if (data === "KICK") {
-                            localStorage.removeItem("id")
-                            localStorage.removeItem("email")
-                            localStorage.removeItem("username")
-                            localStorage.removeItem("token")
-                            localStorage.removeItem("role")
-                            router.push("/")
+                            localStorage.clear()
+                            router.push("/");
                         }
-                    },
-                })
+                    }
+                });
             }
 
             setTimeout(() => router.push(nextPage), 1500)
