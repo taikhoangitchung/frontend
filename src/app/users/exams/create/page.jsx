@@ -190,7 +190,7 @@ export default function CreateExam({id}) {
 
     const toggleQuestionSelection = (questionId) => {
         if (formik.values.categoryId === -1) {
-            toast.warning("Hãy chọn thể loại trước")
+            toast.warning("Hãy chọn danh mục trước")
         } else {
             if (isQuestionAlreadyAdded(questionId)) {
                 toast.warning("Câu hỏi này đã được thêm vào bài kiểm tra!")
