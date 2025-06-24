@@ -32,6 +32,14 @@ class HistoryService {
             throw error;
         }
     }
+
+    static async getLatestByRoomCode(code) {
+        try {
+            return await axiosInstance.get(`/histories/${code}`);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default HistoryService;

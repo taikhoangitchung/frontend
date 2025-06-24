@@ -6,7 +6,6 @@ import HistoryService from "../../../../../services/HistoryService"
 import { Button } from "../../../../../components/ui/button"
 import {
     Loader2,
-    BarChart2,
     Clock,
     User,
     Award,
