@@ -299,7 +299,7 @@ export default function CreateExam({id}) {
                                     variant="outline"
                                     className={`text-xs border-gray-300 text-gray-600 ${isAlreadyAdded ? "opacity-60" : ""}`}
                                 >
-                                    {question.user.username}
+                                    {question.user.id === userId ? "tôi" : question.user.username}
                                 </Badge>
                             </div>
                         </div>
@@ -368,9 +368,9 @@ export default function CreateExam({id}) {
 
     return (
         <div className="min-h-screen bg-gray-100 p-2">
-            <div className="mx-auto max-w-full space-y-6 px-2">
+            <div className="mx-auto max-w-full space-y-2 px-2">
                 {/* Back Button */}
-                <div className="pt-4">
+                <div className="pt-2">
                     <Button
                         onClick={() => router.back()}
                         variant="outline"
@@ -382,8 +382,8 @@ export default function CreateExam({id}) {
                 </div>
 
                 {/* Header */}
-                <div className="text-center space-y-4 py-8">
-                    <div className="flex justify-center items-center gap-3 mb-4">
+                <div className="text-center space-y-1 py-2">
+                    <div className="flex justify-center items-center gap-3 mb-3">
                         <div className="p-3 bg-purple-600 rounded-full">
                             <Sparkles className="h-8 w-8 text-white"/>
                         </div>
