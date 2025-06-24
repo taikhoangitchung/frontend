@@ -11,6 +11,7 @@ import { faEye, faEyeSlash, faEnvelope, faArrowLeft, faLock, faUser } from "@for
 import EmailService from "../../services/EmailService";
 import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
 import EmailTemplate from "../../util/emailTemplate";
+import { jwtDecode } from "jwt-decode";
 
 const Register = () => {
     const router = useRouter()
@@ -21,10 +22,32 @@ const Register = () => {
     const [isReady, setIsReady] = useState(false)
 
     useEffect(() => {
+        // Xử lý token từ URL nếu có (tương tự login/page.jsx)
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("accessToken");
+        const refreshToken = params.get("refreshToken");
+
+        if (token && refreshToken) {
+            const decoded = jwtDecode(token);
+            localStorage.setItem("token", token);
+            localStorage.setItem("refreshToken", refreshToken);
+            localStorage.setItem("email", decoded.sub);
+            localStorage.setItem("id", decoded.id);
+            localStorage.setItem("role", decoded.role);
+            localStorage.setItem("username", decoded.username);
+
+            toast.success("Đăng ký với Google thành công!", { autoClose: 1500 });
+            const nextPage = decoded.role === "ADMIN" ? "/admin/dashboard" : "/users/dashboard";
+
+            // Xóa query sau khi xử lý xong
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+
+            setTimeout(() => router.push(nextPage), 1500);
+        }
+
         setIsReady(true)
     }, [])
-
-    if (!isReady) return null
 
     const validationSchema = Yup.object({
         username: Yup.string()
@@ -75,6 +98,12 @@ const Register = () => {
         }
     }
 
+    const handleGoogleRegister = () => {
+        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    };
+
+    if (!isReady) return null
+
     return (
         <div
             className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900"
@@ -95,7 +124,7 @@ const Register = () => {
                                 <div className="space-y-6 mb-16">
                                     <button
                                         className="w-full flex items-center justify-between p-5 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
-                                        onClick={() => toast.info("Tính năng đăng ký với Google sẽ sớm được triển khai")}
+                                        onClick={handleGoogleRegister}
                                     >
                                         <div className="flex items-center">
                                             <div className="w-5 h-5 mr-3 text-red-500 font-bold">G</div>
@@ -257,7 +286,7 @@ const Register = () => {
                         <div
                             className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
                             <div className="flex items-center mb-2">
-                            <span className="text-lg">Thầy cô yêu chúng tôi</span>
+                                <span className="text-lg">Thầy cô yêu chúng tôi</span>
                                 <span className="ml-2">😍</span>
                             </div>
                             <p className="text-sm opacity-90">Tham gia cùng hơn 200 triệu nhà sư phạm và người học trên QuizGym</p>
