@@ -88,7 +88,7 @@ export default function RecoverPassword() {
 
         const code = crypto.randomUUID()
         localStorage.setItem("code", code)
-        const email = localStorage.getItem("email")
+        const email = localStorage.getItem("currentUserEmail")
         const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
             <EmailTemplate data={code} title={"Code Xác Nhận Lấy Lại Mật Khẩu"} description={""} openButton={false} />,
         )

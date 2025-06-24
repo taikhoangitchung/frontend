@@ -9,9 +9,14 @@ class QuestionService {
         }
     }
 
-    static async filterByCategoryAndSource(categoryId, userId) {
+    static async filterByCategoryAndSource(categoryId, sourceId, currentUserId, username) {
         try {
-            const params = {categoryId: categoryId, userId: userId};
+            const params = {
+                categoryId: categoryId
+                ,sourceId: sourceId
+                ,currentUserId: currentUserId
+                ,username: username
+            };
             return await axiosInstance.post("/questions/filter", params);
         } catch (error) {
             throw error;

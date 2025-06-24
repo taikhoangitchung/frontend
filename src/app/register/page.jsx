@@ -69,10 +69,6 @@ const Register = () => {
         localStorage.removeItem("token")
         try {
             const response = await UserService.register(values)
-            toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.", {
-                autoClose: 2000,
-                className: "bg-green-100 text-green-800 border border-green-300 rounded-lg shadow-md",
-            })
 
             const token = crypto.randomUUID()
             localStorage.setItem("token_confirm_email", token)
@@ -91,8 +87,11 @@ const Register = () => {
                 token: token,
             }
 
-            const responseConfirm = await EmailService.sendMail(params)
-            toast.success(responseConfirm.data)
+            await EmailService.sendMail(params)
+            toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.", {
+                autoClose: 2000,
+                className: "bg-green-100 text-green-800 border border-green-300 rounded-lg shadow-md",
+            })
 
             setTimeout(() => {
                 localStorage.setItem("autoLogin", JSON.stringify({ email: values.email, password: values.password }))
