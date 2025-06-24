@@ -46,6 +46,7 @@ export default function ExamManager() {
             const res = await ExamService.getAll();
 
             let filtered = res.data;
+            console.log(filtered)
 
             if (searchTerm.trim()) {
                 const term = searchTerm.toLowerCase();
