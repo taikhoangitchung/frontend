@@ -14,8 +14,8 @@ import {
     ScrollText,
     Library
 } from "lucide-react"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
+import {Button} from "../ui/button"
+import {Input} from "../ui/input"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -23,11 +23,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "../ui/dropdown-menu"
-import { useRouter } from "next/navigation"
+import {useRouter} from "next/navigation"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import {useEffect, useState} from "react"
+import Link from "next/link";
 
-export default function UserHeader({ searchTerm, setSearchTerm }) {
+export default function UserHeader({searchTerm, setSearchTerm}) {
     const router = useRouter()
     const [email, setEmail] = useState("")
 
@@ -60,7 +61,8 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                     {/* Search */}
                     <div className="flex-1 max-w-xl">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                            <Search
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"/>
                             <Input
                                 placeholder="Tìm quiz theo tên, chủ đề..."
                                 value={searchTerm}
@@ -77,7 +79,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                             variant="ghost"
                             className="text-purple-600 border-b-2 border-purple-600"
                         >
-                            <Home className="h-4 w-4 mr-2" />
+                            <Home className="h-4 w-4 mr-2"/>
                             Trang chủ
                         </Button>
                         <Button
@@ -85,7 +87,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                             className="text-gray-600"
                             onClick={() => router.push("/users/histories")}
                         >
-                            <History className="h-4 w-4 mr-2" />
+                            <History className="h-4 w-4 mr-2"/>
                             Lịch sử thi
                         </Button>
                         <Button
@@ -93,7 +95,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                             className="text-gray-600"
                             onClick={() => router.push("/users/exams")}
                         >
-                            <ScrollText className="h-4 w-4 mr-2" />
+                            <ScrollText className="h-4 w-4 mr-2"/>
                             Thư viện Quiz
                         </Button>
                         <Button
@@ -101,7 +103,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                             className="text-gray-600"
                             onClick={() => router.push("/users/questions")}
                         >
-                            <FileQuestion className="h-4 w-4 mr-2" />
+                            <FileQuestion className="h-4 w-4 mr-2"/>
                             Thư viện câu hỏi
                         </Button>
                         <Button
@@ -109,7 +111,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                             className="text-gray-600"
                             onClick={() => router.push("/users/categories")}
                         >
-                            <Library className="h-4 w-4 mr-2" />
+                            <Library className="h-4 w-4 mr-2"/>
                             Thư viện danh mục
                         </Button>
                     </nav>
@@ -130,7 +132,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                         size="icon"
                         className="md:hidden"
                     >
-                        <Menu className="h-5 w-5" />
+                        <Menu className="h-5 w-5"/>
                     </Button>
 
                     <DropdownMenu>
@@ -144,7 +146,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                     {email?.[0]?.toUpperCase()}
                   </span>
                                 </div>
-                                <ChevronDown className="w-5 h-5 text-gray-500" />
+                                <ChevronDown className="w-5 h-5 text-gray-500"/>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
@@ -162,10 +164,10 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                                 </div>
                             </div>
 
-                            <DropdownMenuSeparator className="my-2 bg-gray-100" />
+                            <DropdownMenuSeparator className="my-2 bg-gray-100"/>
 
                             <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 rounded-lg">
-                                <User className="w-5 h-5 text-gray-600" />
+                                <User className="w-5 h-5 text-gray-600"/>
                                 <button
                                     onClick={() => router.push('/profile')}
                                     className="text-sm text-left w-full"
@@ -175,7 +177,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                             </DropdownMenuItem>
 
                             <DropdownMenuItem className="flex items-center gap-2 p-3 hover:bg-purple-50 rounded-lg">
-                                <Lock className="w-5 h-5 text-gray-600" />
+                                <Lock className="w-5 h-5 text-gray-600"/>
                                 <button
                                     onClick={() => router.push('/change-password')}
                                     className="text-sm text-left w-full"
@@ -184,8 +186,9 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                                 </button>
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem className="flex items-center gap-2 p-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg">
-                                <LogOut className="w-5 h-5" />
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 p-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg">
+                                <LogOut className="w-5 h-5"/>
                                 <button
                                     onClick={handleLogout}
                                     className="text-sm text-left w-full"

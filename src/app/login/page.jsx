@@ -59,11 +59,7 @@ const Login = () => {
                     username,
                     onKick:(data) => {
                         if (data === "KICK") {
-                            localStorage.removeItem("id");
-                            localStorage.removeItem("email");
-                            localStorage.removeItem("username");
-                            localStorage.removeItem("token");
-                            localStorage.removeItem("role");
+                            localStorage.clear()
                             router.push("/");
                         }
                     }
