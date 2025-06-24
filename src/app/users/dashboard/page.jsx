@@ -4,7 +4,7 @@ import UserHeader from "../../../components/layout/UserHeader";
 import {Card, CardContent} from "../../../components/ui/card";
 import {Input} from "../../../components/ui/input";
 import {Button} from "../../../components/ui/button";
-import {Medal, DoorOpen, Zap} from 'lucide-react';
+import { Medal, DoorOpen, Zap, Flame } from 'lucide-react';
 import {toast} from "sonner";
 import ExamSummaryCard from "../../../components/exam/ExamSummaryCard";
 import {useEffect, useState} from "react";
@@ -133,6 +133,10 @@ export default function Page() {
                             </CardContent>
                         </Card>
                     </div>
+                </div>
+                <div className="flex items-center gap-2 mt-8 mb-6">
+                    <Flame className="w-6 h-6 text-orange-500"/>
+                    <h1 className="text-3xl font-bold text-gray-800">Quizz Hot</h1>
                 </div>
                 <ExamSummaryCard search={searchTerm}/>
             </main>
