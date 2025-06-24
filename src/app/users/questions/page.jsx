@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Card, CardContent, CardHeader } from "../../../components/ui/card";
-import { Separator } from "../../../components/ui/separator";
-import { Search, Plus, Edit, X, Check } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {useState, useEffect, useCallback} from "react";
+import {Button} from "../../../components/ui/button";
+import {Input} from "../../../components/ui/input";
+import {Card, CardContent, CardHeader} from "../../../components/ui/card";
+import {Separator} from "../../../components/ui/separator";
+import {Search, Plus, Edit, X, Check} from "lucide-react";
+import {useRouter} from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
-import { toast } from "sonner";
+import {toast} from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import {
     Select,
@@ -17,8 +17,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../../../components/ui/select";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 
 export default function QuizInterface() {
     const router = useRouter();
@@ -28,13 +28,21 @@ export default function QuizInterface() {
     const [allFilteredQuestions, setAllFilteredQuestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
+    const [userId, setUserId] = useState(0);
     const [totalPage, setTotalPage] = useState(1);
     const questionPerPage = 20;
 
+
+    useEffect(() => {
+        const storedId = parseInt(localStorage.getItem("id") || "0");
+        setUserId(storedId);
+    }, []);
+
     const fetchQuestions = useCallback(async () => {
+        if (!userId) return;
+
         setLoading(true);
         try {
-            const userId = parseInt(localStorage.getItem("id"));
             const res = await QuestionService.getAll();
 
             const filtered = res.data.filter((q) => {
@@ -65,31 +73,33 @@ export default function QuizInterface() {
             if (error.response?.status === 403) {
                 router.push("/forbidden");
             } else if (error.response?.status === 401) {
-                toast.error(
-                    "Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập..."
-                );
+                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...");
                 setTimeout(() => router.push("/login"), 2500);
             }
         } finally {
             setLoading(false);
         }
-    }, [searchTerm, ownerFilter, page]);
+    }, [searchTerm, ownerFilter, page, userId]);
+
 
     useEffect(() => {
         fetchQuestions();
     }, [fetchQuestions]);
 
+
     const handleDelete = async (id) => {
         try {
             const result = await QuestionService.delete(id);
             toast.success(result.data);
-            setPage(1); // reset về trang đầu sau khi xóa
+            setPage(1); // Trả về trang đầu tiên
+            setTimeout(() => {
+                fetchQuestions();
+            }, 100);
         } catch (error) {
             toast.error(error.response?.data || "Xoá thất bại");
-        } finally {
-            fetchQuestions(); // gọi lại để cập nhật danh sách
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gray-50 py-6">
@@ -107,9 +117,10 @@ export default function QuizInterface() {
                             }}
                         >
                             <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
-                                <SelectValue placeholder="Lọc theo tác giả" />
+                                <SelectValue placeholder="Lọc theo tác giả"/>
                             </SelectTrigger>
-                            <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
+                            <SelectContent
+                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
                                 <SelectItem value="all">Tất cả</SelectItem>
                                 <SelectItem value="mine">Của tôi</SelectItem>
                                 <SelectItem value="others">Của người khác</SelectItem>
@@ -121,13 +132,13 @@ export default function QuizInterface() {
                         onClick={() => router.push("/users/dashboard")}
                         className="bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 h-9 px-4 py-2"
                     >
-                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 mr-2" />
+                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 mr-2"/>
                         <span>Quay lại</span>
                     </Button>
                 </div>
 
                 <div className="relative w-full mb-4">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"/>
                     <Input
                         placeholder="Nhập nội dung câu hỏi, người tạo hoặc đáp án..."
                         value={searchTerm}
@@ -139,7 +150,7 @@ export default function QuizInterface() {
                     />
                 </div>
 
-                <Separator />
+                <Separator/>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -151,7 +162,7 @@ export default function QuizInterface() {
                             className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
                             variant="outline"
                         >
-                            <Plus className="w-4 h-4 mr-2" />
+                            <Plus className="w-4 h-4 mr-2"/>
                             Tạo mới
                         </Button>
                     </div>
@@ -167,19 +178,21 @@ export default function QuizInterface() {
                                         {index + 1 + (page - 1) * questionPerPage}.{" "}
                                         {question.content}
                                     </h2>
-                                    <div className="flex gap-1">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="p-1"
-                                            onClick={() =>
-                                                router.push(`/users/questions/${question.id}/edit`)
-                                            }
-                                        >
-                                            <Edit className="w-6 h-6" />
-                                        </Button>
-                                        <DeleteButton id={question.id} handleDelete={handleDelete} />
-                                    </div>
+                                    {question.user.id === userId && (
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="p-1"
+                                                onClick={() =>
+                                                    router.push(`/users/questions/${question.id}/edit`)
+                                                }
+                                            >
+                                                <Edit className="w-6 h-6"/>
+                                            </Button>
+                                            <DeleteButton id={question.id} handleDelete={handleDelete}/>
+                                        </div>
+                                    )}
                                 </div>
                             </CardHeader>
 
@@ -201,9 +214,9 @@ export default function QuizInterface() {
                                             }`}
                                         >
                                             {answer.correct ? (
-                                                <Check className="w-4 h-4 text-green-600" />
+                                                <Check className="w-4 h-4 text-green-600"/>
                                             ) : (
-                                                <X className="w-4 h-4 text-red-400 opacity-50" />
+                                                <X className="w-4 h-4 text-red-400 opacity-50"/>
                                             )}
                                             <span className="text-sm">{answer.content}</span>
                                         </div>
@@ -237,7 +250,7 @@ export default function QuizInterface() {
                 )}
                 {!loading && questions.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <Search className="w-12 h-12 mb-4 opacity-50" />
+                        <Search className="w-12 h-12 mb-4 opacity-50"/>
                         <p>Không tìm thấy câu hỏi nào phù hợp</p>
                     </div>
                 )}
