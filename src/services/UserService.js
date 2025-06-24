@@ -20,7 +20,7 @@ class UserService {
 
     static async checkDuplicatePassword(param) {
         try {
-            return await axiosInstance.patch(`/users/check-duplicate`,param);
+            return await axiosInstance.patch(`/users/check-duplicate`, param);
         } catch (error) {
             console.error(`Lỗi trùng mật khẩu cũ`, error);
             throw error;
@@ -82,6 +82,22 @@ class UserService {
         }
     }
 
+    static async findId(email) {
+        try {
+            return await axiosInstance.get("/users/find-id", {params: {email}});
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async confirmEmail(email) {
+        try {
+            return await axiosInstance.get("/users/confirm", {params: {email}});
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async getProfile(email) {
         try {
             return await axiosInstance.get("/users/profile", {params: {email}});
@@ -105,6 +121,14 @@ class UserService {
     static async unblockUser(id) {
         try {
             return await axiosInstance.patch(`/users/${id}/unblock`);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async refreshToken(refreshToken) {
+        try {
+            return await axiosInstance.post("/users/refresh-token", { refreshToken });
         } catch (error) {
             throw error;
         }

@@ -76,14 +76,14 @@ export default function LandingPage() {
                         <Button
                             variant="outline"
                             className="cursor-pointer border-purple-600 text-purple-600 hover:bg-purple-50"
-                            onClick={()=>router.push("/login")}
+                            onClick={() => router.push("/login")}
                         >
-                             Đăng nhập
+                            Đăng nhập
                         </Button>
 
                         <Button
                             className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white"
-                            onClick={()=>router.push("/register")}
+                            onClick={() => router.push("/register")}
                         >
                             Đăng ký
                         </Button>
