@@ -4,9 +4,7 @@ import {AdminSidebar} from "../../../components/layout/AdminSidebar";
 import {AppHeader} from "../../../components/layout/AdminHeader";
 import UserTable from "../../../components/list/UserTable";
 import {useState} from "react";
-import CategoryTable from "../../../components/category/CategoryTable";
-import TypeTable from "../../../components/list/TypeTable";
-import DifficultyTable from "../../../components/list/DifficultyTable";
+import CategoryTable from "../../../components/list/CategoryTable";
 import {Users} from "lucide-react";
 
 export default function Page() {
@@ -27,8 +25,6 @@ export default function Page() {
                 <main className="flex-1 p-6">
                     {selectedMenu?.component === "users" && (<UserTable/>)}
                     {selectedMenu?.component === "categories" && (<CategoryTable/>)}
-                    {selectedMenu?.component === "types" && (<TypeTable/>)}
-                    {selectedMenu?.component === "difficulties" && (<DifficultyTable/>)}
                 </main>
             </div>
         </div>

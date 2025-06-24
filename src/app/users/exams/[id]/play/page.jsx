@@ -231,23 +231,8 @@ export default function OfflineExamForm() {
                 ))}
             </div>
 
-            <div className="flex justify-center gap-4">
-                <Button
-                    onClick={() => changeQuestion(questionIndex - 1)}
-                    disabled={questionIndex === 0 || submitting || submitted}
-                >
-                    Câu trước
-                </Button>
-                <Button
-                    onClick={() => changeQuestion(questionIndex + 1)}
-                    disabled={questionIndex >= questions.length - 1 || submitting || submitted}
-                >
-                    Câu tiếp theo
-                </Button>
-            </div>
-
             <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 w-fit mx-auto border border-purple-600/30">
-                <div className="text-sm font-medium text-center mb-3 text-purple-200">Câu hỏi</div>
+                <div className="text-sm font-medium text-center mb-3 text-purple-200">Bản đồ câu hỏi</div>
                 <div className="grid grid-cols-10 gap-1 overflow-y-auto max-h-[300px] p-1">
                     {questions.map((_, index) => (
                         <button
@@ -260,6 +245,39 @@ export default function OfflineExamForm() {
                         </button>
                     ))}
                 </div>
+
+                {/* 👇 Chú thích màu sắc */}
+                <div className="mt-4 flex justify-center gap-6 text-xs">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-white rounded"></div>
+                        <span className="text-purple-200">Hiện tại</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-400 rounded"></div>
+                        <span className="text-purple-200">Đã trả lời</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-purple-700 rounded"></div>
+                        <span className="text-purple-200">Chưa làm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex justify-center gap-4 mt-4">
+                <Button
+                    onClick={() => changeQuestion(questionIndex - 1)}
+                    disabled={questionIndex === 0 || submitting || submitted}
+                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                >
+                    Câu trước
+                </Button>
+                <Button
+                    onClick={() => changeQuestion(questionIndex + 1)}
+                    disabled={questionIndex >= questions.length - 1 || submitting || submitted}
+                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                >
+                    Câu tiếp theo
+                </Button>
             </div>
         </div>
     )
