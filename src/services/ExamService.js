@@ -53,7 +53,11 @@ class ExamService {
     }
 
     static async delete(id) {
-
+        try {
+            return await axiosInstance.delete(`/exams/${id}`);
+        } catch (error) {
+            return Promise.reject(error);
+        }
     }
 
     static async getToPlayByRoomCode(code) {
