@@ -6,6 +6,7 @@ import { useRouter} from "next/navigation";
 import {RotateCcw, Search, FileText} from "lucide-react"
 import HistoryService from "../../services/HistoryService";
 import ExamDetailPanel from "./ExamDetailPanel";
+import RankStars from "../icon/rank";
 
 export default function ExamResultSummary({isOnline, onReplay, historyId }) {
     const [showPanel, setShowPanel] = useState(false);
@@ -70,12 +71,31 @@ export default function ExamResultSummary({isOnline, onReplay, historyId }) {
                         <p className="text-purple-200 text-xs mb-1">Thời gian hoàn thành</p>
                         <p className="font-bold text-xl text-white">{data.timeTaken}s</p>
                     </div>
-                    {isOnline && (
-                        <div className="bg-black/40 p-4 rounded-xl text-center">
-                            <p className="text-purple-200 text-xs mb-1">Thứ hạng</p>
-                            <p className="font-bold text-xl text-white">
-                                {`${data.rankResponse.rank} / ${data.rankResponse.totalCandidate}`}
-                            </p>
+                    {isOnline && data.rankResponse?.rankings?.length > 0 && (
+                        <div className="bg-black/40 p-4 rounded-xl text-left col-span-full w-full">
+                            <p className="text-purple-200 text-xs mb-2 text-center">Bảng xếp hạng</p>
+                            <div className="space-y-1 text-sm">
+                                {data.rankResponse.rankings.map((r, i) => {
+                                    const isCurrentUser = r.username === username;
+
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`flex justify-between items-center px-3 py-1 rounded ${
+                                                isCurrentUser
+                                                    ? "bg-yellow-200/30 text-white font-semibold"
+                                                    : "text-white"
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span>{r.rank}.</span>
+                                                <span>{r.username}</span>
+                                            </div>
+                                            <RankStars rank={r.rank} />
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </div>
