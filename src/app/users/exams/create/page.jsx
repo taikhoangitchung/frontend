@@ -60,6 +60,7 @@ export default function CreateExam({ id }) {
     const [searchTerm, setSearchTerm] = useState("")
 
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
+    const [userId, setUserId] = useState(Number(localStorage.getItem("id")))
 
     const ExamSchema = Yup.object({
         title: Yup.string().required("Tiêu đề không được để trống"),
@@ -137,8 +138,7 @@ export default function CreateExam({ id }) {
     useEffect(() => {
         if (isEdit) fetchForEdit()
 
-        // formik.setFieldValue("authorId", Number(localStorage.getItem("userId")));
-        formik.setFieldValue("authorId", 2)
+        formik.setFieldValue("authorId", userId);
 
         CategoryService.getAll()
             .then((res) => setCategories(res.data))
@@ -146,20 +146,20 @@ export default function CreateExam({ id }) {
         DifficultyService.getAll()
             .then((res) => setDifficulties(res.data))
             .catch((err) => toast.error(err.response.data))
-        QuestionService.getAll()
-            .then((res) => {
-                setQuestionBank([...res.data])
-            })
-            .catch((err) => toast.error(err.response.data))
     }, [])
 
     useEffect(() => {
-        QuestionService.filterByCategoryAndSource(formik.values.categoryId, questionSource)
+        QuestionService.filterByCategoryAndSource(
+            formik.values.categoryId
+            ,questionSource
+            ,userId
+            ,searchTerm
+        )
             .then((res) => {
                 setQuestionBank(res.data)
             })
             .catch((err) => toast.error(err.response.data))
-    }, [formik.values.categoryId, questionSource])
+    }, [formik.values.categoryId, questionSource, userId, searchTerm])
 
     const fetchForEdit = () => {
         ExamService.findById(id)
@@ -295,7 +295,7 @@ export default function CreateExam({ id }) {
                                     variant="outline"
                                     className={`text-xs border-gray-300 text-gray-600 ${isAlreadyAdded ? "opacity-60" : ""}`}
                                 >
-                                    {question.user.name}
+                                    {question.user.username}
                                 </Badge>
                             </div>
                         </div>
@@ -632,6 +632,12 @@ export default function CreateExam({ id }) {
                                                         Câu hỏi của người khác
                                                     </div>
                                                 </SelectItem>
+                                                <SelectItem value={"999"}>
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="h-4 w-4" />
+                                                        Tất cả
+                                                    </div>
+                                                </SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -645,7 +651,7 @@ export default function CreateExam({ id }) {
                                         <div className="relative">
                                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                             <Input
-                                                placeholder="Tìm kiếm ... đang phát triển ..."
+                                                placeholder="Tìm kiếm theo username"
                                                 value={searchTerm}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                 className="pl-10 border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 focus:bg-white h-9"

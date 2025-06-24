@@ -21,8 +21,7 @@ export default function Component() {
             const token = localStorage.getItem("token_confirm_email");
             const response = await UserService.checkToken(token)
 
-            const autoLogin = localStorage.getItem("autoLogin")
-            const {email, password} = JSON.parse(autoLogin)
+            const email = localStorage.getItem("email")
 
             if (response.data !== true) setIsSuccess(false);
             else {
