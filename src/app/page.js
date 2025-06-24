@@ -37,7 +37,7 @@ export default function LandingPage() {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Image
-                            src="/logo.png"
+                            src="/logofixed.png"
                             alt="QuizGym Logo"
                             width={120}
                             height={40}

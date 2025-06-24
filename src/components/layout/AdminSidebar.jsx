@@ -6,8 +6,6 @@ import Image from "next/image";
 const menuItems = [
     {title: "Quản lý người dùng", icon: Users, component: "users", active: false},
     {title: "Quản lý danh mục", icon: FolderOpen, component: "categories", active: false},
-    {title: "Quản lý thể loại", icon: Tags, component: "types", active: false},
-    {title: "Quản lý độ khó", icon: BarChart3, component: "difficulties", active: false},
 ]
 
 export function AdminSidebar({ onSelectMenu }) {
@@ -17,7 +15,7 @@ export function AdminSidebar({ onSelectMenu }) {
             <div className="flex items-center justify-center py-4">
 
             <Image
-                    src="/logo.png"
+                    src="/logofixed.png"
                     alt="QuizGym Logo"
                     width={120}
                     height={0}

@@ -9,6 +9,7 @@ import ExamResultSummary from "../../../../../../components/exam/ExamResultSumma
 import formatTime from "../../../../../../util/formatTime";
 import {Button} from "../../../../../../components/ui/button";
 import HistoryService from "../../../../../../services/HistoryService";
+import ConfirmDialog from "../../../../../../components/alerts-confirms/ConfirmDialog";
 
 export default function PlayExamFormOnline() {
     const { code } = useParams();
@@ -162,6 +163,12 @@ export default function PlayExamFormOnline() {
         setUserAnswers((prev) => ({ ...prev, [questionIndex]: updated }));
     };
 
+    const changeQuestion = (index) => {
+        if (index < 0 || index >= questions.length) return;
+        setQuestionIndex(index);
+    };
+
+
     const handleSubmitQuiz = async (isAutoSubmit = false) => {
         if (submitted || submitting) return;
 
@@ -247,6 +254,15 @@ export default function PlayExamFormOnline() {
             )}
 
             <div className="flex justify-between">
+                <ConfirmDialog
+                    triggerLabel="Thoát ra"
+                    triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold"
+                    title="Bạn có chắc chắn muốn thoát?"
+                    description="Bài làm sẽ không được lưu lại nếu chưa nộp."
+                    actionLabel="Thoát ngay"
+                    onConfirm={() => router.push("/users/dashboard")}
+                />
+
                 <div className="bg-black/30 px-4 py-2 rounded-full font-semibold">
                     ⏰ <span className={getTimerColor()}>{formatTime(timeLeft)}</span>
                 </div>
@@ -266,20 +282,24 @@ export default function PlayExamFormOnline() {
                 </div>
             </div>
 
-            <div className="grid gap-4 w-full" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
+
+            <div className={`grid gap-4`} style={{gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`}}>
                 {currentQuestion?.answers?.map((answer, index) => (
                     <button
                         key={index}
-                        className={getAnswerButtonStyle(answer)}
                         onClick={() => handleAnswerSelect(index)}
-                        disabled={submitted || submitting}
+                        className={getAnswerButtonStyle(answer)}
+                        disabled={submitting || submitted}
                     >
                         <span className="text-center px-4">{answer.content}</span>
+
                         {userAnswers[questionIndex]?.includes(answer.id) && (
                             <div className="absolute top-3 left-3">
                                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                                     <svg className="w-5 h-5 text-purple-900" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        <path fillRule="evenodd"
+                                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                              clipRule="evenodd"/>
                                     </svg>
                                 </div>
                             </div>
@@ -288,20 +308,71 @@ export default function PlayExamFormOnline() {
                 ))}
             </div>
 
+            <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 border border-purple-600/30 w-fit mx-auto">
+                <div className="text-sm font-medium text-center mb-3 text-purple-200">BẢN ĐỒ CÂU HỎI</div>
+                <div className="grid grid-cols-10 gap-2 max-h-[300px] overflow-y-auto p-1">
+                    {questions.map((_, index) => {
+                        const isCurrent = questionIndex === index;
+                        const hasAnswer = userAnswers[index]?.length > 0;
+
+                        const baseStyle = "w-10 h-10 rounded-lg font-semibold text-sm transition-all duration-200";
+                        let style = "";
+
+                        if (isCurrent) {
+                            style = "bg-white text-purple-900 ring-2 ring-purple-500";
+                        } else if (hasAnswer) {
+                            style = "bg-green-500 text-white hover:bg-green-600";
+                        } else {
+                            style = "bg-purple-700/50 text-white hover:bg-purple-600";
+                        }
+
+                        return (
+                            <button
+                                key={index}
+                                onClick={() => changeQuestion(index)}
+                                className={`${baseStyle} ${style}`}
+                                disabled={submitting || submitted}
+                            >
+                                {index + 1}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Legend giải thích màu sắc các nút câu hỏi */}
+                <div className="mt-4 flex justify-center gap-6 text-xs">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-white rounded"></div>
+                        <span className="text-purple-200">Hiện tại</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-400 rounded"></div>
+                        <span className="text-purple-200">Đã trả lời</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-purple-700 rounded"></div>
+                        <span className="text-purple-200">Chưa làm</span>
+                    </div>
+                </div>
+            </div>
+
             <div className="flex justify-center gap-4 mt-4">
                 <Button
                     onClick={() => setQuestionIndex((prev) => Math.max(0, prev - 1))}
                     disabled={questionIndex === 0 || submitted}
+                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu trước
                 </Button>
                 <Button
                     onClick={() => setQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))}
                     disabled={questionIndex === questions.length - 1 || submitted}
+                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu tiếp theo
                 </Button>
             </div>
+
         </div>
     );
 }
