@@ -279,7 +279,7 @@ const Register = () => {
                                             <button
                                                 type="submit"
                                                 disabled={submitting}
-                                                className="w-full bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 mt-1"
+                                                className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200 mt-1"
                                             >
                                                 {submitting ? "Đang đăng ký..." : "Đăng ký"}
                                             </button>
