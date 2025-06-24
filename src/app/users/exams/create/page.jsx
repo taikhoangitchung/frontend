@@ -40,13 +40,13 @@ import {useRouter} from "next/navigation"
 import {FaCircleQuestion} from "react-icons/fa6";
 
 const questionLimits = [
-    { value: 20, label: "20 câu" },
-    { value: 40, label: "40 câu" },
-    { value: 45, label: "45 câu" },
-    { value: 10000, label: "Không giới hạn" },
+    {value: 20, label: "20 câu"},
+    {value: 40, label: "40 câu"},
+    {value: 45, label: "45 câu"},
+    {value: 10000, label: "Không giới hạn"},
 ]
 
-export default function CreateExam({ id }) {
+export default function CreateExam({id}) {
     const isEdit = id
     const router = useRouter()
     const [oldTitle, setOldTitle] = useState("")
@@ -70,7 +70,7 @@ export default function CreateExam({ id }) {
             .min(1, "Tỉ lệ số câu đúng để đạt không thể âm")
             .max(100, "Tỉ lệ số câu đúng để đạt không thể lớn hơn 100%"),
         duration: Yup.number()
-            .min(1,"Thời gian không thê quá ngắn")
+            .min(1, "Thời gian không thê quá ngắn")
     })
 
     const formik = useFormik({
@@ -89,6 +89,9 @@ export default function CreateExam({ id }) {
             if (values.questions.length === 0) {
                 toast.warning("Hãy thêm ít nhất 1 câu hỏi")
                 return;
+            } else if (values.questions.length < values.questionLimit) {
+                toast.warning("hãy thêm đủ số lượng câu hỏi")
+                return;
             }
 
             setIsSubmitting(true)
@@ -100,29 +103,29 @@ export default function CreateExam({ id }) {
                     } else {
                         if (isEdit) {
                             const idLoading = toast.loading("Đang cập nhật bài thi ...")
-                            const { questions, ...rest } = values
-                            const params = { ...rest, questionIds: questions.map((q) => q.id) }
+                            const {questions, ...rest} = values
+                            const params = {...rest, questionIds: questions.map((q) => q.id)}
 
                             ExamService.update(params, id)
                                 .then((res3) => {
-                                    toast.success(res3.data, { id: idLoading })
+                                    toast.success(res3.data, {id: idLoading})
                                 })
                                 .catch((err3) => {
-                                    toast.error(err3.toString(), { id: idLoading })
+                                    toast.error(err3.toString(), {id: idLoading})
                                 })
                                 .finally(() => setIsSubmitting(false))
                         } else {
                             const idLoading = toast.loading("Đang tạo bài thi ...")
-                            const { questions, ...rest } = values
-                            const params = { ...rest, questionIds: questions.map((q) => q.id) }
+                            const {questions, ...rest} = values
+                            const params = {...rest, questionIds: questions.map((q) => q.id)}
 
                             ExamService.create(params)
                                 .then((res2) => {
-                                    toast.success(res2.data, { id: idLoading })
+                                    toast.success(res2.data, {id: idLoading})
                                     router.push("/users/exams")
                                 })
                                 .catch((err) => {
-                                    toast.error(err.response.data, { id: idLoading })
+                                    toast.error(err.response.data, {id: idLoading})
                                     setIsSubmitting(false)
                                 })
                         }
@@ -151,9 +154,9 @@ export default function CreateExam({ id }) {
     useEffect(() => {
         QuestionService.filterByCategoryAndSource(
             formik.values.categoryId
-            ,questionSource
-            ,userId
-            ,searchTerm
+            , questionSource
+            , userId
+            , searchTerm
         )
             .then((res) => {
                 setQuestionBank(res.data)
@@ -208,7 +211,7 @@ export default function CreateExam({ id }) {
             if (newMap.has(questionId)) {
                 newMap.delete(questionId)
             } else {
-                newMap.set(questionId, { added: added })
+                newMap.set(questionId, {added: added})
             }
             return newMap
         })
@@ -235,7 +238,7 @@ export default function CreateExam({ id }) {
         formik.setFieldValue("questions", [...formik.values.questions.filter((q) => q.id !== id)])
     }
 
-    const QuestionCard = ({ question, index, showRemove = false, onRemove, onToggleSelect, displayAdded }) => {
+    const QuestionCard = ({question, index, showRemove = false, onRemove, onToggleSelect, displayAdded}) => {
         const added = formik.values.questions.find((q) => q.id === question.id) !== undefined
         const isExpanded = expandedQuestions.has(question.id) && added === displayAdded
         const isToggleSelected = selectedQuestion.find((q) => q.id === question.id) !== undefined
@@ -260,15 +263,16 @@ export default function CreateExam({ id }) {
                         {!displayAdded && (
                             <div className="mt-1">
                                 {isAlreadyAdded ? (
-                                    <CheckCircle2 className="h-5 w-5 text-gray-400" />
+                                    <CheckCircle2 className="h-5 w-5 text-gray-400"/>
                                 ) : isToggleSelected ? (
-                                    <CheckCircle2 className="h-5 w-5 text-purple-600" />
+                                    <CheckCircle2 className="h-5 w-5 text-purple-600"/>
                                 ) : (
-                                    <Circle className="h-5 w-5 text-gray-400" />
+                                    <Circle className="h-5 w-5 text-gray-400"/>
                                 )}
                             </div>
                         )}
-                        {index !== undefined && !onToggleSelect && <Badge className="bg-purple-600 text-white">{index + 1}</Badge>}
+                        {index !== undefined && !onToggleSelect &&
+                            <Badge className="bg-purple-600 text-white">{index + 1}</Badge>}
                         <div className="flex-1">
                             <h4 className={`font-medium text-sm mb-3 text-gray-900 ${isAlreadyAdded ? "opacity-60" : ""}`}>
                                 {question.content}
@@ -311,7 +315,7 @@ export default function CreateExam({ id }) {
                                 className="cursor-pointer text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1"
                                 title={isExpanded ? "Thu gọn" : "Xem đáp án"}
                             >
-                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                {isExpanded ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
                             </Button>
                             {showRemove && onRemove && (
                                 <Button
@@ -323,7 +327,7 @@ export default function CreateExam({ id }) {
                                     size="sm"
                                     className="cursor-pointer text-red-500 hover:text-red-700 hover:bg-red-50 p-1"
                                 >
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="h-4 w-4"/>
                                 </Button>
                             )}
                         </div>
@@ -349,7 +353,8 @@ export default function CreateExam({ id }) {
                         {String.fromCharCode(65 + option.id)}.
                       </span>
                                             <span>{option.name}</span>
-                                            {option.correct && <CheckCircle2 className="h-4 w-4 ml-auto text-green-600" />}
+                                            {option.correct &&
+                                                <CheckCircle2 className="h-4 w-4 ml-auto text-green-600"/>}
                                         </div>
                                     </div>
                                 ))}
@@ -371,7 +376,7 @@ export default function CreateExam({ id }) {
                         variant="outline"
                         className="cursor-pointer bg-white text-gray-700 border-gray-300 hover:bg-gray-50 flex items-center gap-2"
                     >
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="h-4 w-4"/>
                         Quay lại
                     </Button>
                 </div>
@@ -380,11 +385,11 @@ export default function CreateExam({ id }) {
                 <div className="text-center space-y-4 py-8">
                     <div className="flex justify-center items-center gap-3 mb-4">
                         <div className="p-3 bg-purple-600 rounded-full">
-                            <Sparkles className="h-8 w-8 text-white" />
+                            <Sparkles className="h-8 w-8 text-white"/>
                         </div>
                         <h1 className="text-5xl font-bold text-gray-900">Tạo Bài Kiểm Tra</h1>
                         <div className="p-3 bg-purple-600 rounded-full">
-                            <Zap className="h-8 w-8 text-white" />
+                            <Zap className="h-8 w-8 text-white"/>
                         </div>
                     </div>
                 </div>
@@ -397,16 +402,17 @@ export default function CreateExam({ id }) {
                             <CardHeader className="bg-purple-600 text-white rounded-t-lg p-0">
                                 <CardTitle className="flex items-center gap-3 text-xl p-4 h-16">
                                     <div className="p-2 bg-white/20 rounded-lg">
-                                        <BookOpen className="h-6 w-6" />
+                                        <BookOpen className="h-6 w-6"/>
                                     </div>
                                     Thông Tin Cơ Bản
-                                    <Trophy className="h-5 w-5 ml-auto" />
+                                    <Trophy className="h-5 w-5 ml-auto"/>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6 space-y-5 bg-white">
                                 <div className="space-y-3">
-                                    <Label htmlFor="title" className="text-gray-700 font-medium flex items-center gap-2">
-                                        <Star className="h-4 w-4 text-purple-600" />
+                                    <Label htmlFor="title"
+                                           className="text-gray-700 font-medium flex items-center gap-2">
+                                        <Star className="h-4 w-4 text-purple-600"/>
                                         Tiêu đề bài kiểm tra
                                     </Label>
                                     <Input
@@ -424,32 +430,35 @@ export default function CreateExam({ id }) {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2 md:col-span-1">
                                         <Label className="text-gray-700 font-medium h-6 flex items-center gap-2">
-                                            <FaFireAlt className="h-4 w-4 text-purple-600" />
+                                            <FaFireAlt className="h-4 w-4 text-purple-600"/>
                                             Độ khó
                                         </Label>
                                         <Select
                                             value={formik.values.difficultyId === -1 ? "" : formik.values.difficultyId}
                                             onValueChange={(value) => formik.setFieldValue("difficultyId", value === "" ? -1 : Number(value))}
                                         >
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-purple-500 focus:bg-white w-full h-10">
-                                                <SelectValue placeholder="Chọn độ khó" />
+                                            <SelectTrigger
+                                                className="border-gray-300 bg-gray-50 focus:border-purple-500 focus:bg-white w-full h-10">
+                                                <SelectValue placeholder="Chọn độ khó"/>
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 {difficulties.map((diff) => (
-                                                    <SelectItem key={diff.id} value={diff.id} className="cursor-pointer">
+                                                    <SelectItem key={diff.id} value={diff.id}
+                                                                className="cursor-pointer">
                                                         <div className="flex items-center gap-2">{diff.name}</div>
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                         {formik.touched.difficultyId && formik.errors.difficultyId && (
-                                            <div className="text-red-500 text-sm mt-1">{formik.errors.difficultyId}</div>
+                                            <div
+                                                className="text-red-500 text-sm mt-1">{formik.errors.difficultyId}</div>
                                         )}
                                     </div>
 
                                     <div className="space-y-2 md:col-span-2">
                                         <Label className="text-gray-700 font-medium h-6 flex items-center gap-2">
-                                            <Tag className="h-4 w-4 text-purple-600" />
+                                            <Tag className="h-4 w-4 text-purple-600"/>
                                             Danh mục
                                         </Label>
                                         <Select
@@ -457,8 +466,9 @@ export default function CreateExam({ id }) {
                                             onValueChange={(value) => formik.setFieldValue("categoryId", value === "" ? -1 : Number(value))}
                                             disabled={formik.values.questions.length > 0}
                                         >
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-purple-500 w-full h-10">
-                                                <SelectValue placeholder="Chọn danh mục" />
+                                            <SelectTrigger
+                                                className="border-gray-300 bg-gray-50 focus:border-purple-500 w-full h-10">
+                                                <SelectValue placeholder="Chọn danh mục"/>
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 {categories.map((category) => (
@@ -477,7 +487,7 @@ export default function CreateExam({ id }) {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium h-6 flex items-center gap-2">
-                                            <Clock className="h-4 w-4 text-purple-600" />
+                                            <Clock className="h-4 w-4 text-purple-600"/>
                                             Thời gian (phút)
                                         </Label>
                                         <Input
@@ -493,7 +503,7 @@ export default function CreateExam({ id }) {
 
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium h-6 flex items-center gap-2">
-                                            <Target className="h-4 w-4 text-purple-600" />
+                                            <Target className="h-4 w-4 text-purple-600"/>
                                             Điểm đạt (%)
                                         </Label>
                                         <Input
@@ -517,8 +527,9 @@ export default function CreateExam({ id }) {
                                             onValueChange={(value) => formik.setFieldValue("questionLimit", value)}
                                             disabled={formik.values.questions.length > 0}
                                         >
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-purple-500 w-full h-10">
-                                                <SelectValue placeholder="Chọn số câu" />
+                                            <SelectTrigger
+                                                className="border-gray-300 bg-gray-50 focus:border-purple-500 w-full h-10">
+                                                <SelectValue placeholder="Chọn số câu"/>
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 {questionLimits.map((limit) => (
@@ -539,7 +550,7 @@ export default function CreateExam({ id }) {
                                 <CardTitle className="flex items-center justify-between text-xl p-4 h-16">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-white/20 rounded-lg">
-                                            <ListIcon className="h-6 w-6" />
+                                            <ListIcon className="h-6 w-6"/>
                                         </div>
                                         Câu Hỏi Đã Chọn ({formik.values.questions.length})
                                     </div>
@@ -551,7 +562,7 @@ export default function CreateExam({ id }) {
                             <CardContent className="p-6 max-h-96 overflow-y-auto bg-white">
                                 {formik.values.questions.length === 0 ? (
                                     <div className="text-center py-8 text-gray-500">
-                                        <Circle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                        <Circle className="h-12 w-12 mx-auto mb-4 opacity-50"/>
                                         <p>Chưa có câu hỏi nào được chọn</p>
                                         <p className="text-sm">Hãy chọn câu hỏi từ ngân hàng bên phải!</p>
                                     </div>
@@ -580,7 +591,7 @@ export default function CreateExam({ id }) {
                                 className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-12 py-4 text-xl font-bold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300"
                                 disabled={isSubmitting}
                             >
-                                <Sparkles className="h-6 w-6 mr-2" />
+                                <Sparkles className="h-6 w-6 mr-2"/>
                                 {id
                                     ? isSubmitting
                                         ? "Đang cập nhật bài kiểm tra ..."
@@ -588,7 +599,7 @@ export default function CreateExam({ id }) {
                                     : isSubmitting
                                         ? "Đang tạo bài kiểm tra ..."
                                         : "Tạo Bài Kiểm Tra"}
-                                <Zap className="h-6 w-6 ml-2" />
+                                <Zap className="h-6 w-6 ml-2"/>
                             </Button>
                         </div>
                     </div>
@@ -599,7 +610,7 @@ export default function CreateExam({ id }) {
                             <CardHeader className="bg-purple-600 text-white rounded-t-lg p-0">
                                 <CardTitle className="flex items-center gap-3 text-xl p-4 h-16">
                                     <div className="p-2 bg-white/20 rounded-lg">
-                                        <Search className="h-6 w-6" />
+                                        <Search className="h-6 w-6"/>
                                     </div>
                                     Ngân Hàng Câu Hỏi
                                     <Badge className="bg-white/20 text-white border-white/30 ml-auto">
@@ -612,29 +623,30 @@ export default function CreateExam({ id }) {
                                     {/* Filters - Compact Layout */}
                                     <div className="space-y-2 w-full md:w-auto flex-shrink-0">
                                         <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                                            <Globe className="h-4 w-4 text-purple-600" />
+                                            <Globe className="h-4 w-4 text-purple-600"/>
                                             Nguồn câu hỏi
                                         </Label>
                                         <Select value={questionSource} onValueChange={setQuestionSource}>
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-purple-500 h-10">
-                                                <SelectValue placeholder="Chọn nguồn câu hỏi" />
+                                            <SelectTrigger
+                                                className="border-gray-300 bg-gray-50 focus:border-purple-500 h-10">
+                                                <SelectValue placeholder="Chọn nguồn câu hỏi"/>
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 <SelectItem value={`${formik.values.authorId}`}>
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4" />
+                                                        <User className="h-4 w-4"/>
                                                         Câu hỏi của tôi
                                                     </div>
                                                 </SelectItem>
                                                 <SelectItem value={"-1"}>
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4" />
+                                                        <User className="h-4 w-4"/>
                                                         Câu hỏi của người khác
                                                     </div>
                                                 </SelectItem>
                                                 <SelectItem value={"999"}>
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4" />
+                                                        <User className="h-4 w-4"/>
                                                         Tất cả
                                                     </div>
                                                 </SelectItem>
@@ -645,11 +657,12 @@ export default function CreateExam({ id }) {
                                     {/* Search - Compact */}
                                     <div className="space-y-2 w-full">
                                         <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                                            <Search className="h-4 w-4 text-purple-600" />
+                                            <Search className="h-4 w-4 text-purple-600"/>
                                             Tìm kiếm
                                         </Label>
                                         <div className="relative">
-                                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <Search
+                                                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"/>
                                             <Input
                                                 placeholder="Tìm kiếm theo username"
                                                 value={searchTerm}
@@ -666,7 +679,7 @@ export default function CreateExam({ id }) {
                                         onClick={addSelectedQuestions}
                                         className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-9"
                                     >
-                                        <Plus className="h-4 w-4 mr-2" />
+                                        <Plus className="h-4 w-4 mr-2"/>
                                         Thêm {selectedQuestion.length} câu hỏi đã chọn
                                     </Button>
                                 )}
@@ -679,7 +692,7 @@ export default function CreateExam({ id }) {
                                 <CardTitle className="flex items-center justify-between text-lg p-4 h-16">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-white/20 rounded-lg">
-                                            <ListIcon className="h-6 w-6" />
+                                            <ListIcon className="h-6 w-6"/>
                                         </div>
                                         Danh Sách Câu Hỏi ({questionBank.length})
                                     </div>
@@ -689,7 +702,7 @@ export default function CreateExam({ id }) {
                                 <div className="max-h-96 overflow-y-auto space-y-3">
                                     {questionBank.length === 0 ? (
                                         <div className="text-center py-8 text-gray-500">
-                                            <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                            <Search className="h-12 w-12 mx-auto mb-4 opacity-50"/>
                                             <p>Không tìm thấy câu hỏi nào</p>
                                         </div>
                                     ) : (
