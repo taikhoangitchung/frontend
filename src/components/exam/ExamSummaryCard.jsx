@@ -51,7 +51,7 @@ export default function ExamSummaryCard({search}) {
     });
 
     return (
-        <div className="flex flex-col gap-8 px-4 pb-12">
+        <div className="flex flex-col gap-5 px-4 pb-5">
             {allFilteredExamsEmpty ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                     <Search className="w-12 h-12 mb-4 text-purple-400"/>
