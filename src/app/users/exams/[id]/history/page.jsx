@@ -71,12 +71,12 @@ export default function ExamHistoryPage() {
                             <th className="p-4 border-b text-center">#</th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <Clock className="w-5 h-5" /> Thời gian thi
+                                    <Clock className="w-5 h-5" /> Ngày chơi
                                 </div>
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <User className="w-5 h-5" /> Học viên
+                                    <User className="w-5 h-5" /> Người chơi
                                 </div>
                             </th>
                             <th className="p-4 border-b">
@@ -91,12 +91,12 @@ export default function ExamHistoryPage() {
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <TimerReset className="w-5 h-5" /> Làm bài
+                                    <TimerReset className="w-5 h-5" /> Thời gian
                                 </div>
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <Repeat2 className="w-5 h-5" /> Lượt thi
+                                    <Repeat2 className="w-5 h-5" /> Lượt chơi
                                 </div>
                             </th>
                         </tr>

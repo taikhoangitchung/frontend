@@ -82,6 +82,13 @@ export default function PlayExamFormOnline() {
         const socket = socketInstance();
         socketRef.current = socket;
 
+        const trySendJoin = () => {
+            if (code && username) {
+                console.log("📤 Gửi lại JOIN từ play exam form");
+                socket.send(`JOIN:${code}:${username}`);
+            }
+        };
+
         const handleMessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -101,29 +108,14 @@ export default function PlayExamFormOnline() {
             }
         };
 
-        const handleJoin = () => {
-            if (code && username) {
-                console.log("📤 Gửi lại JOIN từ play exam form");
-                socket.send(`JOIN:${code}:${username}`);
-            }
-        };
-
-        if (socket.readyState === WebSocket.OPEN) {
-            handleJoin();
-            socket.addEventListener("message", handleMessage);
-        } else {
-            socket.addEventListener("open", () => {
-                handleJoin();
-                socket.addEventListener("message", handleMessage);
-            });
-        }
+        socket.addEventListener("open", trySendJoin);
+        socket.addEventListener("message", handleMessage);
 
         return () => {
-            if (socketRef.current?.readyState === WebSocket.OPEN) {
-                socketRef.current.removeEventListener("message", handleMessage);
-                socketRef.current.close();
-                console.log("❌ WS đóng tại play form");
-            }
+            socket.removeEventListener("open", trySendJoin);
+            socket.removeEventListener("message", handleMessage);
+            socket.close();
+            console.log("❌ WS đóng tại play form");
         };
     }, [code, username]);
 
