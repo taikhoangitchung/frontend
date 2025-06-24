@@ -32,7 +32,7 @@ export default function LandingPage() {
                 <div className="absolute top-80 right-1/3 w-36 h-36 bg-indigo-200 rounded-3xl -rotate-12 opacity-40"></div>
             </div>
             {/* Header */}
-            <header className="relative z-10 px-6 py-0">
+            <header className="relative z-10 px-6 py-6">
                 <nav className="flex items-center justify-between max-w-7xl mx-auto">
                     {/* Logo */}
                     <div className="flex items-center">

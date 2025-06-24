@@ -69,6 +69,8 @@ export default function QuizInterface() {
                     "Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập..."
                 );
                 setTimeout(() => router.push("/login"), 2500);
+            } else {
+                toast.error("Đã xảy ra lỗi khi tải câu hỏi!");
             }
         } finally {
             setLoading(false);
@@ -106,7 +108,7 @@ export default function QuizInterface() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
+                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
                                 <SelectValue placeholder="Lọc theo tác giả" />
                             </SelectTrigger>
                             <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
@@ -119,7 +121,7 @@ export default function QuizInterface() {
 
                     <Button
                         onClick={() => router.push("/users/dashboard")}
-                        className="bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 h-9 px-4 py-2"
+                        className="bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 h-9 px-4 py-2 cursor-pointer transition-all duration-200"
                     >
                         <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 mr-2" />
                         <span>Quay lại</span>
@@ -135,7 +137,7 @@ export default function QuizInterface() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10"
+                        className="pl-10 cursor-pointer transition-all duration-200"
                     />
                 </div>
 
@@ -143,12 +145,12 @@ export default function QuizInterface() {
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-            <span className="text-lg font-medium">
-              Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
-            </span>
+                        <span className="text-lg font-medium">
+                            Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
+                        </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
-                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
+                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300 cursor-pointer transition-all duration-200"
                             variant="outline"
                         >
                             <Plus className="w-4 h-4 mr-2" />
@@ -156,91 +158,102 @@ export default function QuizInterface() {
                         </Button>
                     </div>
 
-                    {questions.map((question, index) => (
-                        <Card
-                            key={question.id}
-                            className="border border-gray-200 hover:cursor-pointer"
-                        >
-                            <CardHeader className="pb-0">
-                                <div className="flex items-start justify-between">
-                                    <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
-                                        {index + 1 + (page - 1) * questionPerPage}.{" "}
-                                        {question.content}
-                                    </h2>
-                                    <div className="flex gap-1">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="p-1"
-                                            onClick={() =>
-                                                router.push(`/users/questions/${question.id}/edit`)
-                                            }
-                                        >
-                                            <Edit className="w-6 h-6" />
-                                        </Button>
-                                        <DeleteButton id={question.id} handleDelete={handleDelete} />
-                                    </div>
-                                </div>
-                            </CardHeader>
-
-                            <CardContent className="space-y-4 mt-2">
-                                <div className="text-sm text-gray-500">
-                                    Người tạo:{" "}
-                                    <span className="font-semibold text-gray-700">
-                    {question.user.username}
-                  </span>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {question.answers.map((answer) => (
-                                        <div
-                                            key={answer.id}
-                                            className={`flex items-center gap-2 p-3 rounded-lg border ${
-                                                answer.correct
-                                                    ? "bg-green-50 border-green-200"
-                                                    : "bg-red-50 bg-opacity-20 border-red-200"
-                                            }`}
-                                        >
-                                            {answer.correct ? (
-                                                <Check className="w-4 h-4 text-green-600" />
-                                            ) : (
-                                                <X className="w-4 h-4 text-red-400 opacity-50" />
-                                            )}
-                                            <span className="text-sm">{answer.content}</span>
+                    {loading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="w-8 h-8 border-4 border-t-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"></div>
+                            <span className="ml-3 text-gray-500">Đang tải câu hỏi...</span>
+                        </div>
+                    ) : questions.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                            <Search className="w-12 h-12 mb-4 opacity-50" />
+                            <p>Không tìm thấy câu hỏi nào phù hợp</p>
+                        </div>
+                    ) : (
+                        questions.map((question, index) => (
+                            <Card
+                                key={question.id}
+                                className="border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+                            >
+                                <CardHeader className="pb-0">
+                                    <div className="flex items-start justify-between">
+                                        <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
+                                            {index + 1 + (page - 1) * questionPerPage}.{" "}
+                                            {question.content}
+                                        </h2>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="p-1 cursor-pointer transition-all duration-200"
+                                                onClick={() =>
+                                                    router.push(`/users/questions/${question.id}/edit`)
+                                                }
+                                            >
+                                                <Edit className="w-6 h-6" />
+                                            </Button>
+                                            <DeleteButton id={question.id} handleDelete={handleDelete} />
                                         </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent className="space-y-4 mt-2">
+                                    <div className="text-sm text-gray-500">
+                                        Người tạo:{" "}
+                                        <span className="font-semibold text-gray-700">
+                                            {question.user.username}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {question.answers.map((answer) => (
+                                            <div
+                                                key={answer.id}
+                                                className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                                    answer.correct
+                                                        ? "bg-green-50 border-green-200"
+                                                        : "bg-red-50 bg-opacity-20 border-red-200"
+                                                }`}
+                                            >
+                                                {answer.correct ? (
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                ) : (
+                                                    <X className="w-4 h-4 text-red-400 opacity-50" />
+                                                )}
+                                                <span className="text-sm">{answer.content}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))
+                    )}
                 </div>
 
                 <div className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
                     {page > 1 && (
-                        <Button variant="outline" onClick={() => setPage(page - 1)} className="text-sm">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(page - 1)}
+                            className="text-sm cursor-pointer transition-all duration-200"
+                        >
                             Trang trước
                         </Button>
                     )}
-                    <Button className="text-blue-700" disabled>
+                    <Button
+                        className="text-blue-700 cursor-pointer transition-all duration-200"
+                        disabled
+                    >
                         {page}/{totalPage}
                     </Button>
                     {page < totalPage && (
-                        <Button variant="outline" onClick={() => setPage(page + 1)} className="text-sm">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(page + 1)}
+                            className="text-sm cursor-pointer transition-all duration-200"
+                        >
                             Trang sau
                         </Button>
                     )}
                 </div>
-
-                {loading && (
-                    <div className="flex justify-center py-8 text-gray-500">
-                        Đang tải câu hỏi...
-                    </div>
-                )}
-                {!loading && questions.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <Search className="w-12 h-12 mb-4 opacity-50" />
-                        <p>Không tìm thấy câu hỏi nào phù hợp</p>
-                    </div>
-                )}
             </div>
         </div>
     );

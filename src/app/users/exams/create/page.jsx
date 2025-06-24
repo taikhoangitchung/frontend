@@ -90,7 +90,7 @@ export default function CreateExam({id}) {
                 toast.warning("Hãy thêm ít nhất 1 câu hỏi")
                 return;
             } else if (values.questions.length < values.questionLimit) {
-                toast.warning("hãy thêm đủ số lượng câu hỏi")
+                toast.warning("Hãy thêm đủ số lượng câu hỏi")
                 return;
             }
 

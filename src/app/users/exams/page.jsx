@@ -1,18 +1,17 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
-import {Button} from "../../../components/ui/button";
-import {Input} from "../../../components/ui/input";
-import {Card, CardContent, CardHeader} from "../../../components/ui/card";
-import {Separator} from "../../../components/ui/separator";
+import React, { useEffect, useState } from "react";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Card, CardContent, CardHeader } from "../../../components/ui/card";
+import { Separator } from "../../../components/ui/separator";
 import {
     Search, Plus, Edit, BookOpen, Target, Clock, CheckCircle, HelpCircle, Flame,
     FileText, BarChart2, FlaskConical, ArrowLeft
 } from "lucide-react";
-
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import ExamService from "../../../services/ExamService";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import RoomService from "../../../services/RoomService";
 import {
@@ -67,6 +66,7 @@ export default function ExamManager() {
             setExams(filtered.slice(start, start + examPerPage));
         } catch (err) {
             console.error(err);
+            toast.error("Đã xảy ra lỗi khi tải danh sách bài thi!");
         } finally {
             setLoading(false);
         }
@@ -78,6 +78,7 @@ export default function ExamManager() {
             router.push(`/users/exams/online/${response.data}`);
         } catch (error) {
             console.error(error);
+            toast.error("Đã xảy ra lỗi khi tạo phòng thi!");
         }
     }
 
@@ -99,11 +100,10 @@ export default function ExamManager() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
-                                <SelectValue placeholder="Lọc theo tác giả"/>
+                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                                <SelectValue placeholder="Lọc theo tác giả" />
                             </SelectTrigger>
-                            <SelectContent
-                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
+                            <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
                                 <SelectItem value="all">Tất cả</SelectItem>
                                 <SelectItem value="mine">Của tôi</SelectItem>
                                 <SelectItem value="others">Của người khác</SelectItem>
@@ -113,15 +113,15 @@ export default function ExamManager() {
 
                     <button
                         onClick={() => router.push("/users/dashboard")}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <ArrowLeft className="w-4 h-4"/>
+                        <ArrowLeft className="w-4 h-4" />
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
 
                 <div className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"/>
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
                         placeholder="Nhập tiêu đề hoặc danh mục..."
                         value={searchTerm}
@@ -129,124 +129,148 @@ export default function ExamManager() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10"
+                        className="pl-10 cursor-pointer transition-all duration-200"
                     />
                 </div>
 
-                <Separator/>
+                <Separator />
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-medium">Danh sách bài thi (Tổng: {totalExams})</span>
                         <Button
                             onClick={() => router.push("/users/exams/create")}
-                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
+                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300 cursor-pointer transition-all duration-200"
                             variant="outline"
                         >
-                            <Plus className="w-4 h-4 mr-2"/>
+                            <Plus className="w-4 h-4 mr-2" />
                             Tạo mới
                         </Button>
                     </div>
 
-                    {exams.map((exam) => (
-                        <Card key={exam.id} className="border border-gray-200 hover:shadow-md transition">
-                            <CardHeader className="pb-0">
-                                <div className="flex justify-between items-start">
-                                    <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{exam.title}</h2>
-                                    {exam.playedTimes === 0 && (
-                                        <div className="flex gap-1">
+                    {loading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="w-8 h-8 border-4 border-t-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"></div>
+                            <span className="ml-3 text-gray-500">Đang tải bài thi...</span>
+                        </div>
+                    ) : exams.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                            <Search className="w-12 h-12 mb-4 opacity-50" />
+                            <p>Không tìm thấy bài thi nào phù hợp</p>
+                        </div>
+                    ) : (
+                        exams.map((exam) => (
+                            <Card key={exam.id} className="border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer">
+                                <CardHeader className="pb-0">
+                                    <div className="flex justify-between items-start">
+                                        <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{exam.title}</h2>
+                                        {exam.playedTimes === 0 && (
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="p-1 cursor-pointer transition-all duration-200"
+                                                    onClick={() => router.push(`/exams/${exam.id}/edit`)}
+                                                >
+                                                    <Edit className="w-6 h-6" />
+                                                </Button>
+                                                <DeleteButton id={exam.id} handleDelete={handleDeleteExam} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent className="space-y-4 mt-2 text-sm text-gray-700">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                        <p className="flex items-center gap-1">
+                                            <BookOpen className="w-4 h-4" />
+                                            Danh mục: {exam.category.name}
+                                        </p>
+                                        <p className="flex items-center gap-1">
+                                            <Target className="w-4 h-4" />
+                                            Độ khó: {exam.difficulty.name}
+                                        </p>
+                                        <p className="flex items-center gap-1">
+                                            <Clock className="w-4 h-4" />
+                                            Thời gian: {exam.duration} phút
+                                        </p>
+                                        <p className="flex items-center gap-1">
+                                            <CheckCircle className="w-4 h-4" />
+                                            Điểm đạt: {exam.passScore}
+                                        </p>
+                                        <p className="flex items-center gap-1">
+                                            <HelpCircle className="w-4 h-4" />
+                                            Số câu hỏi: {exam.questions.length}
+                                        </p>
+                                        <p className="flex items-center gap-1">
+                                            <Flame className="w-4 h-4" />
+                                            Lượt chơi: {exam.playedTimes}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex gap-3 flex-wrap">
+                                        {ownerFilter === "mine" && (
                                             <Button
-                                                variant="ghost"
+                                                variant="outline"
                                                 size="sm"
-                                                className="p-1"
-                                                onClick={() => router.push(`/exams/${exam.id}/edit`)}
+                                                className="text-purple-700 border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200"
+                                                onClick={() => router.push(`/users/exams/${exam.id}`)}
                                             >
-                                                <Edit className="w-6 h-6"/>
+                                                <FileText className="w-4 h-4 mr-1" />
+                                                Xem danh sách câu hỏi
                                             </Button>
-                                            <DeleteButton id={exam.id} handleDelete={handleDeleteExam}/>
-                                        </div>
-                                    )}
-                                </div>
-                            </CardHeader>
-
-                            <CardContent className="space-y-4 mt-2 text-sm text-gray-700">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                                    <p className="flex items-center gap-1"><BookOpen
-                                        className="w-4 h-4"/>Danh mục: {exam.category.name}</p>
-                                    <p className="flex items-center gap-1"><Target
-                                        className="w-4 h-4"/>Độ khó: {exam.difficulty.name}</p>
-                                    <p className="flex items-center gap-1"><Clock
-                                        className="w-4 h-4"/>Thời gian: {exam.duration} phút</p>
-                                    <p className="flex items-center gap-1"><CheckCircle
-                                        className="w-4 h-4"/>Điểm đạt: {exam.passScore}</p>
-                                    <p className="flex items-center gap-1"><HelpCircle
-                                        className="w-4 h-4"/>Số câu hỏi: {exam.questions.length}</p>
-                                    <p className="flex items-center gap-1"><Flame
-                                        className="w-4 h-4"/>Lượt chơi: {exam.playedTimes}</p>
-                                </div>
-
-                                <div className="flex gap-3 flex-wrap">
-                                    {ownerFilter === "mine" && (
+                                        )}
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="text-purple-700 border-purple-300 hover:bg-purple-50 transition-all"
-                                            onClick={() => router.push(`/users/exams/${exam.id}`)}
+                                            className="text-purple-700 border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200"
+                                            onClick={() => router.push(`/users/exams/${exam.id}/history`)}
                                         >
-                                            <FileText className="w-4 h-4 mr-1"/>
-                                            Xem danh sách câu hỏi
+                                            <BarChart2 className="w-4 h-4 mr-1" />
+                                            Lịch sử thi
                                         </Button>
-                                    )}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="text-purple-700 border-purple-300 hover:bg-purple-50 transition-all"
-                                        onClick={() => router.push(`/users/exams/${exam.id}/history`)}
-                                    >
-                                        <BarChart2 className="w-4 h-4 mr-1"/>
-                                        Lịch sử thi
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="text-purple-700 border-purple-300 hover:bg-purple-50 transition-all"
-                                        onClick={() => handleCreateRoom(exam.id)}
-                                    >
-                                        <FlaskConical className="w-4 h-4 mr-1"/>
-                                        Tạo phòng thi online
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-purple-700 border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200"
+                                            onClick={() => handleCreateRoom(exam.id)}
+                                        >
+                                            <FlaskConical className="w-4 h-4 mr-1" />
+                                            Tạo phòng thi online
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))
+                    )}
                 </div>
 
                 <div className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
                     {page > 1 && (
-                        <Button variant="outline" onClick={() => setPage(page - 1)} className="text-sm">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(page - 1)}
+                            className="text-sm cursor-pointer transition-all duration-200"
+                        >
                             Trang trước
                         </Button>
                     )}
-                    <Button className="text-blue-700" disabled>
+                    <Button
+                        className="text-blue-700 cursor-pointer transition-all duration-200"
+                        disabled
+                    >
                         {page}/{totalPage}
                     </Button>
                     {page < totalPage && (
-                        <Button variant="outline" onClick={() => setPage(page + 1)} className="text-sm">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(page + 1)}
+                            className="text-sm cursor-pointer transition-all duration-200"
+                        >
                             Trang sau
                         </Button>
                     )}
                 </div>
-
-                {!loading && exams.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <Search className="w-12 h-12 mb-4 opacity-50"/>
-                        <p>Không tìm thấy bài thi nào phù hợp</p>
-                    </div>
-                )}
-
-                {loading && (
-                    <div className="flex justify-center py-8 text-gray-500">Đang tải bài thi...</div>
-                )}
             </div>
         </div>
     );
