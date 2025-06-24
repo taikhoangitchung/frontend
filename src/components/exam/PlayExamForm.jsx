@@ -3,20 +3,20 @@
 import {useState, useEffect, useRef} from "react"
 import {Button} from "../ui/button"
 import ExamService from "../../services/ExamService"
-import {useParams, useRouter} from "next/navigation"
+import {useParams, usePathname, useRouter} from "next/navigation"
 import {toast} from "sonner"
 import HistoryService from "../../services/HistoryService"
 import ExamResultSummary from "./ExamResultSummary";
 import ConfirmDialog from "../alerts-confirms/ConfirmDialog";
-import ExamDetailPanel from "./ExamDetailPanel";
 import formatTime from "../../util/formatTime";
-import mergedQuestions from "../../util/mergeQuestion";
+import socketInstance from "../../config/socketConfig";
 
 export default function PlayExamForm() {
-    const {id} = useParams()
+    const {id, code} = useParams()
     const router = useRouter()
     const [questions, setQuestions] = useState([])
     const [questionIndex, setQuestionIndex] = useState(0)
+    const [waitingForOthers, setWaitingForOthers] = useState(false);
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [submitted, setSubmitted] = useState(false)
@@ -25,23 +25,29 @@ export default function PlayExamForm() {
     const [timeLeft, setTimeLeft] = useState(0)
     const [timeSpent, setTimeSpent] = useState(0)
     const [resultData, setResultData] = useState(null)
-    const [detailData, setDetailData] = useState(null)
     const [countdown, setCountdown] = useState(3)
     const [ready, setReady] = useState(false)
-    const [reviewing, setReviewing] = useState(false)
     const [userAnswers, setUserAnswers] = useState({})
+    const [isStarted, setIsStarted] = useState(false);
 
+    const isOnline = usePathname().includes("/online/")
     const timerRef = useRef(null)
+    const socketRef = useRef(null);
     const currentQuestion = questions[questionIndex] || {}
     const isMultipleChoice = currentQuestion?.type?.name === "multiple"
+    const username = localStorage.getItem("username");
 
     useEffect(() => {
         const fetchQuizData = async () => {
             setLoading(true)
             try {
-                const response = await ExamService.getToPlayById(id)
+                let response
+                if (id) {
+                    response = await ExamService.getToPlayById(id)
+                } else if (code) {
+                    response = await ExamService.getToPlayByRoomCode(code)
+                }
                 setQuestions(response.data.questions)
-                console.log(response.data.duration)
                 setDuration(response.data.duration)
                 setTimeLeft(response.data.duration * 60)
                 setCountdown(3)
@@ -67,9 +73,54 @@ export default function PlayExamForm() {
         fetchQuizData()
     }, [id])
 
+    useEffect(() => {
+        if (!isOnline || !code || !username) return;
+
+        const socket = socketInstance();
+        socketRef.current = socket;
+
+        const handleMessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+
+                if (data.type === "START") {
+                    setIsStarted(true);
+                    setReady(true); // bắt đầu đếm giờ
+                }
+
+                if (data.type === "END") {
+                    setWaitingForOthers(false);
+                    if (socketRef.current?.readyState === WebSocket.OPEN) {
+                        socketRef.current.close();
+                        console.log("✅ Đã đóng WebSocket sau END");
+                    }
+                }
+            } catch (err) {
+                console.error("❌ Lỗi xử lý WS message:", err);
+            }
+        };
+
+        socket.addEventListener("open", () => {
+            console.log("🟢 WebSocket mở, gửi START");
+        });
+
+        socket.addEventListener("message", handleMessage);
+        socket.addEventListener("close", () => {
+            console.log("🔌 WebSocket đã đóng");
+        });
+
+        return () => {
+            socket.removeEventListener("message", handleMessage);
+            if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+                socket.close();
+                console.log("🚪 Đã đóng WebSocket khi rời trang");
+            }
+        };
+    }, [isOnline, code, username]);
+
 
     useEffect(() => {
-        if (!loading && ready && !submitted) {
+        if (!loading && ready && isStarted && !submitted) {
             timerRef.current = setInterval(() => {
                 setTimeLeft((prev) => {
                     if (prev <= 1) {
@@ -120,8 +171,8 @@ export default function PlayExamForm() {
         setTimeSpent(0)
         setIsTimeUp(false)
         setSubmitting(false)
-        setReviewing(false);
         setReady(false)
+        setIsStarted(false);
         setCountdown(3)
 
         if (timerRef.current) clearInterval(timerRef.current)
@@ -141,11 +192,11 @@ export default function PlayExamForm() {
         }, 1000)
     }
 
-
     const handleSubmitQuiz = async (isAutoSubmit = false) => {
-        if (submitted || submitting) return
-        clearInterval(timerRef.current)
-        setSubmitting(true)
+        if (submitted || submitting) return;
+        clearInterval(timerRef.current);
+        setSubmitting(true);
+
         try {
             const submissionData = {
                 examId: id,
@@ -153,21 +204,30 @@ export default function PlayExamForm() {
                 finishedAt: new Date().toISOString().replace("Z", "").split(".")[0],
                 choices: questions.map((q, i) => ({
                     questionId: q.id,
-                    answerIds: userAnswers[i] || []
-                }))
-            }
+                    answerIds: userAnswers[i] || [],
+                })),
+                ...(code && {roomCode: code}),
+            };
 
-            const response = await HistoryService.add(submissionData)
-            setSubmitted(true)
-            setResultData(response.data)
-            setDetailData(mergedQuestions(response))
-            toast.success(isAutoSubmit ? "Hết thời gian! Tự động nộp bài thi..." : "Nộp bài thi thành công!")
+            const response = await HistoryService.add(submissionData);
+            console.log(response)
+
+            if (isOnline && socketRef.current?.readyState === WebSocket.OPEN) {
+                socketRef.current.send(`SUBMIT:${code}`);
+            }
+            if (isOnline) {
+                setWaitingForOthers(true);
+            }
+            setSubmitted(true);
+            setResultData(response.data);
+
+            toast.success(isAutoSubmit ? "Tự động nộp bài!" : "Nộp bài thành công!");
         } catch (error) {
-            toast.error("Có lỗi xảy ra khi nộp bài thi!")
-            setSubmitting(false)
-            if (isAutoSubmit) setIsTimeUp(false)
+            toast.error("Lỗi khi nộp bài!");
+            setSubmitting(false);
+            if (isAutoSubmit) setIsTimeUp(false);
         }
-    }
+    };
 
     const getQuestionButtonStyle = (index) => {
         const isCurrent = questionIndex === index
@@ -183,9 +243,9 @@ export default function PlayExamForm() {
         const disabled = submitted || submitting
         const state = disabled ? "opacity-50 cursor-not-allowed" : ""
         if (selected) {
-            return `${base} ${state} bg-gradient-to-br ${answer.color || "from-purple-600 to-purple-700"} ring-4 ring-white ring-opacity-60 scale-105 shadow-lg`
+            return `${base} ${state} bg-gradient-to-br ${answer.color} ring-4 ring-white ring-opacity-60 scale-105 shadow-lg`
         } else {
-            return `${base} ${state} bg-gradient-to-br ${answer.color || "from-purple-600 to-purple-700"} ${!disabled ? "hover:scale-105 hover:shadow-lg" : ""}`
+            return `${base} ${state} bg-gradient-to-br ${answer.color} ${!disabled ? "hover:scale-105 hover:shadow-lg" : ""}`
         }
     }
 
@@ -226,20 +286,22 @@ export default function PlayExamForm() {
                     BẮT ĐẦU!
                 </div>
             )}
-            {submitted && resultData && !reviewing && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <ExamResultSummary
-                        result={resultData}
-                        onReview={() => setReviewing(true)}
-                        onReplay={handleReplay}
-                    />
+
+            {submitted && isOnline && waitingForOthers && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center text-white z-50">
+                    <div className="text-3xl font-bold">Đang chờ các thí sinh khác hoàn thành...</div>
                 </div>
             )}
 
-            {reviewing && detailData && (
-                <ExamDetailPanel data={detailData} onClose={() => setReviewing(false)} />
+            {submitted && resultData && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <ExamResultSummary
+                        historyId={resultData}
+                        onReplay={handleReplay}
+                        isOnline={isOnline}
+                    />
+                </div>
             )}
-
             <>
                 <div className="flex items-center justify-between">
                     <ConfirmDialog
