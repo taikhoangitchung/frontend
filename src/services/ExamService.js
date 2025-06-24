@@ -55,6 +55,14 @@ class ExamService {
     static async delete(id) {
 
     }
+
+    static async getToPlayByRoomCode(code) {
+        try {
+            return await axiosInstance.get(`/exams/rooms/${code}/play`);
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
 }
 
 export default ExamService;

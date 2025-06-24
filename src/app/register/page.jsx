@@ -8,9 +8,10 @@ import UserService from "../../services/UserService"
 import { toast } from "sonner"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEye, faEyeSlash, faEnvelope, faArrowLeft, faLock, faUser } from "@fortawesome/free-solid-svg-icons"
-import EmailService from "../../services/EmailService";
-import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
-import EmailTemplate from "../../util/emailTemplate";
+import EmailService from "../../services/EmailService"
+import { ReactDOMServerEdge } from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints"
+import EmailTemplate from "../../util/emailTemplate"
+import { jwtDecode } from "jwt-decode"
 
 const Register = () => {
     const router = useRouter()
@@ -21,14 +22,39 @@ const Register = () => {
     const [isReady, setIsReady] = useState(false)
 
     useEffect(() => {
+        // Xử lý token từ URL nếu có (tương tự login/page.jsx)
+        const params = new URLSearchParams(window.location.search)
+        const token = params.get("accessToken")
+        const refreshToken = params.get("refreshToken")
+
+        if (token && refreshToken) {
+            const decoded = jwtDecode(token)
+            localStorage.setItem("token", token)
+            localStorage.setItem("refreshToken", refreshToken)
+            localStorage.setItem("email", decoded.sub)
+            localStorage.setItem("id", decoded.id)
+            localStorage.setItem("role", decoded.role)
+            localStorage.setItem("username", decoded.username)
+
+            // Thêm thông báo đăng ký Google thành công
+            toast.success("Đăng ký thành công! Chào mừng bạn đến với QuizGym.", {
+                autoClose: 2000,
+                className: "bg-green-100 text-green-800 border border-green-300 rounded-lg shadow-md",
+            })
+            const nextPage = decoded.role === "ADMIN" ? "/admin/dashboard" : "/users/dashboard"
+
+            // Xóa query sau khi xử lý xong
+            const cleanUrl = window.location.origin + window.location.pathname
+            window.history.replaceState({}, document.title, cleanUrl)
+
+            setTimeout(() => router.push(nextPage), 1500)
+        }
+
         setIsReady(true)
     }, [])
 
-    if (!isReady) return null
-
     const validationSchema = Yup.object({
-        username: Yup.string()
-            .max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
+        username: Yup.string().max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
         email: Yup.string()
             .email("Email phải có định dạng hợp lệ, ví dụ: example@email.com")
             .required("Email không được để trống"),
@@ -43,25 +69,30 @@ const Register = () => {
         localStorage.removeItem("token")
         try {
             const response = await UserService.register(values)
-            toast.success(response.data, { autoClose: 1500 })
+            toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.", {
+                autoClose: 2000,
+                className: "bg-green-100 text-green-800 border border-green-300 rounded-lg shadow-md",
+            })
 
-            const token = crypto.randomUUID();
-            localStorage.setItem("token_confirm_email", token);
+            const token = crypto.randomUUID()
+            localStorage.setItem("token_confirm_email", token)
             const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
-                <EmailTemplate data={`http://localhost:3000/confirm`}
-                               title={"Mở Khóa Tài Khoản"}
-                               description={"Nhấn nút bên dưới để xác nhận"}
-                               openButton={true}/>
-            );
+                <EmailTemplate
+                    data={`http://localhost:3000/confirm`}
+                    title={"Mở Khóa Tài Khoản"}
+                    description={"Nhấn nút bên dưới để xác nhận"}
+                    openButton={true}
+                />
+            )
             const params = {
                 to: values.email,
                 subject: "Mở Khóa Tài Khoản",
                 html: htmlString,
-                token: token
+                token: token,
             }
 
-            const responseConfirm = await EmailService.sendMail(params);
-            toast.success(responseConfirm.data);
+            const responseConfirm = await EmailService.sendMail(params)
+            toast.success(responseConfirm.data)
 
             setTimeout(() => {
                 localStorage.setItem("autoLogin", JSON.stringify({ email: values.email, password: values.password }))
@@ -74,6 +105,12 @@ const Register = () => {
             setSubmitting(false)
         }
     }
+
+    const handleGoogleRegister = () => {
+        window.location.href = "http://localhost:8080/oauth2/authorization/google"
+    }
+
+    if (!isReady) return null
 
     return (
         <div
@@ -95,7 +132,7 @@ const Register = () => {
                                 <div className="space-y-6 mb-16">
                                     <button
                                         className="w-full flex items-center justify-between p-5 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
-                                        onClick={() => toast.info("Tính năng đăng ký với Google sẽ sớm được triển khai")}
+                                        onClick={handleGoogleRegister}
                                     >
                                         <div className="flex items-center">
                                             <div className="w-5 h-5 mr-3 text-red-500 font-bold">G</div>
@@ -133,12 +170,12 @@ const Register = () => {
                                     onClick={() => setShowEmailForm(false)}
                                     className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                                 >
-                                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2"/>
+                                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
                                     Quay lại
                                 </button>
                                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Đăng ký với email</h1>
                                 <Formik
-                                    initialValues={{username: "", email: "", password: "", confirmPassword: ""}}
+                                    initialValues={{ username: "", email: "", password: "", confirmPassword: "" }}
                                     validationSchema={validationSchema}
                                     onSubmit={handleSubmit}
                                 >
@@ -157,8 +194,11 @@ const Register = () => {
                                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                                                     />
                                                 </div>
-                                                <ErrorMessage name="username" component="p"
-                                                              className="text-red-500 text-sm mt-1"/>
+                                                <ErrorMessage
+                                                    name="username"
+                                                    component="p"
+                                                    className="text-red-500 text-sm mt-1"
+                                                />
                                             </div>
                                             <div>
                                                 <div className="relative">
@@ -174,8 +214,11 @@ const Register = () => {
                                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                                                     />
                                                 </div>
-                                                <ErrorMessage name="email" component="p"
-                                                              className="text-red-500 text-sm mt-1"/>
+                                                <ErrorMessage
+                                                    name="email"
+                                                    component="p"
+                                                    className="text-red-500 text-sm mt-1"
+                                                />
                                             </div>
                                             <div>
                                                 <div className="relative">
@@ -195,11 +238,14 @@ const Register = () => {
                                                         onClick={() => setShowPassword(!showPassword)}
                                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                     >
-                                                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye}/>
+                                                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                                                     </button>
                                                 </div>
-                                                <ErrorMessage name="password" component="p"
-                                                              className="text-red-500 text-sm mt-1"/>
+                                                <ErrorMessage
+                                                    name="password"
+                                                    component="p"
+                                                    className="text-red-500 text-sm mt-1"
+                                                />
                                             </div>
                                             <div>
                                                 <div className="relative">
@@ -220,11 +266,15 @@ const Register = () => {
                                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                     >
                                                         <FontAwesomeIcon
-                                                            icon={showConfirmPassword ? faEyeSlash : faEye}/>
+                                                            icon={showConfirmPassword ? faEyeSlash : faEye}
+                                                        />
                                                     </button>
                                                 </div>
-                                                <ErrorMessage name="confirmPassword" component="p"
-                                                              className="text-red-500 text-sm mt-1"/>
+                                                <ErrorMessage
+                                                    name="confirmPassword"
+                                                    component="p"
+                                                    className="text-red-500 text-sm mt-1"
+                                                />
                                             </div>
                                             <button
                                                 type="submit"
@@ -252,15 +302,19 @@ const Register = () => {
 
                     {/* Right Panel */}
                     <div className="flex-1 bg-gradient-to-br from-orange-100 to-blue-100 relative overflow-hidden">
-                        <img src="/photo-login.jpg" alt="Quizizz Hero"
-                             className="absolute inset-0 w-full h-full object-cover"/>
-                        <div
-                            className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
+                        <img
+                            src="/photo-login.jpg"
+                            alt="Quizizz Hero"
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
                             <div className="flex items-center mb-2">
-                            <span className="text-lg">Thầy cô yêu chúng tôi</span>
+                                <span className="text-lg">Thầy cô yêu chúng tôi</span>
                                 <span className="ml-2">😍</span>
                             </div>
-                            <p className="text-sm opacity-90">Tham gia cùng hơn 200 triệu nhà sư phạm và người học trên QuizGym</p>
+                            <p className="text-sm opacity-90">
+                                Tham gia cùng hơn 200 triệu nhà sư phạm và người học trên QuizGym
+                            </p>
                         </div>
                     </div>
                 </div>

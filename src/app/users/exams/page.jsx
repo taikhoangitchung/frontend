@@ -75,7 +75,7 @@ export default function ExamManager() {
     async function handleCreateRoom(id) {
         try {
             const response = await RoomService.create(id);
-            router.push(`/users/room/${response.data}/join`);
+            router.push(`/users/exams/online/${response.data}`);
         } catch (error) {
             console.error(error);
         }
