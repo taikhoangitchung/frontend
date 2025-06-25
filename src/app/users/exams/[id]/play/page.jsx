@@ -1,17 +1,18 @@
 "use client"
 
-import {useState, useEffect, useRef} from "react"
-import {useParams, useRouter} from "next/navigation"
-import {toast} from "sonner"
+import { useState, useEffect, useRef } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { toast } from "sonner"
 import ExamService from "../../../../../services/ExamService";
 import ExamResultSummary from "../../../../../components/exam/ExamResultSummary";
 import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDialog";
 import formatTime from "../../../../../util/formatTime";
-import {Button} from "../../../../../components/ui/button";
+import { Button } from "../../../../../components/ui/button";
 import HistoryService from "../../../../../services/HistoryService";
+import { X } from "lucide-react" // Thêm icon X
 
 export default function OfflineExamForm() {
-    const {id} = useParams()
+    const { id } = useParams()
     const router = useRouter()
     const [questions, setQuestions] = useState([])
     const [questionIndex, setQuestionIndex] = useState(0)
@@ -80,7 +81,7 @@ export default function OfflineExamForm() {
         } else {
             updatedAnswerIds = [answerId]
         }
-        setUserAnswers((prev) => ({...prev, [questionIndex]: updatedAnswerIds}))
+        setUserAnswers((prev) => ({ ...prev, [questionIndex]: updatedAnswerIds }))
     }
 
     const changeQuestion = (index) => {
@@ -170,13 +171,18 @@ export default function OfflineExamForm() {
             className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white p-6 flex flex-col gap-6 relative">
             {submitted && resultData && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <ExamResultSummary historyId={resultData} onReplay={handleReplay} isOnline={false}/>
+                    <ExamResultSummary historyId={resultData} onReplay={handleReplay} isOnline={false} />
                 </div>
             )}
             <div className="flex items-center justify-between">
                 <ConfirmDialog
-                    triggerLabel="Thoát ra"
-                    triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold"
+                    triggerLabel={
+                        <div className="flex items-center gap-2">
+                            <X size={18} /> {/* Thêm icon X */}
+                            Thoát ra
+                        </div>
+                    }
+                    triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2"
                     title="Bạn có chắc chắn muốn thoát?"
                     description="Bài làm sẽ không được lưu lại nếu chưa nộp."
                     actionLabel="Thoát ngay"
@@ -206,7 +212,7 @@ export default function OfflineExamForm() {
                 </div>
             </div>
 
-            <div className={`grid gap-4`} style={{gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`}}>
+            <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
                 {currentQuestion?.answers?.map((answer, index) => (
                     <button
                         key={index}
@@ -222,7 +228,7 @@ export default function OfflineExamForm() {
                                     <svg className="w-5 h-5 text-purple-900" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd"
                                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                              clipRule="evenodd"/>
+                                              clipRule="evenodd" />
                                     </svg>
                                 </div>
                             </div>
