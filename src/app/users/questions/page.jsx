@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { Separator } from "../../../components/ui/separator";
-import { Search, Plus, Edit, X, Check } from "lucide-react";
+import {Search, Plus, Edit, X, Check, ArrowLeft} from "lucide-react";
 import { useRouter } from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
 import { toast } from "sonner";
@@ -105,7 +105,7 @@ export default function QuizInterface() {
     return (
         <div className="min-h-screen bg-gray-50 py-6">
             <div className="max-w-6xl mx-auto px-6">
-                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
                     <div className="flex items-center gap-3 flex-wrap">
                         <h1 className="text-2xl font-semibold text-gray-900">
                             Tìm kiếm câu hỏi
@@ -128,17 +128,17 @@ export default function QuizInterface() {
                         </Select>
                     </div>
 
-                    <Button
+                    <button
                         onClick={() => router.push("/users/dashboard")}
-                        className="bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 h-9 px-4 py-2 cursor-pointer transition-all duration-200"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 mr-2" />
-                        <span>Quay lại</span>
-                    </Button>
+                        <ArrowLeft className="w-4 h-4"/>
+                        <span className="text-white">Quay lại</span>
+                    </button>
                 </div>
 
-                <div className="relative w-full mb-4">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <div className="relative w-full mb-8">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4"/>
                     <Input
                         placeholder="Nhập nội dung câu hỏi, người tạo hoặc đáp án..."
                         value={searchTerm}
@@ -146,11 +146,11 @@ export default function QuizInterface() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 cursor-pointer transition-all duration-200"
+                        className="pl-10 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 
-                <Separator />
+                <Separator/>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -159,7 +159,7 @@ export default function QuizInterface() {
                         </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
-                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300 cursor-pointer transition-all duration-200"
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs h-9 px-4 py-2 has-[>svg]:px-3 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                             variant="outline"
                         >
                             <Plus className="w-4 h-4 mr-2" />
@@ -181,7 +181,7 @@ export default function QuizInterface() {
                         questions.map((question, index) => (
                             <Card
                                 key={question.id}
-                                className="border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+                                className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white"
                             >
                                 <CardHeader className="pb-0">
                                     <div className="flex items-start justify-between">
