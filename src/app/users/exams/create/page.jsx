@@ -85,56 +85,18 @@ export default function CreateExam({id}) {
             questions: [],
         },
         validationSchema: ExamSchema,
-        onSubmit: (values) => {
-            if (values.questions.length === 0) {
-                toast.warning("Hãy thêm ít nhất 1 câu hỏi")
-                return;
-            } else if (values.questions.length < values.questionLimit) {
-                toast.warning("Hãy thêm đủ số lượng câu hỏi")
-                return;
+        onSubmit: async (values) => {
+            if (values.questionLimit < Math.max(...questionLimits.map(limit => limit.value))) {
+                if (values.questions.length === 0) {
+                    toast.warning("Hãy thêm ít nhất 1 câu hỏi")
+                    return;
+                } else if (values.questions.length < values.questionLimit) {
+                    toast.warning("hãy thêm đủ số lượng câu hỏi")
+                    return;
+                }
             }
 
-            setIsSubmitting(true)
-            ExamService.exist(values.title)
-                .then((res1) => {
-                    if (res1.data && ((isEdit && oldTitle !== values.title) || !isEdit)) {
-                        toast.warning("Tên bài thi đã tồn tại")
-                        setIsSubmitting(false)
-                    } else {
-                        if (isEdit) {
-                            const idLoading = toast.loading("Đang cập nhật bài thi ...")
-                            const {questions, ...rest} = values
-                            const params = {...rest, questionIds: questions.map((q) => q.id)}
-
-                            ExamService.update(params, id)
-                                .then((res3) => {
-                                    toast.success(res3.data, {id: idLoading})
-                                })
-                                .catch((err3) => {
-                                    toast.error(err3.toString(), {id: idLoading})
-                                })
-                                .finally(() => setIsSubmitting(false))
-                        } else {
-                            const idLoading = toast.loading("Đang tạo bài thi ...")
-                            const {questions, ...rest} = values
-                            const params = {...rest, questionIds: questions.map((q) => q.id)}
-
-                            ExamService.create(params)
-                                .then((res2) => {
-                                    toast.success(res2.data, {id: idLoading})
-                                    router.push("/users/exams")
-                                })
-                                .catch((err) => {
-                                    toast.error(err.response.data, {id: idLoading})
-                                    setIsSubmitting(false)
-                                })
-                        }
-                    }
-                })
-                .catch((err) => {
-                    toast.error(err.toString())
-                    setIsSubmitting(false)
-                })
+            await handleSubmit(values);
         },
     })
 
@@ -163,6 +125,50 @@ export default function CreateExam({id}) {
             })
             .catch((err) => toast.error(err.response.data))
     }, [formik.values.categoryId, questionSource, userId, searchTerm])
+
+    const handleSubmit = async (values) => {
+        setIsSubmitting(true);
+
+        try {
+            const titleChanged = isEdit && oldTitle !== values.title;
+            const shouldCheckDuplicate = titleChanged || !isEdit;
+
+            if (shouldCheckDuplicate) {
+                const existRes = await ExamService.exist(values.title);
+                const titleExists = existRes.data;
+
+                if (titleExists) {
+                    toast.warning("Tên bài thi đã tồn tại");
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+
+            const { questions, ...rest } = values;
+            const params = {
+                ...rest,
+                questionIds: questions.map(q => q.id)
+            };
+
+            const loadingMessage = isEdit ? "Đang cập nhật bài thi ..." : "Đang tạo bài thi ...";
+            const idLoading = toast.loading(loadingMessage);
+
+            if (isEdit) {
+                const res = await ExamService.update(params, id);
+                toast.success(res.data, { id: idLoading });
+            } else {
+                const res = await ExamService.create(params);
+                toast.success(res.data, { id: idLoading });
+                router.push("/users/exams");
+            }
+        } catch (error) {
+            const errorMessage = error?.response?.data || error?.message || "Đã xảy ra lỗi";
+            toast.error(errorMessage);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
     const fetchForEdit = () => {
         ExamService.findById(id)
@@ -644,7 +650,7 @@ export default function CreateExam({id}) {
                                                         Câu hỏi của người khác
                                                     </div>
                                                 </SelectItem>
-                                                <SelectItem value={"999"}>
+                                                <SelectItem value={"-999"}>
                                                     <div className="flex items-center gap-2">
                                                         <User className="h-4 w-4"/>
                                                         Tất cả
