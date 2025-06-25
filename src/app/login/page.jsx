@@ -15,7 +15,6 @@ import {
     faLock,
 } from "@fortawesome/free-solid-svg-icons"
 import { jwtDecode } from "jwt-decode"
-import { useKickSocket } from "../../config/socketConfig"
 
 const Login = () => {
     const router = useRouter()
@@ -102,16 +101,6 @@ const Login = () => {
                 nextPage = "/admin/dashboard"
             } else {
                 nextPage = "/users/dashboard"
-
-                useKickSocket({
-                    username,
-                    onKick: (data) => {
-                        if (data === "KICK") {
-                            localStorage.clear()
-                            router.push("/");
-                        }
-                    }
-                });
             }
 
             setTimeout(() => router.push(nextPage), 1500)

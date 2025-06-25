@@ -1,13 +1,15 @@
 'use client'
 
 import {useEffect, useState} from "react"
-import { useRouter } from "next/navigation"
+import {useRouter} from "next/navigation"
 import {Loader2} from "lucide-react"
 import {jwtDecode} from "jwt-decode"
+import {useKickSocket} from "../../config/socketConfig";
 
-export default function UserLayout({ children }) {
+export default function UserLayout({children}) {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
+    const [email, setEmail] = useState("")
 
     useEffect(() => {
         const token = localStorage.getItem("token")
@@ -15,23 +17,34 @@ export default function UserLayout({ children }) {
             router.replace("/forbidden")
             return
         }
-
         try {
             const decoded = jwtDecode(token)
             const role = decoded.role
-
             if (role !== "USER") {
                 router.replace("/forbidden")
                 return
             }
+            const email = localStorage.getItem("email")
+            setEmail(email)
         } catch (e) {
             console.error("Invalid token:", e)
             router.replace("/forbidden")
             return
         }
-
         setLoading(false)
     }, [])
+
+    if (email !== "") {
+        useKickSocket({
+            email,
+            onKick: (data) => {
+                if (data === "KICK") {
+                    localStorage.clear()
+                    router.push("/");
+                }
+            }
+        });
+    }
 
     if (loading) {
         return (
