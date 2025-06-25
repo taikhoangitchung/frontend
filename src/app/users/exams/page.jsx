@@ -128,8 +128,8 @@ export default function ExamManager() {
                     </button>
                 </div>
 
-                <div className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <div className="relative w-full mb-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4"/>
                     <Input
                         placeholder="Nhập tiêu đề hoặc danh mục..."
                         value={searchTerm}
@@ -137,18 +137,18 @@ export default function ExamManager() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 cursor-pointer transition-all duration-200"
+                        className="pl-10 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 
-                <Separator />
+                <Separator/>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-medium">Danh sách bài thi (Tổng: {totalExams})</span>
                         <Button
                             onClick={() => router.push("/users/exams/create")}
-                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300 cursor-pointer transition-all duration-200"
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs h-9 px-4 py-2 has-[>svg]:px-3 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                             variant="outline"
                         >
                             <Plus className="w-4 h-4 mr-2" />
@@ -168,7 +168,7 @@ export default function ExamManager() {
                         </div>
                     ) : (
                         exams.map((exam) => (
-                            <Card key={exam.id} className="border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer">
+                            <Card key={exam.id} className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white">
                                 <CardHeader className="pb-0">
                                     <div className="flex justify-between items-start">
                                         <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{exam.title}</h2>
@@ -192,27 +192,27 @@ export default function ExamManager() {
                                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                                         <p className="flex items-center gap-1">
                                             <BookOpen className="w-4 h-4" />
-                                            Danh mục: {exam.category.name}
+                                            Danh mục: <strong>{exam.category.name}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
                                             <Target className="w-4 h-4" />
-                                            Độ khó: {exam.difficulty.name}
+                                            Độ khó: <strong>{exam.difficulty.name}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
                                             <Clock className="w-4 h-4" />
-                                            Thời gian: {exam.duration} phút
+                                            Thời gian: <strong>{exam.duration} phút</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
                                             <CheckCircle className="w-4 h-4" />
-                                            Điểm đạt: {exam.passScore}
+                                            Điểm đạt: <strong>{exam.passScore}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
                                             <HelpCircle className="w-4 h-4" />
-                                            Số câu hỏi: {exam.questions.length}
+                                            Số câu hỏi: <strong>{exam.questions.length}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
                                             <Flame className="w-4 h-4" />
-                                            Lượt chơi: {exam.playedTimes}
+                                            Lượt chơi: <strong>{exam.playedTimes}</strong>
                                         </p>
                                     </div>
 
@@ -231,7 +231,7 @@ export default function ExamManager() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="text-purple-700 border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200"
+                                            className="text-blue-500 border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200"
                                             onClick={() => router.push(`/users/exams/${exam.id}/history`)}
                                         >
                                             <BarChart2 className="w-4 h-4 mr-1" />
@@ -240,7 +240,7 @@ export default function ExamManager() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="text-purple-700 border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200"
+                                            className="text-green-600 border-green-300 hover:bg-green-50 cursor-pointer transition-all duration-200"
                                             onClick={() => handleCreateRoom(exam.id)}
                                         >
                                             <FlaskConical className="w-4 h-4 mr-1" />
