@@ -40,7 +40,6 @@ import {useRouter} from "next/navigation"
 import {FaCircleQuestion} from "react-icons/fa6";
 
 const questionLimits = [
-    {value: 2, label: "2 câu"},
     {value: 20, label: "20 câu"},
     {value: 40, label: "40 câu"},
     {value: 45, label: "45 câu"},

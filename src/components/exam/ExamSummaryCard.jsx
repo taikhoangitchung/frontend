@@ -111,7 +111,7 @@ export default function ExamSummaryCard({search}) {
                                                     className={`p-1 rounded-full ${bgColor} bg-opacity-40 flex items-center justify-center`}>
                                                     {icon}
                                                 </div>
-                                                {exam.playedTimes.toLocaleString()} lần chơi
+                                                {exam.playedTimes.toLocaleString()} lượt chơi
                                             </div>
                                             <div
                                                 className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
