@@ -24,6 +24,9 @@ import {
     Target,
     Trash2,
     Trophy,
+    Upload,
+    ExternalLink,
+    Edit,
     User,
     Zap,
 } from "lucide-react"
@@ -37,15 +40,16 @@ import {toast} from "sonner"
 import QuestionService from "../../../../services/QuestionService"
 import ExamService from "../../../../services/ExamService"
 import {useRouter} from "next/navigation"
-import {FaCircleQuestion} from "react-icons/fa6";
+import {FaCircleQuestion} from "react-icons/fa6"
 import {
     Dialog,
-    DialogContent, DialogDescription,
+    DialogContent,
+    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
-} from "../../../../components/ui/dialog";
+    DialogTrigger,
+} from "../../../../components/ui/dialog"
 
 const questionLimits = [
     {value: 30, label: "30 câu"},
@@ -70,17 +74,19 @@ export default function CreateExam({id}) {
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
     const [userId, setUserId] = useState(Number(localStorage.getItem("id")))
 
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+    const [showImportDialog, setShowImportDialog] = useState(false)
 
     const ExamSchema = Yup.object({
         title: Yup.string().required("Tiêu đề không được để trống"),
-        difficultyId: Yup.number().test("not-default", "Hãy chọn một độ khó", (value) => value !== -1),
-        categoryId: Yup.number().test("not-default", "Hãy chọn một thể loại", (value) => value !== -1),
-        passScore: Yup.number()
+        difficultyId: Yup.number().required("Thiếu độ khó bài thi")
+            .test("not-default", "Hãy chọn một độ khó", (value) => value !== -1),
+        categoryId: Yup.number().required("Thiếu danh mục bài thi")
+            .test("not-default", "Hãy chọn một thể loại", (value) => value !== -1),
+        passScore: Yup.number().required("Thiếu mức điểm để vượt qua bài thi")
             .min(1, "Tỉ lệ số câu đúng để đạt không thể âm")
             .max(100, "Tỉ lệ số câu đúng để đạt không thể lớn hơn 100%"),
-        duration: Yup.number()
-            .min(1, "Thời gian không thê quá ngắn")
+        duration: Yup.number().min(1, "Thời gian không thê quá ngắn").required("Thiếu thời gian để làm bài thi")
     })
 
     const formik = useFormik({
@@ -91,29 +97,29 @@ export default function CreateExam({id}) {
             categoryId: -1,
             duration: 30,
             passScore: 70,
-            questionLimit: 20,
+            questionLimit: 30,
             questions: [],
         },
         validationSchema: ExamSchema,
         onSubmit: async (values) => {
-            if (values.questionLimit < Math.max(...questionLimits.map(limit => limit.value))) {
-                if (values.questions.length === 0) {
-                    toast.warning("Hãy thêm ít nhất 1 câu hỏi")
-                    return;
-                } else if (values.questions.length < values.questionLimit) {
+            if (values.questionLimit < Math.max(...questionLimits.map((limit) => limit.value))) {
+                if (values.questions.length < values.questionLimit) {
                     toast.warning("hãy thêm đủ số lượng câu hỏi")
-                    return;
+                    return
+                } else if (values.questions.length > values.questionLimit) {
+                    toast.warning(`Bạn đang thừa ${values.questions.length - values.questionLimit} câu hỏi`)
+                    return
                 }
             }
 
-            await handleSubmit(values);
+            await handleSubmit(values)
         },
     })
 
     useEffect(() => {
         if (isEdit) fetchForEdit()
 
-        formik.setFieldValue("authorId", userId);
+        formik.setFieldValue("authorId", userId)
 
         CategoryService.getAll()
             .then((res) => setCategories(res.data))
@@ -124,61 +130,64 @@ export default function CreateExam({id}) {
     }, [])
 
     useEffect(() => {
-        QuestionService.filterByCategoryAndSource(
-            formik.values.categoryId
-            , questionSource
-            , userId
-            , searchTerm
-        )
+        QuestionService.filterByCategoryAndSource(formik.values.categoryId, questionSource, userId, searchTerm)
             .then((res) => {
                 setQuestionBank(res.data)
             })
             .catch((err) => toast.error(err.response.data))
     }, [formik.values.categoryId, questionSource, userId, searchTerm])
 
+    useEffect(() => {
+        const countQuestions = formik.values.questions.length
+        const countQuestionLimit = formik.values.questionLimit
+        if (countQuestions > countQuestionLimit) {
+            toast.warning(`Bạn đang thêm thừa ${countQuestions - countQuestionLimit} câu hỏi`)
+        }
+    }, [formik.values.questionLimit]);
+
     const handleSubmit = async (values) => {
-        setIsSubmitting(true);
+        setIsSubmitting(true)
 
         try {
-            const titleChanged = isEdit && oldTitle !== values.title;
-            const shouldCheckDuplicate = titleChanged || !isEdit;
+            const titleChanged = isEdit && oldTitle !== values.title
+            const shouldCheckDuplicate = titleChanged || !isEdit
 
             if (shouldCheckDuplicate) {
-                const existRes = await ExamService.exist(values.title);
-                const titleExists = existRes.data;
+                const existRes = await ExamService.exist(values.title)
+                const titleExists = existRes.data
 
                 if (titleExists) {
-                    toast.warning("Tên bài thi đã tồn tại");
-                    setIsSubmitting(false);
-                    return;
+                    toast.warning("Tên bài thi đã tồn tại")
+                    setIsSubmitting(false)
+                    return
                 }
             }
 
-            const {questions, ...rest} = values;
+            const {questions, ...rest} = values
             const params = {
                 ...rest,
-                questionIds: questions.map(q => q.id)
-            };
+                questionIds: questions.map((q) => q.id),
+            }
 
-            const loadingMessage = isEdit ? "Đang cập nhật bài thi ..." : "Đang tạo bài thi ...";
-            const idLoading = toast.loading(loadingMessage);
+            const loadingMessage = isEdit ? "Đang cập nhật bài thi ..." : "Đang tạo bài thi ..."
+            const idLoading = toast.loading(loadingMessage)
 
             if (isEdit) {
-                const res = await ExamService.update(params, id);
-                toast.success(res.data, {id: idLoading});
+                const res = await ExamService.update(params, id)
+                toast.success(res.data, {id: idLoading})
+                // router.push("/users/exams")
             } else {
-                const res = await ExamService.create(params);
-                toast.success(res.data, {id: idLoading});
-                router.push("/users/exams");
+                const res = await ExamService.create(params)
+                toast.success(res.data, {id: idLoading})
+                router.push("/users/exams")
             }
         } catch (error) {
-            const errorMessage = error?.response?.data || error?.message || "Đã xảy ra lỗi";
-            toast.error(errorMessage);
+            const errorMessage = error?.response?.data || error?.message || "Đã xảy ra lỗi"
+            toast.error(errorMessage)
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false)
         }
-    };
-
+    }
 
     const fetchForEdit = () => {
         ExamService.findById(id)
@@ -205,7 +214,7 @@ export default function CreateExam({id}) {
     }
 
     const clearAllQuestions = () => {
-        formik.setFieldValue("questions", []);
+        formik.setFieldValue("questions", [])
         setShowDeleteDialog(false)
     }
 
@@ -240,10 +249,14 @@ export default function CreateExam({id}) {
 
     const addSelectedQuestions = () => {
         const newQuestions = selectedQuestion.filter((q) => !isQuestionAlreadyAdded(q.id))
+        const countQuestions = formik.values.questions.length
+        const countQuestionLimit = formik.values.questionLimit
 
-        if (formik.values.questions.length >= formik.values.questionLimit) {
+        if (countQuestions > countQuestionLimit) {
+            toast.warning(`Đã vượt giới hạn ${countQuestions - countQuestions} câu hỏi`)
+        } else if (countQuestions === countQuestionLimit) {
             toast.warning("Đã đạt số câu hỏi tối đa")
-        } else if (formik.values.questions.length >= 0) {
+        } else {
             const questionCanAdd = newQuestions.slice(0, formik.values.questionLimit - formik.values.questions.length)
 
             if (questionCanAdd.length !== selectedQuestion.length) {
@@ -257,6 +270,51 @@ export default function CreateExam({id}) {
 
     const removeQuestion = (id) => {
         formik.setFieldValue("questions", [...formik.values.questions.filter((q) => q.id !== id)])
+    }
+
+    const handleEdit = async (question) => {
+        const payload = {
+            category: question.category.name,
+            difficulty: question.difficulty.name,
+            type: question.type.name,
+            content: question.content,
+            answers: question.answers
+        }
+
+        try {
+            await QuestionService.update(question.id, payload)
+            router.push(`/users/questions/${question.id}/edit`)
+        } catch (error) {
+            const message = error?.response?.data;
+            toast.error(message);
+        }
+    }
+
+    const handleDuration = (e) => {
+        let value = e.target.value;
+
+        if (!value || isNaN(value)) {
+            formik.setFieldValue("duration", '');
+            return;
+        }
+        formik.setFieldValue("duration", removeZeroStart(value));
+    };
+
+    const handlePassScore = (e) => {
+        let value = e.target.value;
+
+        if (!value || isNaN(value)) {
+            formik.setFieldValue("passScore", '');
+            return;
+        }
+        formik.setFieldValue("passScore", removeZeroStart(value))
+    }
+
+    const removeZeroStart = (value) => {
+        while (value.toString().startsWith("0")) {
+            value = value.substring(1, value.toString().length);
+        }
+        return value;
     }
 
     const QuestionCard = ({question, index, showRemove = false, onRemove, onToggleSelect, displayAdded}) => {
@@ -338,6 +396,21 @@ export default function CreateExam({id}) {
                             >
                                 {isExpanded ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
                             </Button>
+                            {/* Edit Button */}
+                            {question.user.id === userId && (
+                                <Button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleEdit(question);
+                                    }}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="cursor-pointer text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1"
+                                    title="Chỉnh sửa câu hỏi"
+                                >
+                                    <Edit className="h-4 w-4"/>
+                                </Button>
+                            )}
                             {showRemove && onRemove && (
                                 <Button
                                     onClick={(e) => {
@@ -514,7 +587,7 @@ export default function CreateExam({id}) {
                                         <Input
                                             type="number"
                                             value={formik.values.duration}
-                                            onChange={(e) => formik.setFieldValue("duration", Number(e.target.value))}
+                                            onChange={handleDuration}
                                             className="border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 focus:bg-white h-10"
                                         />
                                         {formik.touched.duration && formik.errors.duration && (
@@ -530,7 +603,7 @@ export default function CreateExam({id}) {
                                         <Input
                                             type="number"
                                             value={formik.values.passScore}
-                                            onChange={(e) => formik.setFieldValue("passScore", Number(e.target.value))}
+                                            onChange={handlePassScore}
                                             className="border-gray-300 bg-gray-50 focus:border-purple-500 focus:ring-purple-500 focus:bg-white h-10"
                                         />
                                         {formik.touched.passScore && formik.errors.passScore && (
@@ -546,7 +619,6 @@ export default function CreateExam({id}) {
                                         <Select
                                             value={formik.values.questionLimit}
                                             onValueChange={(value) => formik.setFieldValue("questionLimit", value)}
-                                            disabled={formik.values.questions.length > 0}
                                         >
                                             <SelectTrigger
                                                 className="border-gray-300 bg-gray-50 focus:border-purple-500 w-full h-10">
@@ -684,9 +756,71 @@ export default function CreateExam({id}) {
                                         <Search className="h-6 w-6"/>
                                     </div>
                                     Ngân Hàng Câu Hỏi
-                                    <Badge className="bg-white/20 text-white border-white/30 ml-auto">
-                                        {`${selectedQuestion.length} đã chọn`}
-                                    </Badge>
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        <Badge className="bg-white/20 text-white border-white/30">
+                                            {`${selectedQuestion.length} đã chọn`}
+                                        </Badge>
+                                        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-white hover:bg-white/20 p-2"
+                                                    title="Import câu hỏi từ Excel"
+                                                >
+                                                    <Upload className="h-4 w-4"/>
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="bg-white max-w-md">
+                                                <DialogHeader>
+                                                    <DialogTitle className="flex items-center gap-2 text-purple-600">
+                                                        <Upload className="h-5 w-5"/>
+                                                        Import Câu Hỏi từ Excel
+                                                    </DialogTitle>
+                                                    <DialogDescription>
+                                                        Tải lên file Excel chứa danh sách câu hỏi để import vào hệ
+                                                        thống.
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <div className="space-y-4">
+                                                    <div
+                                                        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors">
+                                                        <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4"/>
+                                                        <p className="text-gray-600 mb-2">Kéo thả file Excel vào đây</p>
+                                                        <p className="text-sm text-gray-500">hoặc click để chọn file</p>
+                                                        <input
+                                                            type="file"
+                                                            accept=".xlsx,.xls"
+                                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-center">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="bg-white text-purple-600 border-purple-300 hover:bg-purple-50 flex items-center gap-2"
+                                                        >
+                                                            <ExternalLink className="h-4 w-4"/>
+                                                            Xem mẫu Excel
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                                <DialogFooter className="gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => setShowImportDialog(false)}
+                                                        className="bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                                    >
+                                                        Hủy
+                                                    </Button>
+                                                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                                                        <Upload className="h-4 w-4 mr-2"/>
+                                                        Import
+                                                    </Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </div>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 space-y-3 bg-white">
@@ -795,3 +929,4 @@ export default function CreateExam({id}) {
         </div>
     )
 }
+

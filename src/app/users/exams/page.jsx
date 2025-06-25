@@ -170,7 +170,7 @@ export default function ExamManager() {
                                                     variant="ghost"
                                                     size="sm"
                                                     className="p-1 cursor-pointer transition-all duration-200"
-                                                    onClick={() => router.push(`/exams/${exam.id}/edit`)}
+                                                    onClick={() => router.push(`/users/exams/${exam.id}/edit`)}
                                                 >
                                                     <Edit className="w-6 h-6" />
                                                 </Button>

@@ -35,8 +35,7 @@ const ForgotPassword = () => {
                     data={`http://localhost:3000/recover-password`}
                     title={"Yêu cầu đặt lại mật khẩu"}
                     description={
-                        "Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n" +
-                        "          Nhấn nút bên dưới để tiến hành đặt lại mật khẩu:"
+                        "Nhấn nút bên dưới để tiến hành đặt lại mật khẩu:"
                     }
                     openButton={true}
                 />
