@@ -3,10 +3,21 @@
 import React from 'react';
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Play, Users } from "lucide-react";
+import { Play, Globe } from "lucide-react";
+import RoomService from "../../services/RoomService";
 
 function ExamPrePlayCard({ exam, onClose }) {
     const router = useRouter();
+
+    async function handleCreateRoom(id) {
+        try {
+            const response = await RoomService.create(id);
+            router.push(`/users/exams/online/${response.data}`);
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi tạo phòng thi!");
+        }
+    }
 
     return (
         <div
@@ -30,7 +41,7 @@ function ExamPrePlayCard({ exam, onClose }) {
                     {exam.questionCount} Câu hỏi
                 </div>
                 <div className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full px-3 py-1.5 text-sm font-semibold">
-                    {exam.playedTimes.toLocaleString()} lần chơi
+                    {exam.playedTimes.toLocaleString()} lượt chơi
                 </div>
             </div>
 
@@ -53,10 +64,10 @@ function ExamPrePlayCard({ exam, onClose }) {
 
                     <button
                         className="flex-1 bg-purple-500 text-white h-12 rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-purple-600 hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed cursor-pointer"
-                        onClick={() => toast.info("Chức năng này đang được phát triển...")}
+                        onClick={() => handleCreateRoom(exam.id)}
                     >
-                        <Users className="w-5 h-5" />
-                        Thách đấu
+                        <Globe className="w-5 h-5" />
+                        Thách đấu bạn bè
                     </button>
                 </div>
             </div>
