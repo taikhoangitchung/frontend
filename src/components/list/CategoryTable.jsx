@@ -124,19 +124,17 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
     }, [searchTerm])
 
     return (
-        <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div>
             {/* Header */}
             <div className="space-y-4 flex flex-col items-center">
-                <h1 className="text-2xl font-semibold text-gray-900">Danh sách danh mục</h1>
-
                 {/* Search Input with Icon */}
                 <div className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4"/>
                     <Input
                         placeholder="Nhập tên danh mục cần tìm..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 cursor-pointer transition-all duration-200"
+                        className="pl-10 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
             </div>
@@ -144,7 +142,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
             <Separator />
 
             {/* Categories Section */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-8">
                 {/* Categories Header */}
                 <div className="flex items-center justify-between">
                     <div className="text-lg font-medium">Tổng số: {filteredCategories.length}</div>
@@ -167,7 +165,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
 
                 {/* Category Cards */}
                 {paginatedCategories.map((category, index) => (
-                    <Card key={category.id} className="border border-gray-200 px-4 py-3">
+                    <Card key={category.id} className="border border-gray-200 px-4 py-3 bg-white">
                         <CardContent className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
@@ -213,7 +211,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
             {loading && (
                 <div className="space-y-4">
                     {Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => (
-                        <Card key={idx} className="border border-gray-200">
+                        <Card key={idx} className="border border-gray-200 bg-white">
                             <CardHeader className="pb-3">
                                 <div className="flex items-center gap-4">
                                     <Skeleton className="h-4 w-20 rounded" />

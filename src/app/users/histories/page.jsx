@@ -78,7 +78,7 @@ const HistoryPage = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
-            <div className="max-w-7xl mx-auto px-6">
+            <div className="max-w-6xl mx-auto px-6">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-semibold text-gray-900">Lịch sử thi của tôi</h1>
                     <button
@@ -146,7 +146,7 @@ const HistoryPage = () => {
                                     className="bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden cursor-pointer"
                                     onClick={() => router.push(`/users/histories/${history.id}`)}
                                 >
-                                    <div className="w-full h-40 rounded-t-xl overflow-hidden relative group">
+                                    <div className="w-full h-36 rounded-t-xl overflow-hidden relative group">
                                         <img
                                             src="/cardquiz.png"
                                             alt={history.examTitle}
@@ -163,7 +163,7 @@ const HistoryPage = () => {
 
                                     <div className="p-4">
                                         <div
-                                            className="text-center text-base font-semibold text-gray-800 hover:text-gray-900 transition-colors duration-300 mb-4 h-12 flex items-center justify-center">
+                                            className="text-center text-base font-semibold text-gray-800 hover:text-gray-900 transition-colors duration-300 mb-4 h-10 flex items-center justify-center">
                                             <span
                                                 className="line-clamp-2 overflow-hidden text-ellipsis text-wrap">{history.examTitle}</span>
                                         </div>

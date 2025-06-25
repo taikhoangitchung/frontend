@@ -20,6 +20,8 @@ export default function Page() {
     const router = useRouter()
     const username = localStorage.getItem("username")
 
+
+
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -65,7 +67,9 @@ export default function Page() {
                 <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                     {/* Left - Join Quiz */}
                     <div className="flex-1 flex flex-col">
-                        <Card className="bg-gradient-to-br from-white to-purple-50/30 shadow-xl rounded-2xl border border-purple-100/50 overflow-hidden backdrop-blur-sm">
+                        <Card
+                            className="bg-gradient-to-br from-white to-purple-50/30 shadow-xl rounded-2xl border border-purple-100/50 overflow-hidden backdrop-blur-sm cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105"
+                        >
                             <CardContent className="p-0 flex flex-col justify-center">
                                 <div className="space-y-5 max-w-md w-full mx-auto">
                                     <div className="text-center mb-3">
@@ -76,7 +80,7 @@ export default function Page() {
 
                                     <Input
                                         placeholder="Nhập mã quiz để vào phòng thi"
-                                        className="h-14 text-xl text-center font-mono border-2 border-purple-200 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 rounded-xl uppercase cursor-pointer transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                                        className="h-14 text-xl text-center font-mono border-2 border-purple-200 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 rounded-xl uppercase cursor-pointer transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white/90"
                                         maxLength={8}
                                         onChange={handleInput}
                                     />
@@ -106,19 +110,25 @@ export default function Page() {
 
                     {/* Right - User Info */}
                     <div className="flex-1 flex flex-col">
-                        <Card className="flex-1 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 border-0 shadow-xl rounded-2xl overflow-hidden">
+                        <Card
+                            className="flex-1 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 border-0 shadow-xl rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105"
+                            onClick={()=>router.push("/users/histories")}
+                        >
                             <CardContent className="p-6 flex flex-col justify-between h-full relative">
                                 {/* Decorative elements */}
                                 <div
-                                    className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
+                                    className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"
+                                ></div>
                                 <div
-                                    className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10"></div>
+                                    className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-10"
+                                ></div>
 
                                 <div className="relative z-10">
                                     <div className="mb-4 flex items-center gap-3">
                                         <div
-                                            className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                                            <Medal className="w-5 h-5 text-yellow-300"/>
+                                            className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"
+                                        >
+                                            <Medal className="w-5 h-5 text-yellow-300" />
                                         </div>
                                         <div>
                                             <h3 className="text-sm font-medium text-white/80">Xin chào,</h3>
@@ -127,10 +137,11 @@ export default function Page() {
                                     </div>
 
                                     <div
-                                        className="bg-white/15 rounded-xl p-3 border border-white/20 mb-4 backdrop-blur-sm">
+                                        className="bg-white/15 rounded-xl p-3 border border-white/20 mb-4 backdrop-blur-sm"
+                                    >
                                         <div className="flex items-center justify-between">
                                             <span className="text-white/90 font-medium">Thành tích học tập</span>
-                                            <Target className="w-5 h-5 text-yellow-300"/>
+                                            <Target className="w-5 h-5 text-yellow-300" />
                                         </div>
                                     </div>
 
@@ -138,15 +149,23 @@ export default function Page() {
                                         <Card className="bg-white/95 shadow-lg rounded-xl border-0 backdrop-blur-sm">
                                             <CardContent className="p-3 text-center">
                                                 <div
-                                                    className="text-2xl font-bold text-purple-600 mb-1">{playedCount}</div>
-                                                <div className="text-xs text-gray-600 font-medium">Bài đã làm</div>
+                                                    className="text-2xl font-bold text-purple-600 mb-1"
+                                                >
+                                                    {playedCount}
+                                                </div>
+                                                <div className="text-xs text-gray-600 font-medium">
+                                                    Bài đã làm
+                                                </div>
                                             </CardContent>
                                         </Card>
                                         <Card className="bg-white/95 shadow-lg rounded-xl border-0 backdrop-blur-sm">
                                             <CardContent className="p-3 text-center">
-                                                <div className="text-2xl font-bold text-amber-600 mb-1">{accuracy}%
+                                                <div className="text-2xl font-bold text-amber-600 mb-1">
+                                                    {accuracy}%
                                                 </div>
-                                                <div className="text-xs text-gray-600 font-medium">Độ chính xác</div>
+                                                <div className="text-xs text-gray-600 font-medium">
+                                                    Độ chính xác
+                                                </div>
                                             </CardContent>
                                         </Card>
                                     </div>
@@ -160,7 +179,8 @@ export default function Page() {
                 <div className="mt-10">
                     <div className="flex items-center gap-3 mb-8">
                         <div
-                            className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
+                            className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center shadow-lg"
+                        >
                             <Flame className="w-6 h-6 text-white" />
                         </div>
                         <div>
