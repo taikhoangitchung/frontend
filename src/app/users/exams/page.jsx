@@ -82,8 +82,16 @@ export default function ExamManager() {
         }
     }
 
-    const handleDeleteExam = (id) => {
-        toast.info("Chức năng đang được phát triển...");
+    const handleDeleteExam = async (id) => {
+        try {
+            const result = await ExamService.delete(id);
+            toast.success(result.data || "Đã xoá bài thi");
+
+            if (page !== 1) setPage(1);
+            else fetchExams();
+        } catch (error) {
+            toast.error(error.response?.data || "Xoá bài thi thất bại");
+        }
     };
 
     return (
@@ -164,13 +172,13 @@ export default function ExamManager() {
                                 <CardHeader className="pb-0">
                                     <div className="flex justify-between items-start">
                                         <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{exam.title}</h2>
-                                        {exam.playedTimes === 0 && (
+                                        {exam.author.id === currentUserId && exam.playedTimes === 0 && (
                                             <div className="flex gap-1">
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     className="p-1 cursor-pointer transition-all duration-200"
-                                                    onClick={() => router.push(`/exams/${exam.id}/edit`)}
+                                                    onClick={() => router.push(`/users/exams/${exam.id}/edit`)}
                                                 >
                                                     <Edit className="w-6 h-6" />
                                                 </Button>

@@ -29,12 +29,18 @@ export default function QuizInterface() {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPage, setTotalPage] = useState(1);
+    const [userId, setUserId] = useState(undefined);
     const questionPerPage = 20;
 
+    useEffect(() => {
+        const storedId = parseInt(localStorage.getItem("id") || "0");
+        setUserId(storedId);
+    }, []);
+
     const fetchQuestions = useCallback(async () => {
+        if (!userId) return;
         setLoading(true);
         try {
-            const userId = parseInt(localStorage.getItem("id"));
             const res = await QuestionService.getAll();
 
             const filtered = res.data.filter((q) => {
@@ -75,21 +81,24 @@ export default function QuizInterface() {
         } finally {
             setLoading(false);
         }
-    }, [searchTerm, ownerFilter, page]);
+    }, [searchTerm, ownerFilter, page, userId]);
 
     useEffect(() => {
-        fetchQuestions();
-    }, [fetchQuestions]);
+        if (userId !== undefined) {
+            fetchQuestions();
+        }
+    }, [fetchQuestions, userId]);
 
     const handleDelete = async (id) => {
         try {
             const result = await QuestionService.delete(id);
             toast.success(result.data);
             setPage(1); // reset về trang đầu sau khi xóa
+            setTimeout(() => {
+                fetchQuestions();
+            }, 100);
         } catch (error) {
             toast.error(error.response?.data || "Xoá thất bại");
-        } finally {
-            fetchQuestions(); // gọi lại để cập nhật danh sách
         }
     };
 
@@ -180,19 +189,21 @@ export default function QuizInterface() {
                                             {index + 1 + (page - 1) * questionPerPage}.{" "}
                                             {question.content}
                                         </h2>
-                                        <div className="flex gap-1">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="p-1 cursor-pointer transition-all duration-200"
-                                                onClick={() =>
-                                                    router.push(`/users/questions/${question.id}/edit`)
-                                                }
-                                            >
-                                                <Edit className="w-6 h-6" />
-                                            </Button>
-                                            <DeleteButton id={question.id} handleDelete={handleDelete} />
-                                        </div>
+                                        {question.user.id === userId && (
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="p-1"
+                                                    onClick={() =>
+                                                        router.push(`/users/questions/${question.id}/edit`)
+                                                    }
+                                                >
+                                                    <Edit className="w-6 h-6"/>
+                                                </Button>
+                                                <DeleteButton id={question.id} handleDelete={handleDelete}/>
+                                            </div>
+                                        )}
                                     </div>
                                 </CardHeader>
 
