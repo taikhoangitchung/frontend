@@ -5,11 +5,11 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { Separator } from "../../../components/ui/separator";
-import {Search, Plus, Edit, X, Check, ArrowLeft} from "lucide-react";
+import { Search, Plus, Edit, X, Check, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
 import { toast } from "sonner";
-import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
+
 import {
     Select,
     SelectContent,
@@ -19,6 +19,7 @@ import {
 } from "../../../components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 
 export default function QuizInterface() {
     const router = useRouter();
@@ -117,28 +118,28 @@ export default function QuizInterface() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:scale-[1.02] ease-in-out">
                                 <SelectValue placeholder="Lọc theo tác giả" />
                             </SelectTrigger>
                             <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem value="all">Tất cả</SelectItem>
-                                <SelectItem value="mine">Của tôi</SelectItem>
-                                <SelectItem value="others">Của người khác</SelectItem>
+                                <SelectItem value="all" className="cursor-pointer hover:bg-gray-100">Tất cả</SelectItem>
+                                <SelectItem value="mine" className="cursor-pointer hover:bg-gray-100">Của tôi</SelectItem>
+                                <SelectItem value="others" className="cursor-pointer hover:bg-gray-100">Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
                     <button
                         onClick={() => router.push("/users/dashboard")}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 hover:scale-[1.02] ease-in-out border border-gray-500 cursor-pointer h-9 px-4 py-2 hover:shadow-md"
                     >
-                        <ArrowLeft className="w-4 h-4"/>
+                        <ArrowLeft className="w-4 h-4" />
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
 
                 <div className="relative w-full mb-8">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4"/>
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4" />
                     <Input
                         placeholder="Nhập nội dung câu hỏi, người tạo hoặc đáp án..."
                         value={searchTerm}
@@ -146,11 +147,11 @@ export default function QuizInterface() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
+                        className="pl-10 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500 hover:bg-gray-50 hover:scale-[1.01] ease-in-out"
                     />
                 </div>
 
-                <Separator/>
+                <Separator />
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -159,7 +160,7 @@ export default function QuizInterface() {
                         </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
-                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs h-9 px-4 py-2 has-[>svg]:px-3 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs h-9 px-4 py-2 has-[>svg]:px-3 bg-purple-600 hover:bg-purple-700 hover:scale-[1.02] ease-in-out text-white cursor-pointer transition-all duration-200 hover:shadow-md disabled:cursor-not-allowed"
                             variant="outline"
                         >
                             <Plus className="w-4 h-4 mr-2" />
@@ -181,7 +182,7 @@ export default function QuizInterface() {
                         questions.map((question, index) => (
                             <Card
                                 key={question.id}
-                                className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white"
+                                className="border border-gray-200 hover:shadow-md hover:scale-[1.01] transition-all duration-200 ease-in-out cursor-pointer"
                             >
                                 <CardHeader className="pb-0">
                                     <div className="flex items-start justify-between">
@@ -194,14 +195,22 @@ export default function QuizInterface() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="p-1"
+                                                    className="p-1 cursor-pointer transition-all duration-200 hover:bg-gray-100 hover:scale-[1.02] ease-in-out"
                                                     onClick={() =>
-                                                        router.push(`/users/questions/${question.id}/edit`)
+                                                        router.push(
+                                                            `/users/questions/${question.id}/edit`
+                                                        )
                                                     }
                                                 >
-                                                    <Edit className="w-6 h-6"/>
+                                                    <Edit className="w-6 h-6" />
                                                 </Button>
-                                                <DeleteButton id={question.id} handleDelete={handleDelete}/>
+                                                <DeleteButton
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="p-1 cursor-pointer transition-all duration-200 hover:bg-red-100 hover:scale-[1.02] ease-in-out text-red-500"
+                                                    id={question.id}
+                                                    handleDelete={handleDelete}
+                                                />
                                             </div>
                                         )}
                                     </div>
@@ -244,7 +253,7 @@ export default function QuizInterface() {
                         <Button
                             variant="outline"
                             onClick={() => setPage(page - 1)}
-                            className="text-sm cursor-pointer transition-all duration-200"
+                            className="text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100 hover:scale-[1.02] ease-in-out hover:shadow-sm"
                         >
                             Trang trước
                         </Button>
@@ -259,7 +268,7 @@ export default function QuizInterface() {
                         <Button
                             variant="outline"
                             onClick={() => setPage(page + 1)}
-                            className="text-sm cursor-pointer transition-all duration-200"
+                            className="text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100 hover:scale-[1.02] ease-in-out hover:shadow-sm"
                         >
                             Trang sau
                         </Button>
