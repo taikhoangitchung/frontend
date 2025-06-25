@@ -38,11 +38,19 @@ import QuestionService from "../../../../services/QuestionService"
 import ExamService from "../../../../services/ExamService"
 import {useRouter} from "next/navigation"
 import {FaCircleQuestion} from "react-icons/fa6";
+import {
+    Dialog,
+    DialogContent, DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "../../../../components/ui/dialog";
 
 const questionLimits = [
-    {value: 20, label: "20 câu"},
+    {value: 30, label: "30 câu"},
     {value: 40, label: "40 câu"},
-    {value: 45, label: "45 câu"},
+    {value: 50, label: "50 câu"},
     {value: 10000, label: "Không giới hạn"},
 ]
 
@@ -61,6 +69,8 @@ export default function CreateExam({id}) {
 
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
     const [userId, setUserId] = useState(Number(localStorage.getItem("id")))
+
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     const ExamSchema = Yup.object({
         title: Yup.string().required("Tiêu đề không được để trống"),
@@ -144,7 +154,7 @@ export default function CreateExam({id}) {
                 }
             }
 
-            const { questions, ...rest } = values;
+            const {questions, ...rest} = values;
             const params = {
                 ...rest,
                 questionIds: questions.map(q => q.id)
@@ -155,10 +165,10 @@ export default function CreateExam({id}) {
 
             if (isEdit) {
                 const res = await ExamService.update(params, id);
-                toast.success(res.data, { id: idLoading });
+                toast.success(res.data, {id: idLoading});
             } else {
                 const res = await ExamService.create(params);
-                toast.success(res.data, { id: idLoading });
+                toast.success(res.data, {id: idLoading});
                 router.push("/users/exams");
             }
         } catch (error) {
@@ -192,6 +202,11 @@ export default function CreateExam({id}) {
 
     const isQuestionAlreadyAdded = (questionId) => {
         return formik.values.questions.find((q) => q.id === questionId) !== undefined
+    }
+
+    const clearAllQuestions = () => {
+        formik.setFieldValue("questions", []);
+        setShowDeleteDialog(false)
     }
 
     const toggleQuestionSelection = (questionId) => {
@@ -560,9 +575,59 @@ export default function CreateExam({id}) {
                                         </div>
                                         Câu Hỏi Đã Chọn ({formik.values.questions.length})
                                     </div>
-                                    <Badge className="bg-white/20 text-white border-white/30">
-                                        {formik.values.questions.length} / {formik.values.questionLimit === 10000 ? "∞" : formik.values.questionLimit}
-                                    </Badge>
+                                    {/*<Badge className="bg-white/20 text-white border-white/30">*/}
+                                    {/*    {formik.values.questions.length} / {formik.values.questionLimit === 10000 ? "∞" : formik.values.questionLimit}*/}
+                                    {/*</Badge>*/}
+                                    <div className="flex items-center gap-2">
+                                        <Badge className="bg-white/20 text-white border-white/30">
+                                            {formik.values.questions.length} /{" "}
+                                            {formik.values.questionLimit === 10000 ? "∞" : formik.values.questionLimit}
+                                        </Badge>
+                                        {formik.values.questions.length > 0 && (
+                                            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-white hover:bg-white/20 p-2"
+                                                        title="Xóa tất cả câu hỏi"
+                                                    >
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="bg-white">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                                                            <Trash2 className="h-5 w-5"/>
+                                                            Xác nhận xóa
+                                                        </DialogTitle>
+                                                        <DialogDescription>
+                                                            Bạn có chắc chắn muốn xóa tất
+                                                            cả {formik.values.questions.length} câu hỏi đã chọn không?
+                                                            Hành động này không thể hoàn tác.
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <DialogFooter className="gap-2">
+                                                        <Button
+                                                            variant="outline"
+                                                            onClick={() => setShowDeleteDialog(false)}
+                                                            className="bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                                        >
+                                                            Hủy
+                                                        </Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={clearAllQuestions}
+                                                            className="bg-red-600 hover:bg-red-700 text-white"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 mr-2"/>
+                                                            Xóa tất cả
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        )}
+                                    </div>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6 max-h-96 overflow-y-auto bg-white">
