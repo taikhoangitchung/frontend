@@ -30,7 +30,13 @@ import {
 } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
 import { FaFireAlt } from "react-icons/fa"
+import CategoryService from "../../../../services/CategoryService"
+import DifficultyService from "../../../../services/DifficultyService"
+import { useFormik } from "formik"
+import * as Yup from "yup"
 import { toast } from "sonner"
+import QuestionService from "../../../../services/QuestionService"
+import ExamService from "../../../../services/ExamService"
 import { useRouter } from "next/navigation"
 import { FaCircleQuestion } from "react-icons/fa6"
 import {
@@ -44,104 +50,10 @@ import {
 } from "../../../../components/ui/dialog"
 
 const questionLimits = [
-    { value: 20, label: "20 câu" },
+    { value: 30, label: "30 câu" },
     { value: 40, label: "40 câu" },
-    { value: 45, label: "45 câu" },
+    { value: 50, label: "50 câu" },
     { value: 10000, label: "Không giới hạn" },
-]
-
-// Mock data - restored full dataset
-const categories = [
-    { id: 1, name: "Công nghệ" },
-    { id: 2, name: "Toán học" },
-    { id: 3, name: "Vật lý" },
-]
-
-const difficulties = [
-    { id: 1, name: "Dễ" },
-    { id: 2, name: "Trung bình" },
-    { id: 3, name: "Khó" },
-]
-
-const mockQuestions = [
-    {
-        id: 1,
-        content: "Hệ điều hành nào được phát triển bởi Microsoft?",
-        category: { id: 1, name: "Công nghệ" },
-        difficulty: { id: 1, name: "Dễ" },
-        user: { id: 1, username: "alice" },
-        answers: [
-            { id: 0, name: "Windows", correct: true },
-            { id: 1, name: "Linux", correct: false },
-            { id: 2, name: "macOS", correct: false },
-            { id: 3, name: "Android", correct: false },
-        ],
-    },
-    {
-        id: 2,
-        content: "Ngôn ngữ nào là lập trình hướng đối tượng?",
-        category: { id: 1, name: "Công nghệ" },
-        difficulty: { id: 2, name: "Trung bình" },
-        user: { id: 2, username: "bob" },
-        answers: [
-            { id: 0, name: "HTML", correct: false },
-            { id: 1, name: "CSS", correct: false },
-            { id: 2, name: "Java", correct: true },
-            { id: 3, name: "SQL", correct: false },
-        ],
-    },
-    {
-        id: 3,
-        content: "Phương trình bậc hai ax² + bx + c = 0 có nghiệm khi nào?",
-        category: { id: 2, name: "Toán học" },
-        difficulty: { id: 2, name: "Trung bình" },
-        user: { id: 1, username: "alice" },
-        answers: [
-            { id: 0, name: "Δ > 0", correct: true },
-            { id: 1, name: "Δ < 0", correct: false },
-            { id: 2, name: "a = 0", correct: false },
-            { id: 3, name: "b = 0", correct: false },
-        ],
-    },
-    {
-        id: 4,
-        content: "Định luật Newton thứ nhất nói về điều gì?",
-        category: { id: 3, name: "Vật lý" },
-        difficulty: { id: 1, name: "Dễ" },
-        user: { id: 3, username: "charlie" },
-        answers: [
-            { id: 0, name: "Quán tính", correct: true },
-            { id: 1, name: "Gia tốc", correct: false },
-            { id: 2, name: "Lực", correct: false },
-            { id: 3, name: "Khối lượng", correct: false },
-        ],
-    },
-    {
-        id: 5,
-        content: "HTML là viết tắt của gì?",
-        category: { id: 1, name: "Công nghệ" },
-        difficulty: { id: 1, name: "Dễ" },
-        user: { id: 2, username: "bob" },
-        answers: [
-            { id: 0, name: "HyperText Markup Language", correct: true },
-            { id: 1, name: "High Tech Modern Language", correct: false },
-            { id: 2, name: "Home Tool Markup Language", correct: false },
-            { id: 3, name: "Hyperlink and Text Markup Language", correct: false },
-        ],
-    },
-    {
-        id: 6,
-        content: "Công thức tính diện tích hình tròn là gì?",
-        category: { id: 2, name: "Toán học" },
-        difficulty: { id: 1, name: "Dễ" },
-        user: { id: 1, username: "alice" },
-        answers: [
-            { id: 0, name: "πr²", correct: true },
-            { id: 1, name: "2πr", correct: false },
-            { id: 2, name: "πd", correct: false },
-            { id: 3, name: "r²", correct: false },
-        ],
-    },
 ]
 
 export default function CreateExam({ id }) {
@@ -152,19 +64,31 @@ export default function CreateExam({ id }) {
     const [difficulties, setDifficulties] = useState([])
 
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [questionBank, setQuestionBank] = useState(mockQuestions)
+    const [questionBank, setQuestionBank] = useState([])
     const [selectedQuestion, setSelectedQuestion] = useState([])
     const [questionSource, setQuestionSource] = useState("-1")
     const [searchTerm, setSearchTerm] = useState("")
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
-    const [userId, setUserId] = useState(1)
+    const [userId, setUserId] = useState(Number(localStorage.getItem("id")))
 
-    const [formik, setFormik] = useState({
-        values: {
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+    const ExamSchema = Yup.object({
+        title: Yup.string().required("Tiêu đề không được để trống"),
+        difficultyId: Yup.number().test("not-default", "Hãy chọn một độ khó", (value) => value !== -1),
+        categoryId: Yup.number().test("not-default", "Hãy chọn một thể loại", (value) => value !== -1),
+        passScore: Yup.number()
+            .min(1, "Tỉ lệ số câu đúng để đạt không thể âm")
+            .max(100, "Tỉ lệ số câu đúng để đạt không thể lớn hơn 100%"),
+        duration: Yup.number()
+            .min(1, "Thời gian không thể quá ngắn"),
+    })
+
+    const formik = useFormik({
+        initialValues: {
             title: "",
-            authorId: 1,
+            authorId: -2,
             difficultyId: -1,
             categoryId: -1,
             duration: 30,
@@ -172,50 +96,108 @@ export default function CreateExam({ id }) {
             questionLimit: 20,
             questions: [],
         },
-        touched: {},
-        errors: {},
-        handleChange: (e) => {
-            const { name, value } = e.target
-            setFormik((prev) => ({
-                ...prev,
-                values: { ...prev.values, [name]: value },
-            }))
-        },
-        setFieldValue: (field, value) => {
-            setFormik((prev) => ({
-                ...prev,
-                values: { ...prev.values, [field]: value },
-            }))
-        },
-        handleSubmit: () => {
-            if (formik.values.questions.length === 0) {
-                toast.warning("Hãy thêm ít nhất 1 câu hỏi")
-                return
-            } else if (formik.values.questions.length < formik.values.questionLimit) {
-                toast.warning("Hãy thêm đủ số lượng câu hỏi")
-                return
+        validationSchema: ExamSchema,
+        onSubmit: async (values) => {
+            if (values.questionLimit < Math.max(...questionLimits.map(limit => limit.value))) {
+                if (values.questions.length === 0) {
+                    toast.warning("Hãy thêm ít nhất 1 câu hỏi")
+                    return
+                } else if (values.questions.length < values.questionLimit) {
+                    toast.warning("Hãy thêm đủ số lượng câu hỏi")
+                    return
+                }
             }
-            setIsSubmitting(true)
-            setTimeout(() => {
-                setIsSubmitting(false)
-                toast.success("Bài kiểm tra đã được tạo thành công!")
-            }, 2000)
+            await handleSubmit(values)
         },
     })
 
     useEffect(() => {
-        setCategories([
-            { id: 1, name: "Công nghệ" },
-            { id: 2, name: "Toán học" },
-            { id: 3, name: "Vật lý" },
-        ])
-        setDifficulties([
-            { id: 1, name: "Dễ" },
-            { id: 2, name: "Trung bình" },
-            { id: 3, name: "Khó" },
-        ])
+        if (isEdit) fetchForEdit()
+
         formik.setFieldValue("authorId", userId)
+
+        CategoryService.getAll()
+            .then((res) => setCategories(res.data))
+            .catch((err) => toast.error(err.response.data))
+        DifficultyService.getAll()
+            .then((res) => setDifficulties(res.data))
+            .catch((err) => toast.error(err.response.data))
     }, [])
+
+    useEffect(() => {
+        QuestionService.filterByCategoryAndSource(
+            formik.values.categoryId,
+            questionSource,
+            userId,
+            searchTerm
+        )
+            .then((res) => {
+                setQuestionBank(res.data)
+            })
+            .catch((err) => toast.error(err.response.data))
+    }, [formik.values.categoryId, questionSource, userId, searchTerm])
+
+    const handleSubmit = async (values) => {
+        setIsSubmitting(true)
+        try {
+            const titleChanged = isEdit && oldTitle !== values.title
+            const shouldCheckDuplicate = titleChanged || !isEdit
+
+            if (shouldCheckDuplicate) {
+                const existRes = await ExamService.exist(values.title)
+                const titleExists = existRes.data
+
+                if (titleExists) {
+                    toast.warning("Tên bài thi đã tồn tại")
+                    setIsSubmitting(false)
+                    return
+                }
+            }
+
+            const { questions, ...rest } = values
+            const params = {
+                ...rest,
+                questionIds: questions.map(q => q.id),
+            }
+
+            const loadingMessage = isEdit ? "Đang cập nhật bài thi ..." : "Đang tạo bài thi ..."
+            const idLoading = toast.loading(loadingMessage)
+
+            if (isEdit) {
+                const res = await ExamService.update(params, id)
+                toast.success(res.data, { id: idLoading })
+            } else {
+                const res = await ExamService.create(params)
+                toast.success(res.data, { id: idLoading })
+                router.push("/users/exams")
+            }
+        } catch (error) {
+            const errorMessage = error?.response?.data || error?.message || "Đã xảy ra lỗi"
+            toast.error(errorMessage)
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const fetchForEdit = () => {
+        ExamService.findById(id)
+            .then((res) => {
+                const questionLimit = questionLimits.find((limit) => limit.value > res.data.questions.length).value
+                setOldTitle(res.data.title)
+
+                formik.setFieldValue("title", res.data.title)
+                formik.setFieldValue("difficultyId", res.data.difficulty.id)
+                formik.setFieldValue("categoryId", res.data.category.id)
+                formik.setFieldValue("duration", res.data.duration)
+                formik.setFieldValue("passScore", res.data.passScore)
+                formik.setFieldValue("questionLimit", questionLimit)
+                formik.setFieldValue("questions", res.data.questions)
+            })
+            .catch((err) => {
+                toast.error(err.response.data)
+                router.push("/")
+            })
+    }
 
     const isQuestionAlreadyAdded = (questionId) => {
         return formik.values.questions.find((q) => q.id === questionId) !== undefined
@@ -282,10 +264,10 @@ export default function CreateExam({ id }) {
             <div
                 className={`border-2 rounded-lg transition-all duration-300 shadow-sm ${
                     isAlreadyAdded
-                        ? "bg-gray-100 border-gray-300 opacity-60"
+                        ? "bg-gray-100 border-gray-200 opacity-80"
                         : isToggleSelected
-                            ? "bg-teal-50 border-teal-400 shadow-md"
-                            : "bg-white border-gray-300 hover:border-teal-300 hover:shadow-md"
+                            ? "bg-teal-100 border-teal-400 shadow-md"
+                            : "bg-white border-gray-200 hover:border-teal-300 hover:shadow-md"
                 }`}
             >
                 <div
@@ -304,9 +286,11 @@ export default function CreateExam({ id }) {
                                 )}
                             </div>
                         )}
-                        {index !== undefined && !onToggleSelect && <Badge className="bg-teal-600 text-white">{index + 1}</Badge>}
+                        {index !== undefined && !onToggleSelect && (
+                            <Badge className="bg-teal-600 text-white">{index + 1}</Badge>
+                        )}
                         <div className="flex-1">
-                            <h4 className={`font-medium text-sm mb-3 text-gray-900 ${isAlreadyAdded ? "opacity-60" : ""}`}>
+                            <h4 className={`font-medium text-sm mb-3 text-gray-800 ${isAlreadyAdded ? "opacity-50" : ""}`}>
                                 {question.content}
                                 {isAlreadyAdded && (
                                     <Badge variant="outline" className="ml-2 text-xs border-gray-300 text-gray-500">
@@ -379,9 +363,9 @@ export default function CreateExam({ id }) {
                                         }`}
                                     >
                                         <div className="flex items-center gap-2">
-                      <span className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}>
-                        {String.fromCharCode(65 + option.id)}.
-                      </span>
+                                            <span className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}>
+                                                {String.fromCharCode(65 + option.id)}.
+                                            </span>
                                             <span>{option.name}</span>
                                             {option.correct && <CheckCircle2 className="h-4 w-4 ml-auto text-teal-600" />}
                                         </div>
@@ -400,7 +384,7 @@ export default function CreateExam({ id }) {
             <div className="mx-auto max-w-full space-y-2 px-2">
                 <div className="flex justify-between items-center pt-4">
                     <button
-                        onClick={() => router.push("/users/dashboard")}
+                        onClick={() => router.back()}
                         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
                         <ArrowLeft className="w-4 h-4" />
@@ -412,7 +396,7 @@ export default function CreateExam({ id }) {
                         disabled={isSubmitting}
                     >
                         <Save className="h-4 w-4" />
-                        {isSubmitting ? "Đang lưu..." : "Lưu bài kiểm tra"}
+                        {isSubmitting ? "Đang lưu..." : (id ? "Cập nhật bài kiểm tra" : "Lưu bài kiểm tra")}
                     </Button>
                 </div>
 
@@ -448,6 +432,9 @@ export default function CreateExam({ id }) {
                                         onChange={formik.handleChange}
                                         className="border-gray-300 bg-gray-50 focus:border-teal-500 focus:ring-teal-500 focus:bg-white"
                                     />
+                                    {formik.touched.title && formik.errors.title && (
+                                        <div className="text-red-500 text-sm mt-1">{formik.errors.title}</div>
+                                    )}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -470,6 +457,9 @@ export default function CreateExam({ id }) {
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                        {formik.touched.difficultyId && formik.errors.difficultyId && (
+                                            <div className="text-red-500 text-sm mt-1">{formik.errors.difficultyId}</div>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
@@ -492,6 +482,9 @@ export default function CreateExam({ id }) {
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                        {formik.touched.categoryId && formik.errors.categoryId && (
+                                            <div className="text-red-500 text-sm mt-1">{formik.errors.categoryId}</div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-3 gap-4">
@@ -506,6 +499,9 @@ export default function CreateExam({ id }) {
                                             onChange={(e) => formik.setFieldValue("duration", Number(e.target.value))}
                                             className="border-gray-300 bg-gray-50 focus:border-purple-500 focus:bg-white"
                                         />
+                                        {formik.touched.duration && formik.errors.duration && (
+                                            <div className="text-red-500 text-sm mt-1">{formik.errors.duration}</div>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
@@ -518,6 +514,9 @@ export default function CreateExam({ id }) {
                                             onChange={(e) => formik.setFieldValue("passScore", Number(e.target.value))}
                                             className="border-gray-300 bg-gray-50 focus:border-teal-500 focus:bg-white"
                                         />
+                                        {formik.touched.passScore && formik.errors.passScore && (
+                                            <div className="text-red-500 text-sm mt-1">{formik.errors.passScore}</div>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
@@ -661,7 +660,7 @@ export default function CreateExam({ id }) {
                                                         Câu hỏi của người khác
                                                     </div>
                                                 </SelectItem>
-                                                <SelectItem value={"999"}>
+                                                <SelectItem value={"-999"}>
                                                     <div className="flex items-center gap-2">
                                                         <User className="h-4 w-4" />
                                                         Tất cả
