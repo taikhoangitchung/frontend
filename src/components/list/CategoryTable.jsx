@@ -134,7 +134,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                         placeholder="Nhập tên danh mục cần tìm..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
+                        className="pl-10 border border-gray-200 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
             </div>
@@ -165,7 +165,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
 
                 {/* Category Cards */}
                 {paginatedCategories.map((category, index) => (
-                    <Card key={category.id} className="border border-gray-200 px-4 py-3 bg-white">
+                    <Card key={category.id} className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white">
                         <CardContent className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
