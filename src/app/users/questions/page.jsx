@@ -20,16 +20,20 @@ import {
 const Modal = ({ onClose, children }) => {
     return (
         <div
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
             onClick={onClose}
         >
             <div
-                className="bg-white p-4 rounded-md relative max-w-lg"
-                onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click từ việc đóng modal
+                className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
             >
-                <button className="absolute top-2 right-2" onClick={onClose}>
-                    <X className="w-5 h-5" />
-                </button>
+                <Button
+                    variant="ghost"
+                    className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white z-10 transition-all duration-200 cursor-pointer"
+                    onClick={onClose}
+                >
+                    ✕
+                </Button>
                 {children}
             </div>
         </div>
@@ -39,7 +43,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 
-export default function QuizInterface() {
+export default function QuizInterface() {   
     const router = useRouter();
     const [searchTerm, setSearchTerm] = useState("");
     const [ownerFilter, setOwnerFilter] = useState("all");
@@ -141,28 +145,32 @@ export default function QuizInterface() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer hover:bg-gray-50 active:scale-[0.98] transition-all duration-200">
-                                <SelectValue placeholder="Lọc theo tác giả" />
+                            <SelectTrigger
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer hover:bg-gray-50 active:scale-[0.98] transition-all duration-200">
+                                <SelectValue placeholder="Lọc theo tác giả"/>
                             </SelectTrigger>
-                            <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
+                            <SelectContent
+                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
                                 <SelectItem value="all" className="cursor-pointer hover:bg-gray-100">Tất cả</SelectItem>
-                                <SelectItem value="mine" className="cursor-pointer hover:bg-gray-100">Của tôi</SelectItem>
-                                <SelectItem value="others" className="cursor-pointer hover:bg-gray-100">Của người khác</SelectItem>
+                                <SelectItem value="mine" className="cursor-pointer hover:bg-gray-100">Của
+                                    tôi</SelectItem>
+                                <SelectItem value="others" className="cursor-pointer hover:bg-gray-100">Của người
+                                    khác</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <Button
+                    <button
                         onClick={() => router.push("/users/dashboard")}
-                        className="bg-gray-700 text-white hover:bg-gray-600 cursor-pointer hover:shadow-md active:scale-[0.98] transition-all duration-200"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Quay lại
-                    </Button>
+                        <ArrowLeft className="w-4 h-4"/>
+                        <span className="text-white">Quay lại</span>
+                    </button>
                 </div>
 
                 <div className="relative w-full mb-8">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4"/>
                     <Input
                         placeholder="Nhập nội dung câu hỏi, người tạo hoặc đáp án..."
                         value={searchTerm}
@@ -170,11 +178,11 @@ export default function QuizInterface() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 border border-gray-200 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition-all duration-200"
+                        className="pl-10 border border-gray-200 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 
-                <Separator />
+                <Separator/>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -204,7 +212,7 @@ export default function QuizInterface() {
                         questions.map((question, index) => (
                             <Card
                                 key={question.id}
-                                className="border border-gray-200 cursor-default hover:shadow-md hover:bg-gray-50 active:scale-[0.98] transition-all duration-200"
+                                className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white"
                             >
                                 <CardHeader className="pb-0">
                                     <div className="flex items-start justify-between">
@@ -314,7 +322,7 @@ export default function QuizInterface() {
                     <img
                         src={selectedImage}
                         alt="Enlarged Question"
-                        className="max-w-full h-auto"
+                        className="w-full h-full max-h-[90vh] object-contain"
                     />
                 </Modal>
             )}
