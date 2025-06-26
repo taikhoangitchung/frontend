@@ -139,7 +139,7 @@ export default function ExamSummaryCard({search}) {
             }))}
             {showForm.visible && (
                 <div
-                    className="fixed inset-0 bg-opacity-5 backdrop-blur-xs flex items-center justify-center z-50"
+                    className="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs flex items-center justify-center z-50"
                     onClick={handleCloseForm}
                 >
                     <ExamPrePlayCard exam={showForm.exam} onClose={handleCloseForm}/>

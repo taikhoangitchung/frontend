@@ -21,7 +21,7 @@ function ExamPrePlayCard({ exam, onClose }) {
 
     return (
         <div
-            className="w-118 bg-white shadow-lg rounded-2xl p-0 relative overflow-hidden transform transition-all duration-200 hover:shadow-2xl hover:scale-105 cursor-pointer"
+            className="w-118 bg-white shadow-lg rounded-2xl p-0 relative overflow-hidden transform transition-all duration-200 hover:shadow-2xl hover:scale-103"
             onClick={(e) => e.stopPropagation()}
         >
             <button
