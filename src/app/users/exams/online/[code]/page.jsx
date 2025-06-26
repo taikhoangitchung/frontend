@@ -7,104 +7,75 @@ import {Copy, LinkIcon, Loader2, QrCode, Users, X} from "lucide-react";
 import {toast} from "sonner";
 import {Button} from "../../../../../components/ui/button";
 import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDialog";
-import socketInstance from "../../../../../config/socketConfig";
+import createExamSocket from "../../../../../config/socketConfig";
 
 export default function WaitingRoom() {
     const {code} = useParams();
     const router = useRouter();
 
-    const [candidates, setCandidates] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [hostName, setHostName] = useState("");
     const [authorName, setAuthorName] = useState("");
+    const [candidates, setCandidates] = useState([]);
     const [examTitle, setExamTitle] = useState("");
-    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-
-    const [currentUsername, setCurrentUsername] = useState("");
-
     const [copiedCode, setCopiedCode] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isHost, setIsHost] = useState(false);
 
     const socketRef = useRef(null);
-    const isHost = currentUsername === hostName;
+    const cleanupRef = useRef(null);
+    const storedEmail = localStorage.getItem("email");
 
-    // Lấy username từ localStorage
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const username = localStorage.getItem("username");
-            setCurrentUsername(username);
-        }
-    }, []);
-
-    // Gọi API lấy thông tin phòng
-    useEffect(() => {
-        const fetchRoomData = async () => {
-            try {
-                const response = await RoomService.join(code);
-                setCandidates(response.data.candidateNames);
-                setHostName(response.data.hostName);
-                setExamTitle(response.data.examTitle);
-                setAuthorName(response.data.authorName);
-            } catch (error) {
-                if (error.response?.status === 409 || error.response?.status === 404) {
-                    toast.error(error.response.data + ", đang trở về trang chủ...");
-                    setTimeout(() => router.push("/users/dashboard"), 2000);
-                } else {
-                    console.error(error);
-                }
-            } finally {
-                setLoading(false);
+    const fetchRoomData = async () => {
+        try {
+            const response = await RoomService.join(code);
+            setCandidates(response.data.candidateNames);
+            setExamTitle(response.data.examTitle);
+            setAuthorName(response.data.authorName);
+            setIsHost(response.data.hostEmail === storedEmail);
+            localStorage.setItem("hostEmail", response.data.hostEmail);
+        } catch (error) {
+            if (error.response?.status === 409 || error.response?.status === 404) {
+                toast.error(error.response.data + ", trở về trang chủ...");
+                setTimeout(() => router.push("/users/dashboard"), 2000);
+            } else {
+                console.error(error);
             }
-        };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!code || !storedEmail) return;
 
         fetchRoomData();
-    }, [code]);
 
-    useEffect(() => {
-        if (!code || !currentUsername) return;
-
-        const socket = socketInstance();
-        socketRef.current = socket;
-
-        const handleMessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                const username = data.username;
-
-                if (data.type === "JOIN") {
-                    setCandidates((prev) => [...new Set([...prev, username])]);
-                    toast.success(username === currentUsername ? "Bạn đã vào phòng" : `${username} đã vào phòng`);
+        const {socket, cleanup} = createExamSocket({
+            code,
+            onStart: () => {
+                router.push(`/users/exams/online/${code}/play`);
+            },
+            onJoin: (username) => {
+                setCandidates((prev) => [...new Set([...prev, username])]);
+                if (isHost) {
+                    toast.success(`${username} đã vào phòng`);
                 }
-
-                if (data.type === "LEAVE") {
-                    setCandidates((prev) => prev.filter((name) => name !== username));
-                    toast.error(username === currentUsername ? "Bạn đã rời phòng" : `${username} đã rời phòng`);
+            },
+            onLeave: (username) => {
+                setCandidates((prev) => prev.filter(name => name !== username));
+                if (isHost) {
+                    toast.error(`${username} đã rời phòng`);
                 }
-
-                if (data.type === "START") {
-                    router.push(`/users/exams/online/${code}/play`);
-                }
-            } catch (e) {
-                console.error("❌ Parse WS lỗi:", e);
             }
-        };
-
-        socket.addEventListener("open", () => {
-            console.log("✅ Socket mở");
-            socket.send(`JOIN:${code}:${currentUsername}`);
         });
 
-        socket.addEventListener("message", handleMessage);
+        socketRef.current = socket;
+        cleanupRef.current = cleanup;
 
         return () => {
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(`LEAVE:${code}:${currentUsername}`);
-            }
-            socket.removeEventListener("message", handleMessage);
-            socket.close();
-            console.log("❌ Socket đóng");
+            cleanup();
         };
-    }, [code, currentUsername]);
+    }, [code, storedEmail]);
 
     const handleCopyCode = () => {
         navigator.clipboard.writeText(code);
@@ -131,21 +102,22 @@ export default function WaitingRoom() {
         }
     };
 
-
     const handleLeaveRoom = async () => {
+        setLoading(true);
         try {
-            socketRef.current?.send(`LEAVE:${code}:${currentUsername}`);
             await RoomService.leave(code);
             router.push("/users/dashboard");
         } catch (error) {
             toast.error("Lỗi khi rời phòng");
+        } finally {
+            setLoading(false);
         }
     };
 
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-purple-900">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
             </div>
         );
     }
@@ -153,14 +125,22 @@ export default function WaitingRoom() {
     return (
         <div className="flex h-screen bg-black text-white relative">
             {/* Nút Thoát */}
-            <Button
-                variant="outline"
-                className="absolute top-4 right-4 z-10 px-3 py-1 text-sm flex items-center gap-1"
-                onClick={() => setConfirmDialogOpen(true)}
-            >
-                <X className="w-4 h-4" /> Thoát
-            </Button>
-
+            <ConfirmDialog
+                trigger={
+                    <Button
+                        variant="outline"
+                        className="absolute top-4 right-4 z-10 px-3 py-1 text-sm flex items-center gap-1"
+                    >
+                        <X className="w-4 h-4"/> Thoát
+                    </Button>}
+                title="Bạn có chắc muốn rời phòng?"
+                description="Bạn sẽ bị đưa trở về bảng điều khiển. Nếu bạn là chủ phòng, những người khác vẫn sẽ ở lại phòng chờ."
+                cancelLabel="Hủy"
+                actionLabel="Rời phòng"
+                onConfirm={handleLeaveRoom}
+                actionClass="bg-red-600 hover:bg-red-700 text-white"
+                cancelClass="bg-gray-100 hover:bg-gray-200 text-gray-800 border-0"
+            />
             {/* Left: Slide preview */}
             <div className="flex-1 flex items-center justify-center bg-white rounded-r-3xl">
                 <div className="text-center space-y-8">
@@ -175,7 +155,6 @@ export default function WaitingRoom() {
                 <div className="space-y-4">
                     <p className="text-sm font-semibold text-gray-400">Mã phòng</p>
                     <div className="text-4xl font-bold tracking-widest">{code}</div>
-                    <h1 className="text-xl font-bold text-white">Chủ phòng - {hostName}</h1>
                     <p className="text-sm font-semibold text-gray-400">Xin đợi các thí sinh khác cùng tham gia...</p>
 
                     {isHost && (
@@ -190,7 +169,7 @@ export default function WaitingRoom() {
 
                     <div className="flex items-center justify-between">
                         <div className="w-20 h-20 bg-white rounded p-2 flex items-center justify-center">
-                            <QrCode className="w-14 h-14 text-black" />
+                            <QrCode className="w-14 h-14 text-black"/>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -198,7 +177,7 @@ export default function WaitingRoom() {
                                 {copiedLink ? (
                                     <span className="text-green-500 font-bold">✓</span>
                                 ) : (
-                                    <LinkIcon className="w-5 h-5" />
+                                    <LinkIcon className="w-5 h-5"/>
                                 )}
                             </Button>
 
@@ -206,7 +185,7 @@ export default function WaitingRoom() {
                                 {copiedCode ? (
                                     <span className="text-green-500 font-bold">✓</span>
                                 ) : (
-                                    <Copy className="w-5 h-5" />
+                                    <Copy className="w-5 h-5"/>
                                 )}
                             </Button>
                         </div>
@@ -216,7 +195,7 @@ export default function WaitingRoom() {
                 {/* Participants List */}
                 <div className="flex-1 overflow-y-auto">
                     <h2 className="text-white font-semibold mb-2 flex items-center gap-2">
-                        <Users className="w-5 h-5" />
+                        <Users className="w-5 h-5"/>
                         Danh sách thí sinh ({candidates.length})
                     </h2>
 
@@ -226,25 +205,12 @@ export default function WaitingRoom() {
                                 {name}
                             </div>
                         ))}
-
                         {candidates.length === 0 && (
                             <div className="text-sm text-gray-400 italic">Chưa có thí sinh nào...</div>
                         )}
                     </div>
                 </div>
             </div>
-
-            <ConfirmDialog
-                open={confirmDialogOpen}
-                setOpen={setConfirmDialogOpen}
-                title="Bạn có chắc muốn rời phòng?"
-                description="Bạn sẽ bị đưa trở về bảng điều khiển. Nếu bạn là chủ phòng, những người khác vẫn sẽ ở lại phòng chờ."
-                cancelLabel="Hủy"
-                actionLabel="Rời phòng"
-                onConfirm={handleLeaveRoom}
-                actionClass="bg-red-600 hover:bg-red-700 text-white"
-                cancelClass="bg-gray-100 hover:bg-gray-200 text-gray-800 border-0"
-            />
         </div>
     );
 }

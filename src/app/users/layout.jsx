@@ -24,6 +24,7 @@ export default function UserLayout({children}) {
                 router.replace("/forbidden")
                 return
             }
+            localStorage.removeItem("hostEmail")
             const email = localStorage.getItem("email")
             setEmail(email)
         } catch (e) {

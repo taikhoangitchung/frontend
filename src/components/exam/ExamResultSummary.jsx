@@ -6,9 +6,9 @@ import { useRouter} from "next/navigation";
 import {RotateCcw, Search, FileText} from "lucide-react"
 import HistoryService from "../../services/HistoryService";
 import ExamDetailPanel from "./ExamDetailPanel";
-import RankStars from "../icon/rank";
 
 export default function ExamResultSummary({isOnline, onReplay, historyId }) {
+    console.log(historyId)
     const [showPanel, setShowPanel] = useState(false);
     const router = useRouter()
     const [data, setData] = useState(null)
@@ -32,7 +32,7 @@ export default function ExamResultSummary({isOnline, onReplay, historyId }) {
     const avgTimePerQ = data && data.correct + data.wrong > 0
         ? Math.round(data.timeTaken / (data.correct + data.wrong))
         : 0;
-
+    const score = data && (data.score).toFixed(1)
     const showDetail = () => {
         setShowPanel(true);
     };
@@ -59,7 +59,7 @@ export default function ExamResultSummary({isOnline, onReplay, historyId }) {
 
                     <div className="bg-purple-700 p-4 rounded-xl text-center">
                         <p className="text-purple-200 text-xs mb-1">Điểm số</p>
-                        <p className="font-bold text-xl text-white">{data.score?.toFixed(1)}</p>
+                        <p className="font-bold text-xl text-white">{score}</p>
                     </div>
 
                     <div className="bg-cyan-700 p-4 rounded-xl text-center">
@@ -71,36 +71,16 @@ export default function ExamResultSummary({isOnline, onReplay, historyId }) {
                         <p className="text-purple-200 text-xs mb-1">Thời gian hoàn thành</p>
                         <p className="font-bold text-xl text-white">{data.timeTaken}s</p>
                     </div>
-                    {isOnline && data.rankResponse?.rankings?.length > 0 && (
-                        <div className="bg-black/40 p-4 rounded-xl text-left col-span-full w-full">
-                            <p className="text-purple-200 text-xs mb-2 text-center">Bảng xếp hạng</p>
-                            <div className="space-y-1 text-sm">
-                                {data.rankResponse.rankings.map((r, i) => {
-                                    const isCurrentUser = r.username === username;
-
-                                    return (
-                                        <div
-                                            key={i}
-                                            className={`flex justify-between items-center px-3 py-1 rounded ${
-                                                isCurrentUser
-                                                    ? "bg-yellow-200/30 text-white font-semibold"
-                                                    : "text-white"
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <span>{r.rank}.</span>
-                                                <span>{r.username}</span>
-                                            </div>
-                                            <RankStars rank={r.rank} />
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
                 </div>
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2 mt-6">
+                    <Button
+                        onClick={showDetail}
+                        className="bg-white text-purple-900 rounded-full px-6 py-2 font-semibold mt-2"
+                    >
+                        <FileText size={18}/>
+                        Xem chi tiết
+                    </Button>
                     {!isOnline && (
                         <Button
                             onClick={onReplay}
@@ -114,14 +94,7 @@ export default function ExamResultSummary({isOnline, onReplay, historyId }) {
                     <Button className="bg-white text-purple-900 rounded-full font-semibold py-2"
                             onClick={() => router.push("/users/dashboard")}>
                         <Search size={18}/>
-                        Tìm quiz mới
-                    </Button>
-                    <Button
-                        onClick={showDetail}
-                        className="bg-white text-purple-900 rounded-full px-6 py-2 font-semibold mt-2"
-                    >
-                        <FileText size={18}/>
-                        Xem chi tiết
+                        Thoát
                     </Button>
                 </div>
             </div>
