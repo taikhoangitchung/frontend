@@ -31,8 +31,6 @@ export default function HistoryDetailPage() {
     if (loading || !data) return <p className="p-6">Đang tải chi tiết bài làm...</p>;
 
     return (
-        <div className="group hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer">
             <ExamDetailPanel data={data} onClose={() => router.push("/users/histories")}/>
-        </div>
     );
 }

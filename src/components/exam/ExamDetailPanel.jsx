@@ -13,7 +13,7 @@ export default function ExamDetailPanel({ data, onClose }) {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center"
+        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center"
              onClick={handleOverlayClick}
         >
 
