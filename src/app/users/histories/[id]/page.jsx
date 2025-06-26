@@ -31,6 +31,6 @@ export default function HistoryDetailPage() {
     if (loading || !data) return <p className="p-6">Đang tải chi tiết bài làm...</p>;
 
     return (
-            <ExamDetailPanel data={data} onClose={() => router.push("/users/histories")}/>
+        <ExamDetailPanel data={data} onClose={() => router.push("/users/histories")} />
     );
 }

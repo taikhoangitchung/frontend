@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
         <body className="min-h-screen bg-white text-gray-900 antialiased">
         <AuthInitializer /> {/* ✅ Thêm vào đây */}
         {children}
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="bottom-right" />
         </body>
         </html>
     );

@@ -27,7 +27,7 @@ export default function ExamDetailPanel({ data, onClose }) {
                     className="absolute top-4 right-4 rounded-full p-1 text-gray-500 transition-colors duration-200 ease-in-out hover:bg-red-500 hover:text-white focus:outline-none z-50 cursor-pointer"
                     aria-label="Đóng"
                 >
-                    <X size={20} />
+                    <X className="w-12 h-12" />
                 </button>
 
                 <h2 className="text-2xl font-bold mb-4 text-purple-900">Chi tiết bài làm</h2>

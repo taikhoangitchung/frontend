@@ -11,6 +11,18 @@ import { Button } from "../../../../../components/ui/button";
 import HistoryService from "../../../../../services/HistoryService";
 import { X } from "lucide-react" // Thêm icon X
 
+
+const fallbackColors = [
+    "from-orange-300 to-orange-400",
+    "from-green-400 to-green-600",
+    "from-blue-400 to-blue-600",
+    "from-pink-400 to-pink-600",
+    "from-purple-400 to-purple-600",
+    "from-yellow-400 to-yellow-600",
+    "from-teal-400 to-teal-600",
+];
+
+
 export default function OfflineExamForm() {
     const { id } = useParams()
     const router = useRouter()
@@ -137,15 +149,22 @@ export default function OfflineExamForm() {
         return Math.round((count / questions.length) * 100)
     }
 
-    const getAnswerButtonStyle = (answer) => {
-        const base = `relative w-full h-full min-h-[14rem] md:min-h-[20rem] rounded-2xl flex items-center justify-center text-white font-semibold text-base sm:text-lg md:text-xl transition-all duration-300 cursor-pointer`
-        const selected = userAnswers[questionIndex]?.includes(answer.id)
-        const disabled = submitted || submitting
-        const state = disabled ? "opacity-50 cursor-not-allowed" : ""
+    const getAnswerButtonStyle = (answer, index) => {
+        const base = `relative w-full h-full min-h-[14rem] md:min-h-[20rem] 
+        rounded-2xl flex items-center justify-center 
+        text-white font-semibold text-base sm:text-lg md:text-xl 
+        transition-all duration-300 cursor-pointer`;
+
+        const selected = userAnswers[questionIndex]?.includes(answer.id);
+        const disabled = submitted || submitting;
+        const state = disabled ? "opacity-50 cursor-not-allowed" : "";
+
+        const color = fallbackColors[index % fallbackColors.length];
+
         return selected
-            ? `${base} ${state} bg-gradient-to-br ${answer.color} ring-4 ring-white scale-105 shadow-lg`
-            : `${base} ${state} bg-gradient-to-br ${answer.color} ${!disabled ? "hover:scale-105 hover:shadow-lg" : ""}`
-    }
+            ? `${base} ${state} bg-gradient-to-br ${color} ring-4 ring-white scale-105 shadow-lg`
+            : `${base} ${state} bg-gradient-to-br ${color} ${!disabled ? "hover:scale-105 hover:shadow-lg" : ""}`;
+    };
 
     const getQuestionButtonStyle = (index) => {
         const isCurrent = questionIndex === index
@@ -176,13 +195,12 @@ export default function OfflineExamForm() {
             )}
             <div className="flex items-center justify-between">
                 <ConfirmDialog
-                    triggerLabel={
-                        <div className="flex items-center gap-2">
-                            <X size={18} /> {/* Thêm icon X */}
+                    trigger={
+                        <div className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 cursor-pointer">
+                            <X className="w-5 h-5" />
                             Thoát ra
                         </div>
                     }
-                    triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2"
                     title="Bạn có chắc chắn muốn thoát?"
                     description="Bài làm sẽ không được lưu lại nếu chưa nộp."
                     actionLabel="Thoát ngay"
@@ -198,7 +216,7 @@ export default function OfflineExamForm() {
                     <Button
                         onClick={() => handleSubmitQuiz(false)}
                         disabled={submitting || submitted}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
+                        className="bg-green-600 hover:bg-green-700 cursor-pointer text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
                     >
                         {submitting ? "Đang nộp..." : "Nộp bài"}
                     </Button>
@@ -217,7 +235,7 @@ export default function OfflineExamForm() {
                     <button
                         key={index}
                         onClick={() => handleAnswerSelect(index)}
-                        className={getAnswerButtonStyle(answer)}
+                        className={getAnswerButtonStyle(answer, index)}
                         disabled={submitting || submitted}
                     >
                         <span className="text-center px-4">{answer.content}</span>
@@ -228,7 +246,7 @@ export default function OfflineExamForm() {
                                     <svg className="w-5 h-5 text-purple-900" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd"
                                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                              clipRule="evenodd" />
+                                              clipRule="evenodd"/>
                                     </svg>
                                 </div>
                             </div>
@@ -244,7 +262,7 @@ export default function OfflineExamForm() {
                         <button
                             key={index}
                             onClick={() => changeQuestion(index)}
-                            className={`w-10 h-10 rounded-lg font-semibold text-sm ${getQuestionButtonStyle(index)}`}
+                            className={`w-10 h-10 rounded-lg hover:cursor-pointer font-semibold text-sm ${getQuestionButtonStyle(index)}`}
                             disabled={submitting || submitted}
                         >
                             {index + 1}
@@ -273,14 +291,14 @@ export default function OfflineExamForm() {
                 <Button
                     onClick={() => changeQuestion(questionIndex - 1)}
                     disabled={questionIndex === 0 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                    className="bg-white text-purple-900 hover:bg-gray-200 cursor-pointer font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu trước
                 </Button>
                 <Button
                     onClick={() => changeQuestion(questionIndex + 1)}
                     disabled={questionIndex >= questions.length - 1 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                    className="bg-white text-purple-900 hover:bg-gray-200 cursor-pointer font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu tiếp theo
                 </Button>

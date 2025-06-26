@@ -61,10 +61,8 @@ export default function ExamResultSummary({ isOnline, onReplay, historyId, onClo
         >
             <button
                 onClick={() => router.push("/users/dashboard")}
-                className="absolute top-6 left-6 rounded-full p-2 text-white transition-colors duration-200 ease-in-out hover:bg-red-500 focus:outline-none z-50 cursor-pointer"
-                aria-label="Thoát"
-            >
-                <X size={28} />
+                className="absolute top-6 left-6 rounded-full p-2 text-white transition-colors duration-200 ease-in-out hover:bg-red-500 focus:outline-none z-50 cursor-pointer">
+                <X className="w-12 h-12" />
             </button>
 
             <div ref={panelRef} className="relative">
