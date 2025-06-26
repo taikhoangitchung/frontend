@@ -287,7 +287,7 @@ export default function PlayExamFormOnline() {
                         onClick={() => router.push("/users/dashboard")}
                         className="absolute top-4 left-4 text-white hover:text-red-500 p-2 rounded-full z-50 bg-black/30"
                     >
-                        <X className="w-6 h-6" />
+                        <X className="w-10 h-10" />
                     </button>
 
                     <div className={`rounded-xl p-6 max-w-6xl w-full grid gap-6 overflow-y-auto max-h-[90vh] ${
