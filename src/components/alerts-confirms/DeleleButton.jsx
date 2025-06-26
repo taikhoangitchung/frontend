@@ -2,22 +2,19 @@
 
 import { Trash2 } from "lucide-react"
 import ConfirmDialog from "./ConfirmDialog"
+import { Button } from "../ui/button"
 
 export default function DeleteButton({
-                                                    id,
-                                                    handleDelete,
-                                                    disabled = false,
-                                                }) {
+    id,
+    handleDelete,
+    ...props
+}) {
     return (
         <ConfirmDialog
             trigger={
-                <button
-                    className="text-red-600 hover:text-red-800 p-2 disabled:opacity-50"
-                    title="Xoá"
-                    disabled={disabled}
-                >
+                <Button {...props} title="Xoá">
                     <Trash2 className="w-4 h-4" />
-                </button>
+                </Button>
             }
             title="Xác nhận xoá"
             description="Bạn có chắc chắn muốn xoá mục này? Hành động này không thể hoàn tác."
