@@ -9,7 +9,7 @@ import HistoryService from "../../services/HistoryService"
 import ExamResultSummary from "./ExamResultSummary";
 import ConfirmDialog from "../alerts-confirms/ConfirmDialog";
 import formatTime from "../../util/formatTime";
-import socketInstance from "../../config/socketConfig";
+import roomSocket from "../../config/socketConfig";
 
 export default function PlayExamForm() {
     const {id, code} = useParams()
@@ -76,7 +76,7 @@ export default function PlayExamForm() {
     useEffect(() => {
         if (!isOnline || !code || !username) return;
 
-        const socket = socketInstance();
+        const socket = roomSocket();
         socketRef.current = socket;
 
         const handleMessage = (event) => {
