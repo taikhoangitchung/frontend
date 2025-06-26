@@ -195,13 +195,12 @@ export default function OfflineExamForm() {
             )}
             <div className="flex items-center justify-between">
                 <ConfirmDialog
-                    triggerLabel={
-                        <div className="flex items-center gap-2">
-                            <X size={18} /> {/* Thêm icon X */}
+                    trigger={
+                        <div className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 cursor-pointer">
+                            <X className="w-5 h-5" />
                             Thoát ra
                         </div>
                     }
-                    triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2"
                     title="Bạn có chắc chắn muốn thoát?"
                     description="Bài làm sẽ không được lưu lại nếu chưa nộp."
                     actionLabel="Thoát ngay"
@@ -217,7 +216,7 @@ export default function OfflineExamForm() {
                     <Button
                         onClick={() => handleSubmitQuiz(false)}
                         disabled={submitting || submitted}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
+                        className="bg-green-600 hover:bg-green-700 cursor-pointer text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
                     >
                         {submitting ? "Đang nộp..." : "Nộp bài"}
                     </Button>
@@ -263,7 +262,7 @@ export default function OfflineExamForm() {
                         <button
                             key={index}
                             onClick={() => changeQuestion(index)}
-                            className={`w-10 h-10 rounded-lg font-semibold text-sm ${getQuestionButtonStyle(index)}`}
+                            className={`w-10 h-10 rounded-lg hover:cursor-pointer font-semibold text-sm ${getQuestionButtonStyle(index)}`}
                             disabled={submitting || submitted}
                         >
                             {index + 1}
@@ -292,14 +291,14 @@ export default function OfflineExamForm() {
                 <Button
                     onClick={() => changeQuestion(questionIndex - 1)}
                     disabled={questionIndex === 0 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                    className="bg-white text-purple-900 hover:bg-gray-200 cursor-pointer font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu trước
                 </Button>
                 <Button
                     onClick={() => changeQuestion(questionIndex + 1)}
                     disabled={questionIndex >= questions.length - 1 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                    className="bg-white text-purple-900 hover:bg-gray-200 cursor-pointer font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu tiếp theo
                 </Button>
