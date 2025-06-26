@@ -470,7 +470,7 @@ export default function CreateExam({ id }) {
                         <span className="text-white">Quay lại</span>
                     </button>
                     <Button
-                        onClick={formik.handleSubmit}
+                        onClick={() => formik.handleSubmit()}
                         className="cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 font-semibold rounded-lg shadow-md transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
                         disabled={isSubmitting}
                     >
@@ -611,7 +611,7 @@ export default function CreateExam({ id }) {
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 {questionLimits.map((limit) => (
-                                                    <SelectItem key={limit.value} value={limit.value.toString()}>
+                                                    <SelectItem key={limit.value} value={limit.value}>
                                                         {limit.label}
                                                     </SelectItem>
                                                 ))}
