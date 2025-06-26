@@ -98,7 +98,7 @@ export default function CreateExam({ id }) {
             categoryId: -1,
             duration: 30,
             passScore: 70,
-            questionLimit: 30,
+            questionLimit: 10000,
             questions: [],
         },
         validationSchema: ExamSchema,
@@ -391,12 +391,11 @@ export default function CreateExam({ id }) {
                                 }}
                                 variant="ghost"
                                 size="sm"
-                                className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-teal-50 p-1"
+                                className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-teal-50 p-1 transition-all duration-200"
                                 title={isExpanded ? "Thu gọn" : "Xem đáp án"}
                             >
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                             </Button>
-                            {/* Edit Button */}
                             {question.user.id === userId && (
                                 <Button
                                     onClick={(e) => {
@@ -405,7 +404,7 @@ export default function CreateExam({ id }) {
                                     }}
                                     variant="ghost"
                                     size="sm"
-                                    className="cursor-pointer text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1"
+                                    className="cursor-pointer text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1 transition-all duration-200"
                                     title="Chỉnh sửa câu hỏi"
                                 >
                                     <Edit className="h-4 w-4"/>
@@ -419,7 +418,7 @@ export default function CreateExam({ id }) {
                                     }}
                                     variant="ghost"
                                     size="sm"
-                                    className="cursor-pointer text-red-500 hover:text-red-700 hover:bg-red-50 p-1"
+                                    className="cursor-pointer text-red-500 hover:text-red-700 hover:bg-red-50 p-1 transition-all duration-200"
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -471,7 +470,7 @@ export default function CreateExam({ id }) {
                     </button>
                     <Button
                         onClick={formik.handleSubmit}
-                        className="cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 font-semibold rounded-lg shadow-md transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                        className="cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 font-semibold rounded-lg shadow-md transform hover:scale-105 transition-all duration-200 flex items-center gap-2 disabled:cursor-not-allowed"
                         disabled={isSubmitting}
                     >
                         <Save className="h-4 w-4" />
@@ -515,34 +514,41 @@ export default function CreateExam({ id }) {
                                         <div className="text-red-500 text-sm mt-1">{formik.errors.title}</div>
                                     )}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
-                                            <FaFireAlt className="h-4 w-4 text-purple-600" />
+                                            <FaFireAlt className="h-4 w-4 text-purple-600"/>
                                             Độ khó
                                         </Label>
                                         <Select
                                             value={formik.values.difficultyId === -1 ? "" : formik.values.difficultyId.toString()}
                                             onValueChange={(value) => formik.setFieldValue("difficultyId", value === "" ? -1 : Number(value))}
                                         >
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-purple-500 focus:bg-white">
-                                                <SelectValue placeholder="Chọn độ khó" />
+                                            <SelectTrigger
+                                                className="w-full border-gray-300 bg-gray-50 focus:border-purple-500 focus:bg-white cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                            >
+                                                <SelectValue placeholder="Chọn độ khó"/>
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 {difficulties.map((diff) => (
-                                                    <SelectItem key={diff.id} value={diff.id.toString()}>
+                                                    <SelectItem
+                                                        key={diff.id}
+                                                        value={diff.id.toString()}
+                                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                                    >
                                                         {diff.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                         {formik.touched.difficultyId && formik.errors.difficultyId && (
-                                            <div className="text-red-500 text-sm mt-1">{formik.errors.difficultyId}</div>
+                                            <div
+                                                className="text-red-500 text-sm mt-1">{formik.errors.difficultyId}</div>
                                         )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
-                                            <Tag className="h-4 w-4 text-teal-600" />
+                                            <Tag className="h-4 w-4 text-teal-600"/>
                                             Danh mục
                                         </Label>
                                         <Select
@@ -550,12 +556,18 @@ export default function CreateExam({ id }) {
                                             onValueChange={(value) => formik.setFieldValue("categoryId", value === "" ? -1 : Number(value))}
                                             disabled={formik.values.questions.length > 0}
                                         >
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-teal-500">
-                                                <SelectValue placeholder="Chọn danh mục" />
+                                            <SelectTrigger
+                                                className="w-full border-gray-300 bg-gray-50 focus:border-teal-500 cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                            >
+                                                <SelectValue placeholder="Chọn danh mục"/>
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 {categories.map((category) => (
-                                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                                    <SelectItem
+                                                        key={category.id}
+                                                        value={category.id.toString()}
+                                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                                    >
                                                         {category.name}
                                                     </SelectItem>
                                                 ))}
@@ -565,11 +577,38 @@ export default function CreateExam({ id }) {
                                             <div className="text-red-500 text-sm mt-1">{formik.errors.categoryId}</div>
                                         )}
                                     </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-gray-700 font-medium flex items-center gap-2">
+                                            <FaCircleQuestion className="h-4 w-4 text-purple-600"/>
+                                            Số lượng câu hỏi
+                                        </Label>
+                                        <Select
+                                            value={formik.values.questionLimit}
+                                            onValueChange={(value) => formik.setFieldValue("questionLimit", Number(value))}
+                                        >
+                                            <SelectTrigger
+                                                className="w-full border-gray-300 bg-gray-50 focus:border-purple-500 cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                            >
+                                                <SelectValue placeholder="Chọn số câu"/>
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white">
+                                                {questionLimits.map((limit) => (
+                                                    <SelectItem
+                                                        key={limit.value}
+                                                        value={limit.value}
+                                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                                    >
+                                                        {limit.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
-                                            <Clock className="h-4 w-4 text-purple-600" />
+                                            <Clock className="h-4 w-4 text-purple-600"/>
                                             Thời gian (phút)
                                         </Label>
                                         <Input
@@ -584,7 +623,7 @@ export default function CreateExam({ id }) {
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
-                                            <Target className="h-4 w-4 text-teal-600" />
+                                            <Target className="h-4 w-4 text-teal-600"/>
                                             Điểm đạt (%)
                                         </Label>
                                         <Input
@@ -596,27 +635,6 @@ export default function CreateExam({ id }) {
                                         {formik.touched.passScore && formik.errors.passScore && (
                                             <div className="text-red-500 text-sm mt-1">{formik.errors.passScore}</div>
                                         )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-gray-700 font-medium flex items-center gap-2">
-                                            <FaCircleQuestion className="h-4 w-4 text-purple-600" />
-                                            Số lượng câu hỏi
-                                        </Label>
-                                        <Select
-                                            value={formik.values.questionLimit}
-                                            onValueChange={(value) => formik.setFieldValue("questionLimit", value)}
-                                        >
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-purple-500">
-                                                <SelectValue placeholder="Chọn số câu" />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white">
-                                                {questionLimits.map((limit) => (
-                                                    <SelectItem key={limit.value} value={limit.value.toString()}>
-                                                        {limit.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
                                     </div>
                                 </div>
                             </CardContent>
@@ -638,7 +656,7 @@ export default function CreateExam({ id }) {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="text-white hover:bg-white/20 p-2"
+                                                        className="text-white hover:bg-white/20 p-2 cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                                         title="Xóa tất cả câu hỏi"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -718,7 +736,7 @@ export default function CreateExam({ id }) {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="text-white hover:bg-white/20 p-2"
+                                                    className="text-white hover:bg-white/20 p-2 cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                                     title="Import câu hỏi từ Excel"
                                                 >
                                                     <Upload className="h-4 w-4"/>
@@ -751,7 +769,7 @@ export default function CreateExam({ id }) {
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="bg-white text-purple-600 border-purple-300 hover:bg-purple-50 flex items-center gap-2"
+                                                            className="bg-white text-purple-600 border-purple-300 hover:bg-purple-50 flex items-center gap-2 cursor-pointer transition-all duration-200"
                                                         >
                                                             <ExternalLink className="h-4 w-4"/>
                                                             Xem mẫu Excel
@@ -784,23 +802,28 @@ export default function CreateExam({ id }) {
                                             Nguồn câu hỏi
                                         </Label>
                                         <Select value={questionSource} onValueChange={setQuestionSource}>
-                                            <SelectTrigger className="border-gray-300 bg-gray-50 focus:border-teal-500">
+                                            <SelectTrigger
+                                                className="w-full border-gray-300 bg-gray-50 focus:border-teal-500 cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                            >
                                                 <SelectValue placeholder="Chọn nguồn câu hỏi" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
-                                                <SelectItem value={`${formik.values.authorId}`}>
+                                                <SelectItem value={`${formik.values.authorId}`}
+                                                            className="hover:bg-gray-100 cursor-pointer transition-all duration-200">
                                                     <div className="flex items-center gap-2">
                                                         <User className="h-4 w-4" />
                                                         Câu hỏi của tôi
                                                     </div>
                                                 </SelectItem>
-                                                <SelectItem value={"-1"}>
+                                                <SelectItem value={"-1"}
+                                                            className="hover:bg-gray-100 cursor-pointer transition-all duration-200">
                                                     <div className="flex items-center gap-2">
                                                         <User className="h-4 w-4" />
                                                         Câu hỏi của người khác
                                                     </div>
                                                 </SelectItem>
-                                                <SelectItem value={"-999"}>
+                                                <SelectItem value={"-999"}
+                                                            className="hover:bg-gray-100 cursor-pointer transition-all duration-200">
                                                     <div className="flex items-center gap-2">
                                                         <User className="h-4 w-4" />
                                                         Tất cả
@@ -828,7 +851,7 @@ export default function CreateExam({ id }) {
                                 {selectedQuestion.length > 0 && (
                                     <Button
                                         onClick={addSelectedQuestions}
-                                        className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium"
+                                        className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                     >
                                         <Plus className="h-4 w-4 mr-2" />
                                         Thêm {selectedQuestion.length} câu hỏi đã chọn

@@ -3,7 +3,9 @@ import axiosInstance from "../config/axiosConfig";
 class QuestionService {
     static async create(questionData) {
         try {
-            return await axiosInstance.post("/questions", questionData)
+            return await axiosInstance.post("/questions", questionData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
         } catch (error) {
             return Promise.reject(error);
         }
@@ -12,10 +14,10 @@ class QuestionService {
     static async filterByCategoryAndSource(categoryId, sourceId, currentUserId, username) {
         try {
             const params = {
-                categoryId: categoryId
-                ,sourceId: sourceId
-                ,currentUserId: currentUserId
-                ,username: username
+                categoryId: categoryId,
+                sourceId: sourceId,
+                currentUserId: currentUserId,
+                username: username
             };
             return await axiosInstance.post("/questions/filter", params);
         } catch (error) {
@@ -49,7 +51,9 @@ class QuestionService {
 
     static async update(id, questionData) {
         try {
-            return await axiosInstance.put(`/questions/${id}`, questionData)
+            return await axiosInstance.put(`/questions/${id}`, questionData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
         } catch (error) {
             throw error
         }
