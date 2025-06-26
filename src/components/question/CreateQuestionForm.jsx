@@ -160,22 +160,23 @@ export default function CreateQuestionForm() {
                         onClick={() => router.push("/users/questions")}
                         className="p-2 text-white hover:bg-red-500 hover:scale-105 transition-all duration-200 cursor-pointer"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-4 h-4"/>
                     </Button>
                     <h1 className="text-2xl font-semibold text-white">Tạo câu hỏi mới</h1>
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-6">
                     <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
-                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer">
-                            <SelectValue placeholder="Chọn chủ đề" />
+                        <SelectTrigger
+                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
+                            <SelectValue placeholder="Chọn chủ đề"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {categories.map((cat) => (
                                 <SelectItem
                                     key={cat.id}
                                     value={cat.name}
-                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200"
+                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg"
                                 >
                                     {cat.name}
                                 </SelectItem>
@@ -184,15 +185,16 @@ export default function CreateQuestionForm() {
                     </Select>
 
                     <Select value={formik.values.difficulty} onValueChange={handleSelectChange("difficulty")}>
-                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer">
-                            <SelectValue placeholder="Chọn độ khó" />
+                        <SelectTrigger
+                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
+                            <SelectValue placeholder="Chọn độ khó"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {difficulties.map((diff) => (
                                 <SelectItem
                                     key={diff.id}
                                     value={diff.name}
-                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200"
+                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg"
                                 >
                                     {diff.name}
                                 </SelectItem>
@@ -201,15 +203,16 @@ export default function CreateQuestionForm() {
                     </Select>
 
                     <Select value={formik.values.type} onValueChange={handleSelectChange("type")}>
-                        <SelectTrigger className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer">
-                            <SelectValue placeholder="Một đáp án đúng" />
+                        <SelectTrigger
+                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
+                            <SelectValue placeholder="Một đáp án đúng"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {types.map((type) => (
                                 <SelectItem
                                     key={type.id}
                                     value={type.name}
-                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200"
+                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg"
                                 >
                                     {typeVietSub(type.name)}
                                 </SelectItem>
@@ -219,14 +222,27 @@ export default function CreateQuestionForm() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
-                    {/* Left Section - Image Upload (4/10) */}
-                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-4">
+                    {/* Left Section - Image Upload (3/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-3">
                         <h3 className="text-white font-semibold text-lg">Upload hình ảnh</h3>
                         {!image ? (
-                            <div className="border-2 border-dashed border-white/30 rounded-lg p-8 text-center hover:border-white/50 hover:bg-white/5 transition-all duration-200 cursor-pointer h-[250px] flex flex-col justify-center">
-                                <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden" id="image-upload" />
+                            <div
+                                className="border-2 border-dashed border-white/30 rounded-lg p-8 text-center hover:border-white/50 hover:bg-white/5 transition-all duration-200 cursor-pointer h-[200px] flex flex-col justify-center"
+                                onDragOver={(e) => e.preventDefault()}
+                                onDragEnter={(e) => e.preventDefault()}
+                                onDragLeave={(e) => e.preventDefault()}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    const file = e.dataTransfer.files[0];
+                                    if (file && file.type.startsWith('image/')) {
+                                        handleImageChange({target: {files: [file]}});
+                                    }
+                                }}
+                            >
+                                <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden"
+                                       id="image-upload"/>
                                 <label htmlFor="image-upload" className="cursor-pointer block">
-                                    <div className="w-12 h-6 text-white/60 mx-auto mb-4">📁</div>
+                                    <div className="w-12 h-6 text-white/70 mx-auto mb-3">📁</div>
                                     <p className="text-white/80 mb-2">Chọn tệp</p>
                                     <p className="text-white/60 text-sm">Kéo thả hoặc click để chọn ảnh</p>
                                 </label>
@@ -240,7 +256,7 @@ export default function CreateQuestionForm() {
                                     <img
                                         src={URL.createObjectURL(image) || "/placeholder.svg"}
                                         alt="Preview"
-                                        className="w-full h-[213px] object-cover rounded-lg"
+                                        className="w-full h-[163px] object-cover rounded-lg"
                                     />
                                 </div>
                                 <Button
@@ -255,8 +271,8 @@ export default function CreateQuestionForm() {
                         )}
                     </Card>
 
-                    {/* Right Section - Question Input (6/10) */}
-                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-6">
+                    {/* Right Section - Question Input (7/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-7">
                         <h3 className="text-white font-semibold text-lg">Nội dung câu hỏi</h3>
                         <Textarea
                             name="content"
@@ -264,7 +280,8 @@ export default function CreateQuestionForm() {
                             value={formik.values.content}
                             onChange={formik.handleChange}
                             spellCheck="false"
-                            className="bg-white/10 border-white/30 text-white placeholder:text-white/60 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-none h-[250px]"
+                            className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-none h-[200px]"
+                            style={{fontSize: "1.25rem"}}
                         />
                     </Card>
                 </div>
@@ -273,8 +290,9 @@ export default function CreateQuestionForm() {
                 {formik.values.type === "multiple" ? (
                     <div className="grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                         {formik.values.answers.map((answer, index) => (
-                            <Card key={answer.id} className={`bg-gradient-to-br ${answer.color} border-none h-80 relative`}>
-                                <div className="absolute top-4 right-4">
+                            <Card key={answer.id}
+                                  className={`bg-gradient-to-br ${answer.color} border-none h-60 relative`}>
+                                <div className="absolute top-3 right-3">
                                     <Checkbox
                                         checked={answer.correct}
                                         onCheckedChange={(checked) => {
@@ -282,10 +300,10 @@ export default function CreateQuestionForm() {
                                             updated[index].correct = checked
                                             formik.setFieldValue("answers", updated)
                                         }}
-                                        className="w-5 h-5 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900 hover:scale-110 transition-all duration-200 cursor-pointer"
+                                        className="w-6 h-6 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900 hover:scale-110 transition-all duration-200 cursor-pointer"
                                     />
                                 </div>
-                                <div className="p-6 h-full flex flex-col justify-center">
+                                <div className="p-5 pb-0 h-full flex flex-col justify-center">
                                     <Textarea
                                         value={answer.content}
                                         onChange={(e) => {
@@ -294,7 +312,8 @@ export default function CreateQuestionForm() {
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-white/10 border border-white/30 text-white placeholder:text-white/60 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-20 w-full text-base rounded-md p-3 mr-12"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
                                     />
                                 </div>
                             </Card>
@@ -313,7 +332,8 @@ export default function CreateQuestionForm() {
                         className={`grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 ${formik.values.answers.length === 2 ? "" : "lg:grid-cols-4"}`}
                     >
                         {formik.values.answers.map((answer, index) => (
-                            <Card key={answer.id} className={`bg-gradient-to-br ${answer.color} border-none h-80 relative`}>
+                            <Card key={answer.id}
+                                  className={`bg-gradient-to-br ${answer.color} border-none h-60 relative`}>
                                 <div className="absolute top-3 right-3">
                                     <RadioGroupItem
                                         value={answer.id.toString()}
@@ -327,7 +347,7 @@ export default function CreateQuestionForm() {
                                         )}
                                     />
                                 </div>
-                                <div className="p-5 h-full flex flex-col justify-center">
+                                <div className="p-5 pb-0 h-full flex flex-col justify-center">
                                     <Textarea
                                         value={answer.content}
                                         spellCheck="false"
@@ -337,7 +357,8 @@ export default function CreateQuestionForm() {
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-white/10 border-white/30 text-white placeholder:text-white/60 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
                                     />
                                 </div>
                             </Card>
@@ -355,12 +376,12 @@ export default function CreateQuestionForm() {
                     >
                         {isSubmitting ? (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
                                 Đang gửi
                             </>
                         ) : (
                             <>
-                                <Send className="mr-2 h-4 w-4" />
+                                <Send className="mr-2 h-4 w-4"/>
                                 Tạo câu hỏi
                             </>
                         )}
