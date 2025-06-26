@@ -69,7 +69,7 @@ export default function CreateExam({ id }) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [questionBank, setQuestionBank] = useState([])
     const [selectedQuestion, setSelectedQuestion] = useState([])
-    const [questionSource, setQuestionSource] = useState("-1")
+    const [questionSource, setQuestionSource] = useState("-999")
     const [searchTerm, setSearchTerm] = useState("")
 
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())

@@ -137,7 +137,7 @@ export default function ExamManager() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
+                        className="pl-10 border border-gray-200 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 
