@@ -11,6 +11,7 @@ import { Pencil, Plus, Search, FileText, ListCheck, Loader2 } from "lucide-react
 import CategoryService from "../../services/CategoryService"
 import { Skeleton } from "../ui/skeleton"
 import DeleteButton from "../alerts-confirms/DeleleButton"
+import {cn} from "../../lib/utils";
 
 const ITEMS_PER_PAGE = 10
 
@@ -131,10 +132,10 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                 <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4"/>
                     <Input
-                        placeholder="Nhập tên danh mục cần tìm..."
+                        placeholder="Nhập tiêu đề hoặc mô tả danh mục..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 border border-gray-200 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
+                        className="pl-10 border-gray-200 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200"
                     />
                 </div>
             </div>
@@ -165,19 +166,26 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
 
                 {/* Category Cards */}
                 {paginatedCategories.map((category, index) => (
-                    <Card key={category.id} className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white">
-                        <CardContent className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-xl sm:text-2xl font-bold text-purple-800">
+                    <Card
+                        key={category.id}
+                        onClick={() => viewMode === "USER" && router.push(`/users/questions?categoryId=${category.id}`)}
+                        className={cn(
+                            "border border-gray-200 bg-white transition-all duration-200 hover:shadow-lg",
+                            viewMode === "USER" && "cursor-pointer hover:scale-[1.02]"
+                        )}
+                    >
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-between items-start">
+                                <h2 className="text-lg sm:text-xl font-semibold text-purple-900 truncate">
                                     {index + 1}. {category.name}
                                 </h2>
-
                                 {viewMode === "ADMIN" && (
-                                    <div className="flex gap-1">
+                                    <div className="flex gap-2">
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="p-1 text-primary cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
+                                            title="Chỉnh sửa"
+                                            className="p-1 text-primary hover:bg-gray-100"
                                             onClick={() => handleEdit(category.id)}
                                             disabled={isLoading.edit[category.id]}
                                         >
@@ -187,17 +195,21 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                                                 <Pencil className="w-5 h-5" />
                                             )}
                                         </Button>
-                                        <DeleteButton id={category.id} handleDelete={handleDelete} />
+                                        <DeleteButton
+                                            id={category.id}
+                                            handleDelete={handleDelete}
+                                            className="p-1 text-red-600 hover:bg-red-50"
+                                        />
                                     </div>
                                 )}
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-sm text-gray-700">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
+                                <div className="flex items-center gap-2">
                                     <FileText className="w-4 h-4 text-blue-500" />
                                     <span>{category.description || "—"}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-700">
+                                <div className="flex items-center gap-2">
                                     <ListCheck className="w-4 h-4 text-green-600" />
                                     <span className="font-semibold">{category.questionCount || 0} câu hỏi</span>
                                 </div>
@@ -205,6 +217,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                         </CardContent>
                     </Card>
                 ))}
+
             </div>
 
             {/* Loading */}
