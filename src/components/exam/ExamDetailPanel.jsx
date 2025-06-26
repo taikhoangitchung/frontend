@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef } from "react"
+import { X } from "lucide-react"
 
 export default function ExamDetailPanel({ data, onClose }) {
     const panelRef = useRef(null)
@@ -20,6 +21,15 @@ export default function ExamDetailPanel({ data, onClose }) {
                 ref={panelRef}
                 className="bg-white rounded-xl shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto text-black relative"
             >
+                {/* Nút X ở góc trên bên phải */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 rounded-full p-1 text-gray-500 transition-colors duration-200 ease-in-out hover:bg-red-500 hover:text-white focus:outline-none z-50 cursor-pointer"
+                    aria-label="Đóng"
+                >
+                    <X size={20} />
+                </button>
+
                 <h2 className="text-2xl font-bold mb-4 text-purple-900">Chi tiết bài làm</h2>
 
                 <div className="space-y-6">
@@ -43,7 +53,8 @@ export default function ExamDetailPanel({ data, onClose }) {
                                             className={`relative border rounded-lg px-4 py-3 min-h-[4rem] ${borderColor} ${bgColor}`}
                                         >
                                             {isSelected && (
-                                                <div className="absolute top-0 right-2 -translate-y-1/2 bg-white border border-purple-500 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded shadow-sm z-10">
+                                                <div
+                                                    className="absolute top-0 right-2 -translate-y-1/2 bg-white border border-purple-500 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded shadow-sm z-10">
                                                     Bạn chọn
                                                 </div>
                                             )}

@@ -1,12 +1,11 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter} from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
-import {toast} from "sonner";
-import {ArrowLeft, Timer, CheckCircle, Pencil, XCircle} from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, Timer, CheckCircle, Pencil, XCircle } from "lucide-react";
 import formatTime from "../../../util/formatTime";
-
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -83,9 +82,9 @@ const HistoryPage = () => {
                     <h1 className="text-2xl font-semibold text-gray-900">Lịch sử thi của tôi</h1>
                     <button
                         onClick={() => router.push("/users/dashboard")}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2 hover:shadow-md"
                     >
-                        <ArrowLeft className="w-4 h-4"/>
+                        <ArrowLeft className="w-4 h-4" />
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
@@ -95,37 +94,37 @@ const HistoryPage = () => {
                     <div className="flex space-x-8 border-b border-gray-200">
                         <button
                             onClick={() => handleTabChange("running")}
-                            className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
+                            className={`pb-4 px-2 text-sm font-medium transition-all duration-200 relative cursor-pointer hover:text-orange-600 ${
                                 activeTab === "running"
                                     ? "text-orange-600 border-b-2 border-orange-600"
-                                    : "text-gray-500 hover:text-gray-700"
+                                    : "text-gray-500"
                             }`}
                         >
-                            <Timer size={16} className="inline-block mr-2"/>
+                            <Timer size={16} className="inline-block mr-2" />
                             Đang chạy
                         </button>
 
                         <button
                             onClick={() => handleTabChange("completed")}
-                            className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
+                            className={`pb-4 px-2 text-sm font-medium transition-all duration-200 relative cursor-pointer hover:text-orange-600 ${
                                 activeTab === "completed"
                                     ? "text-orange-600 border-b-2 border-orange-600"
-                                    : "text-gray-500 hover:text-gray-700"
+                                    : "text-gray-500"
                             }`}
                         >
-                            <CheckCircle size={16} className="inline-block mr-2"/>
+                            <CheckCircle size={16} className="inline-block mr-2" />
                             Hoàn thành
                         </button>
 
                         <button
                             onClick={() => handleTabChange("created")}
-                            className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
+                            className={`pb-4 px-2 text-sm font-medium transition-all duration-200 relative cursor-pointer hover:text-orange-600 ${
                                 activeTab === "created"
                                     ? "text-orange-600 border-b-2 border-orange-600"
-                                    : "text-gray-500 hover:text-gray-700"
+                                    : "text-gray-500"
                             }`}
                         >
-                            <Pencil size={16} className="inline-block mr-2"/>
+                            <Pencil size={16} className="inline-block mr-2" />
                             Tạo
                         </button>
                     </div>
@@ -154,18 +153,24 @@ const HistoryPage = () => {
                                         />
 
                                         <div
-                                            className="absolute top-2 right-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold text-purple-700 outline-none transition-colors group-hover:bg-white/90">
+                                            className="absolute top-2 right-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold text-purple-700 outline-none transition-colors group-hover:bg-white/90"
+                                        >
                                             Lượt thi {history.attemptTime}
                                         </div>
                                         <div
-                                            className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                                            className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"
+                                        ></div>
                                     </div>
 
                                     <div className="p-4">
                                         <div
-                                            className="text-center text-base font-semibold text-gray-800 hover:text-gray-900 transition-colors duration-300 mb-4 h-10 flex items-center justify-center">
+                                            className="text-center text-base font-semibold text-gray-800 hover:text-gray-900 transition-colors duration-300 mb-4 h-10 flex items-center justify-center"
+                                        >
                                             <span
-                                                className="line-clamp-2 overflow-hidden text-ellipsis text-wrap">{history.examTitle}</span>
+                                                className="line-clamp-2 overflow-hidden text-ellipsis text-wrap"
+                                            >
+                                                {history.examTitle}
+                                            </span>
                                         </div>
 
                                         <div className="mb-4">
@@ -188,7 +193,11 @@ const HistoryPage = () => {
                                             <span>{formatTime(history.timeTaken)}</span>
                                         </div>
 
-                                        <div className={`text-sm font-semibold mt-2 flex items-center gap-1 ${history.passed ? "text-green-600" : "text-red-600"}`}>
+                                        <div
+                                            className={`text-sm font-semibold mt-2 flex items-center gap-1 ${
+                                                history.passed ? "text-green-600" : "text-red-600"
+                                            }`}
+                                        >
                                             {history.passed ? (
                                                 <>
                                                     <CheckCircle className="w-4 h-4" />
@@ -213,20 +222,20 @@ const HistoryPage = () => {
                                         {currentPage > 0 && (
                                             <button
                                                 onClick={() => handlePageChange(currentPage - 1)}
-                                                className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-colors rounded-l-md"
+                                                className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-l-md cursor-pointer hover:shadow-md"
                                             >
                                                 Trước
                                             </button>
                                         )}
-                                        {Array.from({length: totalPages}, (_, i) => i).map((page) => (
+                                        {Array.from({ length: totalPages }, (_, i) => i).map((page) => (
                                             <button
                                                 key={page}
                                                 onClick={() => handlePageChange(page)}
                                                 className={`px-4 py-2 border border-gray-300 text-sm font-medium ${
                                                     currentPage === page
                                                         ? "bg-purple-600 text-white"
-                                                        : "bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-colors"
-                                                } rounded-md`}
+                                                        : "bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200"
+                                                } cursor-pointer rounded-md hover:shadow-md`}
                                             >
                                                 {page + 1}
                                             </button>
@@ -234,7 +243,7 @@ const HistoryPage = () => {
                                         {currentPage < totalPages - 1 && (
                                             <button
                                                 onClick={() => handlePageChange(currentPage + 1)}
-                                                className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-colors rounded-r-md"
+                                                className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-r-md cursor-pointer hover:shadow-md"
                                             >
                                                 Sau
                                             </button>
@@ -244,12 +253,12 @@ const HistoryPage = () => {
                                     <>
                                         <button
                                             onClick={() => handlePageChange(currentPage - 1)}
-                                            className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-colors rounded-l-md"
+                                            className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-l-md cursor-pointer hover:shadow-md"
                                         >
                                             Trước
                                         </button>
                                         {Array.from(
-                                            {length: Math.min(5, totalPages)},
+                                            { length: Math.min(5, totalPages) },
                                             (_, i) => currentPage - 2 + i
                                         )
                                             .filter((page) => page >= 0 && page < totalPages)
@@ -260,15 +269,15 @@ const HistoryPage = () => {
                                                     className={`px-4 py-2 border border-gray-300 text-sm font-medium ${
                                                         currentPage === page
                                                             ? "bg-purple-600 text-white"
-                                                            : "bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-colors"
-                                                    } rounded-md`}
+                                                            : "bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200"
+                                                    } cursor-pointer rounded-md hover:shadow-md`}
                                                 >
                                                     {page + 1}
                                                 </button>
                                             ))}
                                         <button
                                             onClick={() => handlePageChange(currentPage + 1)}
-                                            className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-colors rounded-r-md"
+                                            className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-r-md cursor-pointer hover:shadow-md"
                                         >
                                             Sau
                                         </button>

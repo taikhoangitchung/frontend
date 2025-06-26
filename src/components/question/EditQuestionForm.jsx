@@ -32,8 +32,7 @@ export default function EditQuestionForm() {
     const [loading, setLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [editingQuestion, setEditingQuestion] = useState(null)
-    const [initialTypeSet, setInitialTypeSet] = useState(false) // Thêm flag để track
-    // Thêm state để track type ban đầu
+    const [initialTypeSet, setInitialTypeSet] = useState(false)
     const [initialType, setInitialType] = useState(null)
 
     const fetchDropdowns = async () => {
@@ -116,21 +115,18 @@ export default function EditQuestionForm() {
         }),
     })
 
-    // Sửa useEffect để set initialType
     useEffect(() => {
         if (editingQuestion && !initialTypeSet) {
             setInitialTypeSet(true)
-            setInitialType(editingQuestion.type) // Lưu type ban đầu
+            setInitialType(editingQuestion.type)
         }
     }, [editingQuestion, initialTypeSet])
 
-    // Sửa useEffect để chỉ reset khi user thay đổi type manually
     useEffect(() => {
         if (formik.values.type && initialTypeSet && initialType) {
-            // Chỉ reset khi type thay đổi khác với type ban đầu
             if (formik.values.type !== initialType) {
                 formik.setFieldValue("answers", initialAnswers(formik.values.type))
-                setInitialType(formik.values.type) // Cập nhật initialType mới
+                setInitialType(formik.values.type)
             }
         }
     }, [formik.values.type, initialTypeSet, initialType])
@@ -187,7 +183,7 @@ export default function EditQuestionForm() {
                         variant="ghost"
                         size="sm"
                         onClick={() => router.push("/users/questions")}
-                        className="p-2 text-white hover:bg-white/10"
+                        className="p-2 text-white hover:bg-white/10 hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer"
                     >
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
@@ -196,12 +192,12 @@ export default function EditQuestionForm() {
 
                 <div className="flex flex-wrap gap-4 mb-8">
                     <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
-                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium">
+                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer">
                             <SelectValue placeholder="Chọn chủ đề" />
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.name} className="text-base font-medium py-3">
+                                <SelectItem key={cat.id} value={cat.name} className="text-base font-medium py-3 hover:bg-white/10 cursor-pointer">
                                     {cat.name}
                                 </SelectItem>
                             ))}
@@ -209,12 +205,12 @@ export default function EditQuestionForm() {
                     </Select>
 
                     <Select value={formik.values.difficulty} onValueChange={handleSelectChange("difficulty")}>
-                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium">
+                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer">
                             <SelectValue placeholder="Chọn độ khó" />
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {difficulties.map((diff) => (
-                                <SelectItem key={diff.id} value={diff.name} className="text-base font-medium py-3">
+                                <SelectItem key={diff.id} value={diff.name} className="text-base font-medium py-3 hover:bg-white/10 cursor-pointer">
                                     {diff.name}
                                 </SelectItem>
                             ))}
@@ -222,12 +218,12 @@ export default function EditQuestionForm() {
                     </Select>
 
                     <Select value={formik.values.type} onValueChange={handleSelectChange("type")}>
-                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium">
+                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer">
                             <SelectValue placeholder="Chọn loại câu hỏi" />
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {types.map((type) => (
-                                <SelectItem key={type.id} value={type.name} className="text-base font-medium py-3">
+                                <SelectItem key={type.id} value={type.name} className="text-base font-medium py-3 hover:bg-white/10 cursor-pointer">
                                     {typeVietSub(type.name)}
                                 </SelectItem>
                             ))}
@@ -245,13 +241,12 @@ export default function EditQuestionForm() {
                     />
                 </Card>
 
-                {/* Đáp án */}
                 {formik.values.type === "multiple" ? (
                     <div className="grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-80 relative shadow-lg hover:shadow-xl transition-shadow duration-200`}
+                                className={`bg-gradient-to-br ${answer.color} border-none h-80 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
                                 <div className="absolute top-4 right-4">
                                     <Checkbox
@@ -261,7 +256,7 @@ export default function EditQuestionForm() {
                                             updated[index].correct = checked
                                             formik.setFieldValue("answers", updated)
                                         }}
-                                        className="w-6 h-6 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900"
+                                        className="w-6 h-6 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900 hover:scale-[1.05] transition-transform duration-150 ease-in-out cursor-pointer"
                                     />
                                 </div>
                                 <div className="p-4 h-full flex flex-col justify-center">
@@ -294,7 +289,7 @@ export default function EditQuestionForm() {
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-80 relative shadow-lg hover:shadow-xl transition-shadow duration-200`}
+                                className={`bg-gradient-to-br ${answer.color} border-none h-80 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
                                 <div className="absolute top-4 right-4">
                                     <RadioGroupItem
@@ -306,6 +301,7 @@ export default function EditQuestionForm() {
                                             "after:content-['✓'] after:absolute after:text-purple-900 after:font-bold after:text-base",
                                             "after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
                                             "data-[state=unchecked]:after:content-none",
+                                            "hover:scale-[1.05] transition-transform duration-150 ease-in-out cursor-pointer"
                                         )}
                                     />
                                 </div>
@@ -332,7 +328,7 @@ export default function EditQuestionForm() {
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-10 py-3 text-lg font-semibold rounded-lg transition-all duration-200"
+                        className="bg-purple-500 hover:bg-purple-600 text-white px-10 py-3 text-lg font-semibold rounded-lg hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer"
                     >
                         {isSubmitting ? (
                             <>
