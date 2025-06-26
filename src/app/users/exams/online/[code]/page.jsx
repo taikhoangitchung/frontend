@@ -90,15 +90,12 @@ export default function WaitingRoom() {
     };
 
     const handleStartExam = async () => {
-        setLoading(true);
         try {
             await RoomService.start(code);
             const expectCount = candidates.length;
             socketRef.current?.send(`START:${code}:${expectCount}`);
         } catch (error) {
             toast.error(error.response?.data || "Lỗi khi bắt đầu bài thi");
-        } finally {
-            setLoading(false);
         }
     };
 
