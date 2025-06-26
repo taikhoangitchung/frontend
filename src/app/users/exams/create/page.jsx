@@ -583,7 +583,7 @@ export default function CreateExam({ id }) {
                                             Số lượng câu hỏi
                                         </Label>
                                         <Select
-                                            value={formik.values.questionLimit.toString()}
+                                            value={formik.values.questionLimit}
                                             onValueChange={(value) => formik.setFieldValue("questionLimit", Number(value))}
                                         >
                                             <SelectTrigger
@@ -595,7 +595,7 @@ export default function CreateExam({ id }) {
                                                 {questionLimits.map((limit) => (
                                                     <SelectItem
                                                         key={limit.value}
-                                                        value={limit.value.toString()}
+                                                        value={limit.value}
                                                         className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
                                                     >
                                                         {limit.label}
