@@ -9,8 +9,8 @@ import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDial
 import formatTime from "../../../../../util/formatTime";
 import { Button } from "../../../../../components/ui/button";
 import HistoryService from "../../../../../services/HistoryService";
-import { X } from "lucide-react" // Thêm icon X
-
+import { X } from "lucide-react"
+import { Card } from "../../../../../components/ui/card"
 
 const fallbackColors = [
     "from-orange-300 to-orange-400",
@@ -21,7 +21,6 @@ const fallbackColors = [
     "from-yellow-400 to-yellow-600",
     "from-teal-400 to-teal-600",
 ];
-
 
 export default function OfflineExamForm() {
     const { id } = useParams()
@@ -37,10 +36,14 @@ export default function OfflineExamForm() {
     const [timeSpent, setTimeSpent] = useState(0)
     const [resultData, setResultData] = useState(null)
     const [userAnswers, setUserAnswers] = useState({})
+    const [showImageModal, setShowImageModal] = useState(false)
     const timerRef = useRef(null)
 
     const currentQuestion = questions[questionIndex] || {}
     const isMultipleChoice = currentQuestion?.type?.name === "multiple"
+
+    // Định nghĩa base URL cho ảnh, tương tự như trong Question.jsx
+    const imageBaseUrl = "http://localhost:8080";
 
     useEffect(() => {
         const fetchQuizData = async () => {
@@ -223,12 +226,41 @@ export default function OfflineExamForm() {
                 </div>
             </div>
 
-            <div className="text-center text-xl bg-black/20 rounded-2xl p-6">
-                {currentQuestion?.content}
-                <div className="text-lg text-purple-200 font-normal">
-                    ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
+            {/* Question and Image Section */}
+            {currentQuestion?.image ? (
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
+                    {/* Left Section - Image Display (3/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-3">
+                        <div
+                            className="border-2 border-white/30 rounded-lg bg-white/5 cursor-pointer hover:scale-105 transition-all duration-200"
+                            onClick={() => setShowImageModal(true)}
+                        >
+                            <img
+                                src={`${imageBaseUrl}${currentQuestion.image}`}
+                                alt="Question image"
+                                className="w-full h-[163px] object-cover rounded-lg"
+                            />
+                        </div>
+                    </Card>
+
+                    {/* Right Section - Question Content (7/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-7">
+                        <div className="text-xl bg-white/10 border-white/30 text-white p-4 rounded-lg">
+                            {currentQuestion.content}
+                            <div className="text-lg text-purple-200 font-normal">
+                                ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
+                            </div>
+                        </div>
+                    </Card>
                 </div>
-            </div>
+            ) : (
+                <div className="text-center text-xl bg-black/20 rounded-2xl p-6">
+                    {currentQuestion?.content}
+                    <div className="text-lg text-purple-200 font-normal">
+                        ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
+                    </div>
+                </div>
+            )}
 
             <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
                 {currentQuestion?.answers?.map((answer, index) => (
@@ -270,7 +302,6 @@ export default function OfflineExamForm() {
                     ))}
                 </div>
 
-                {/* 👇 Chú thích màu sắc */}
                 <div className="mt-4 flex justify-center gap-6 text-xs">
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-white rounded"></div>
@@ -303,6 +334,30 @@ export default function OfflineExamForm() {
                     Câu tiếp theo
                 </Button>
             </div>
+
+            {/* Image Modal */}
+            {showImageModal && currentQuestion?.image && (
+                <div
+                    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+                    onClick={() => setShowImageModal(false)}
+                >
+                    <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden">
+                        <Button
+                            variant="ghost"
+                            className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white z-10 transition-all duration-200 cursor-pointer"
+                            onClick={() => setShowImageModal(false)}
+                        >
+                            ✕
+                        </Button>
+                        <img
+                            src={`${imageBaseUrl}${currentQuestion.image}`}
+                            alt="Full size preview"
+                            className="w-full h-full max-h-[90vh] object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
