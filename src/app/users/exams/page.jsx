@@ -9,7 +9,7 @@ import {
     Search, Plus, Edit, BookOpen, Target, Clock, CheckCircle, HelpCircle, Flame,
     FileText, BarChart2, FlaskConical, ArrowLeft
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import ExamService from "../../../services/ExamService";
 import { toast } from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
@@ -21,9 +21,14 @@ import {
     SelectContent,
     SelectItem
 } from "../../../components/ui/select";
+import CategoryService from "../../../services/CategoryService";
 
 export default function ExamManager() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const categoryIdParam = searchParams.get("categoryId");
+    const [categoryId, setCategoryId] = useState(null);
+    const [categories, setCategories] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [ownerFilter, setOwnerFilter] = useState("all");
     const [exams, setExams] = useState([]);
@@ -36,15 +41,35 @@ export default function ExamManager() {
     const currentUserId = parseInt(localStorage.getItem("id"));
 
     useEffect(() => {
+        setCategoryId(categoryIdParam);
+    }, [categoryIdParam]);
+
+    useEffect(() => {
         fetchExams();
-    }, [searchTerm, page, ownerFilter]);
+    }, [searchTerm, categoryId, ownerFilter, page]);
+
+    useEffect(() => {
+        async function fetchCategories() {
+            try {
+                const res = await CategoryService.getAll();
+                setCategories(res.data);
+            } catch (err) {
+                console.error("Lỗi tải danh mục:", err);
+            }
+        }
+        fetchCategories();
+    }, []);
 
     const fetchExams = async () => {
         setLoading(true);
         try {
             const res = await ExamService.getAll();
-
             let filtered = res.data;
+
+            // Sửa đoạn này:
+            if (categoryId) {
+                filtered = filtered.filter((e) => String(e.category.id) === categoryId);
+            }
 
             if (searchTerm.trim()) {
                 const term = searchTerm.toLowerCase();
@@ -71,6 +96,7 @@ export default function ExamManager() {
             setLoading(false);
         }
     };
+
 
     async function handleCreateRoom(id) {
         try {
@@ -112,11 +138,36 @@ export default function ExamManager() {
                                 <SelectValue placeholder="Lọc theo tác giả" />
                             </SelectTrigger>
                             <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem value="all">Tất cả</SelectItem>
+                                <SelectItem value="all">Tất cả tác giả</SelectItem>
                                 <SelectItem value="mine">Của tôi</SelectItem>
                                 <SelectItem value="others">Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
+                        <Select
+                            value={categoryId || "all"}
+                            onValueChange={(value) => {
+                                const newParams = new URLSearchParams(window.location.search);
+                                if (value === "all") {
+                                    newParams.delete("categoryId");
+                                } else {
+                                    newParams.set("categoryId", value);
+                                }
+                                window.history.replaceState(null, "", `?${newParams.toString()}`);
+                                setCategoryId(value === "all" ? null : value);
+                                setPage(1);
+                            }}
+                        >
+                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
+                                <SelectValue placeholder="Lọc theo danh mục" />
+                            </SelectTrigger>
+                            <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
+                                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                                {categories.map(cat => (
+                                    <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
                     </div>
 
                     <button
