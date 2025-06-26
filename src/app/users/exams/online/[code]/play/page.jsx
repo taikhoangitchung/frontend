@@ -1,21 +1,26 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
+import {useState, useEffect, useRef} from "react";
+import {useParams, useRouter} from "next/navigation";
+import {toast} from "sonner";
 import ExamService from "../../../../../../services/ExamService";
-import socketInstance from "../../../../../../config/socketConfig";
 import ExamResultSummary from "../../../../../../components/exam/ExamResultSummary";
 import formatTime from "../../../../../../util/formatTime";
 import {Button} from "../../../../../../components/ui/button";
 import HistoryService from "../../../../../../services/HistoryService";
 import ConfirmDialog from "../../../../../../components/alerts-confirms/ConfirmDialog";
+import createExamSocket from "../../../../../../config/socketConfig";
+import ProgressBoard from "../../../../../../components/exam/ProgressBoard";
+import {Loader2, X} from "lucide-react";
+import RoomRankingPanel from "../../../../../../components/exam/RankingList";
 
 export default function PlayExamFormOnline() {
-    const { code } = useParams();
+    const {code} = useParams();
     const router = useRouter();
 
     const [questions, setQuestions] = useState([]);
+    const [candidates, setCandidates] = useState([]);
+    const [submittedUsers, setSubmittedUsers] = useState([]);
     const [questionIndex, setQuestionIndex] = useState(0);
     const [userAnswers, setUserAnswers] = useState({});
     const [timeLeft, setTimeLeft] = useState(0);
@@ -26,21 +31,28 @@ export default function PlayExamFormOnline() {
     const [isTimeUp, setIsTimeUp] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [waitingForOthers, setWaitingForOthers] = useState(false);
+    const [waitingForOthers, setWaitingForOthers] = useState(true);
     const [resultData, setResultData] = useState(null);
     const [historyId, setHistoryId] = useState(null);
+    const [ranking, setRanking] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const socketRef = useRef(null);
     const timerRef = useRef(null);
-    const username = localStorage.getItem("username");
+
+    const email = localStorage.getItem("email");
+    const isHost = localStorage.getItem("hostEmail") === email;
 
     const fetchLatestResult = async () => {
         try {
+            setLoading(true);
             const res = await HistoryService.getHistoryDetail(historyId);
-            console.log(res);
             setResultData(res.data);
         } catch (err) {
+            console.log(err);
             toast.error("Không thể tải kết quả bài thi.");
+        } finally {
+            setLoading(false);
         }
     };
     useEffect(() => {
@@ -49,17 +61,18 @@ export default function PlayExamFormOnline() {
         }
     }, [historyId]);
 
-
     const currentQuestion = questions[questionIndex] || {};
     const isMultipleChoice = currentQuestion?.type?.name === "multiple";
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoading(true);
                 const res = await ExamService.getToPlayByRoomCode(code);
                 setQuestions(res.data.questions);
                 setDuration(res.data.duration);
                 setTimeLeft(res.data.duration * 60);
+                setCandidates(res.data.candidates);
 
                 let counter = 3;
                 const interval = setInterval(() => {
@@ -73,46 +86,47 @@ export default function PlayExamFormOnline() {
             } catch (err) {
                 toast.error("Không thể tải bài thi");
                 router.push("/users/dashboard");
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
     }, [code]);
 
     useEffect(() => {
-        const socket = socketInstance();
+        if (!code || !email) return;
+
+        const {socket, cleanup} = createExamSocket({
+            code,
+            onSubmit: (data) => {
+                if (isHost) {
+                    toast.success(`${data.username} đã nộp bài`);
+                    setSubmittedUsers((prev) => [...new Set([...prev, data.email])])
+                }
+            },
+            onEnd: async () => {
+                setWaitingForOthers(false);
+                setSubmitting(true);
+                setLoading(true)
+                try {
+                    const response = await HistoryService.getRankByRoomCode(code);
+                    setRanking(response.data);
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
+
         socketRef.current = socket;
 
-        const trySendJoin = () => {
-            if (code && username) {
-                console.log("📤 Gửi lại JOIN từ play exam form");
-                socket.send(`JOIN:${code}:${username}`);
-            }
-        };
-
-        const handleMessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                console.log("📩 WS received:", data);
-
-                if (data.type === "END") {
-                    console.log("📥 Nhận được END từ server 🎉");
-                    setWaitingForOthers(false);
-                }
-            } catch (e) {
-                console.error("❌ WS parse error:", e);
-            }
-        };
-
-        socket.addEventListener("open", trySendJoin);
-        socket.addEventListener("message", handleMessage);
-
         return () => {
-            socket.removeEventListener("open", trySendJoin);
-            socket.removeEventListener("message", handleMessage);
-            socket.close();
+            cleanup();
             console.log("❌ WS đóng tại play form");
         };
-    }, [code, username]);
+    }, [code, email]);
+
 
     useEffect(() => {
         if (ready && !submitted) {
@@ -154,7 +168,7 @@ export default function PlayExamFormOnline() {
             updated = [answerId];
         }
 
-        setUserAnswers((prev) => ({ ...prev, [questionIndex]: updated }));
+        setUserAnswers((prev) => ({...prev, [questionIndex]: updated}));
     };
 
     const handleSubmitQuiz = async (isAutoSubmit = false) => {
@@ -170,6 +184,7 @@ export default function PlayExamFormOnline() {
         setSubmitting(true);
 
         try {
+            setLoading(true);
             const submissionData = {
                 roomCode: code,
                 timeTaken: timeSpent,
@@ -193,6 +208,8 @@ export default function PlayExamFormOnline() {
         } catch (err) {
             toast.error("Lỗi khi nộp bài!");
             setSubmitting(false);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -232,106 +249,144 @@ export default function PlayExamFormOnline() {
         return "bg-purple-700/50 text-white"
     }
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-purple-900">
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
+            </div>
+        )
+    }
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white p-6 flex flex-col gap-6">
+        <div
+            className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white p-6 flex flex-col gap-6 relative">
             {!ready && countdown > 0 && (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-7xl font-extrabold animate-pulse select-none">
+                <div
+                    className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-7xl font-extrabold animate-pulse select-none">
                     {countdown}
                 </div>
             )}
             {!ready && countdown === 0 && (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-5xl font-bold animate-pulse select-none">
+                <div
+                    className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-5xl font-bold animate-pulse select-none">
                     BẮT ĐẦU!
                 </div>
             )}
 
+            {/* Chờ thí sinh khác */}
             {submitted && waitingForOthers && (
                 <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
                     <div className="text-3xl font-bold">Đang chờ các thí sinh khác hoàn thành...</div>
                 </div>
             )}
 
-            {!waitingForOthers && historyId && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-                    <ExamResultSummary historyId={historyId} isOnline={true} />
+            {!waitingForOthers && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
+                    {/* Nút đóng góc trái dùng Lucide */}
+                    <button
+                        onClick={() => router.push("/users/dashboard")}
+                        className="absolute top-4 left-4 text-white hover:text-red-500 p-2 rounded-full z-50 bg-black/30"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+
+                    <div className={`rounded-xl p-6 max-w-6xl w-full grid gap-6 overflow-y-auto max-h-[90vh] ${
+                        isHost ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+                    }`}>
+                        {!isHost && historyId && (
+                            <ExamResultSummary historyId={historyId} isOnline={true} />
+                        )}
+                        <RoomRankingPanel code={code} />
+                    </div>
                 </div>
             )}
 
-            <div className="flex items-center justify-between flex-wrap gap-4">
-                {/* Nút Thoát ra luôn nằm bên trái */}
-                <ConfirmDialog
-                    triggerLabel="Thoát ra"
-                    triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold"
-                    title="Bạn có chắc chắn muốn thoát?"
-                    description="Bài làm sẽ không được lưu lại nếu chưa nộp."
-                    actionLabel="Thoát ngay"
-                    onConfirm={() => router.push("/users/dashboard")}
-                />
+            <div
+                className={
+                    isHost && waitingForOthers
+                        ? "blur-md brightness-50 pointer-events-none select-none transition-all duration-300"
+                        : ""
+                }
+            >
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    {/* Nút Thoát ra luôn nằm bên trái */}
+                    <ConfirmDialog
+                        triggerLabel="Thoát ra"
+                        triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold"
+                        title="Bạn có chắc chắn muốn thoát?"
+                        description="Bài làm sẽ không được lưu lại nếu chưa nộp."
+                        actionLabel="Thoát ngay"
+                        onConfirm={() => router.push("/users/dashboard")}
+                    />
 
-                {/* Cụm Timer + Hoàn thành + Nút nộp bài sát nhau bên phải */}
-                <div className="flex items-center gap-3 ml-auto">
-                    <div className="bg-black/30 px-4 py-2 rounded-full font-semibold">
-                        ⏰ <span className={getTimerColor()}>{formatTime(timeLeft)}</span>
+                    {/* Cụm Timer + Hoàn thành + Nút nộp bài sát nhau bên phải */}
+                    <div className="flex items-center gap-3 ml-auto">
+                        <div className="bg-black/30 px-4 py-2 rounded-full font-semibold">
+                            ⏰ <span className={getTimerColor()}>{formatTime(timeLeft)}</span>
+                        </div>
+                        <div className="bg-black/30 rounded-full px-4 py-2">
+                            <span className="font-semibold">Hoàn thành: {getCompletionPercentage()}%</span>
+                        </div>
+                        <Button
+                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold"
+                            disabled={submitting || submitted}
+                            onClick={() => handleSubmitQuiz(false)}
+                        >
+                            {submitting ? "Đã nộp bài..." : "Nộp bài"}
+                        </Button>
                     </div>
-                    <div className="bg-black/30 rounded-full px-4 py-2">
-                        <span className="font-semibold">Hoàn thành: {getCompletionPercentage()}%</span>
+                </div>
+
+
+                <div className="text-center text-xl md:text-2xl bg-black/20 rounded-2xl p-6">
+                    {currentQuestion?.content}
+                    <div className="text-lg text-purple-200 font-normal">
+                        ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
                     </div>
+                </div>
+
+                <div className="grid gap-4 w-full"
+                     style={{gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`}}>
+                    {currentQuestion?.answers?.map((answer, index) => (
+                        <button
+                            key={index}
+                            className={getAnswerButtonStyle(answer)}
+                            onClick={() => handleAnswerSelect(index)}
+                            disabled={submitted || submitting}
+                        >
+                            <span className="text-center px-4">{answer.content}</span>
+                            {userAnswers[questionIndex]?.includes(answer.id) && (
+                                <div className="absolute top-3 left-3">
+                                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-purple-900" fill="currentColor"
+                                             viewBox="0 0 20 20">
+                                            <path fillRule="evenodd"
+                                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                  clipRule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex justify-center gap-4 mt-4">
                     <Button
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold"
-                        disabled={submitting || submitted}
-                        onClick={() => handleSubmitQuiz(false)}
+                        onClick={() => changeQuestion(questionIndex - 1)}
+                        disabled={questionIndex === 0 || submitting || submitted}
+                        className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                     >
-                        {submitting ? "Đã nộp bài..." : "Nộp bài"}
+                        Câu trước
+                    </Button>
+                    <Button
+                        onClick={() => changeQuestion(questionIndex + 1)}
+                        disabled={questionIndex >= questions.length - 1 || submitting || submitted}
+                        className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                    >
+                        Câu tiếp theo
                     </Button>
                 </div>
-            </div>
-
-
-            <div className="text-center text-xl md:text-2xl bg-black/20 rounded-2xl p-6">
-                {currentQuestion?.content}
-                <div className="text-lg text-purple-200 font-normal">
-                    ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
-                </div>
-            </div>
-
-            <div className="grid gap-4 w-full" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
-                {currentQuestion?.answers?.map((answer, index) => (
-                    <button
-                        key={index}
-                        className={getAnswerButtonStyle(answer)}
-                        onClick={() => handleAnswerSelect(index)}
-                        disabled={submitted || submitting}
-                    >
-                        <span className="text-center px-4">{answer.content}</span>
-                        {userAnswers[questionIndex]?.includes(answer.id) && (
-                            <div className="absolute top-3 left-3">
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-purple-900" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                            </div>
-                        )}
-                    </button>
-                ))}
-            </div>
-
-            <div className="flex justify-center gap-4 mt-4">
-                <Button
-                    onClick={() => changeQuestion(questionIndex - 1)}
-                    disabled={questionIndex === 0 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
-                >
-                    Câu trước
-                </Button>
-                <Button
-                    onClick={() => changeQuestion(questionIndex + 1)}
-                    disabled={questionIndex >= questions.length - 1 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
-                >
-                    Câu tiếp theo
-                </Button>
-            </div>
                 <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 w-fit mx-auto border border-purple-600/30">
                     <div className="text-sm font-medium text-center mb-3 text-purple-200">Bản đồ câu hỏi</div>
                     <div className="grid grid-cols-10 gap-1 overflow-y-auto max-h-[300px] p-1">
@@ -363,6 +418,16 @@ export default function PlayExamFormOnline() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {isHost && waitingForOthers && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                    <ProgressBoard
+                        candidates={candidates}
+                        submittedUsers={submittedUsers}
+                    />
+                </div>
+            )}
         </div>
     );
 }

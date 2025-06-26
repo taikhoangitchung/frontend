@@ -33,9 +33,9 @@ class HistoryService {
         }
     }
 
-    static async getLatestByRoomCode(code) {
+    static async getRankByRoomCode(code) {
         try {
-            return await axiosInstance.get(`/histories/${code}`);
+            return await axiosInstance.get(`/histories/${code}/rank`);
         } catch (error) {
             throw error;
         }

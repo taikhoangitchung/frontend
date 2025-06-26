@@ -27,11 +27,9 @@ export default function Page() {
             try {
                 const response = await HistoryService.getAll()
                 const histories = response.data || []
-
                 const played = histories.length
                 const totalScore = histories.reduce((sum, h) => sum + h.score, 0)
                 const avgScore = played > 0 ? (totalScore / played).toFixed(1) : 0
-
                 setPlayedCount(played)
                 setAccuracy(avgScore)
             } catch (e) {
