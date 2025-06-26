@@ -16,6 +16,25 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../../../components/ui/select";
+
+const Modal = ({ onClose, children }) => {
+    return (
+        <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white p-4 rounded-md relative max-w-lg"
+                onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click từ việc đóng modal
+            >
+                <button className="absolute top-2 right-2" onClick={onClose}>
+                    <X className="w-5 h-5" />
+                </button>
+                {children}
+            </div>
+        </div>
+    );
+};
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
@@ -31,6 +50,8 @@ export default function QuizInterface() {
     const [totalPage, setTotalPage] = useState(1);
     const [userId, setUserId] = useState(undefined);
     const questionPerPage = 20;
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState("");
 
     useEffect(() => {
         const storedId = parseInt(localStorage.getItem("id") || "0");
@@ -96,6 +117,13 @@ export default function QuizInterface() {
         } catch (error) {
             toast.error(error.response?.data || "Xoá thất bại");
         }
+    };
+
+    const imageBaseUrl = "http://localhost:8080"; // Tiền tố cho đường dẫn ảnh
+
+    const handleImageClick = (image) => {
+        setSelectedImage(image);
+        setModalOpen(true);
     };
 
     return (
@@ -208,6 +236,16 @@ export default function QuizInterface() {
                                             </div>
                                         )}
                                     </div>
+                                    {question.image && (
+                                        <div className="mt-2 flex justify-center">
+                                            <img
+                                                src={`${imageBaseUrl}${question.image}`}
+                                                alt="Question image"
+                                                className="max-w-[33%] h-auto cursor-pointer transition-transform duration-200 hover:scale-105"
+                                                onClick={() => handleImageClick(`${imageBaseUrl}${question.image}`)}
+                                            />
+                                        </div>
+                                    )}
                                 </CardHeader>
 
                                 <CardContent className="space-y-4 mt-2">
@@ -269,6 +307,17 @@ export default function QuizInterface() {
                     )}
                 </div>
             </div>
+
+            {/* Modal cho hình ảnh lớn */}
+            {modalOpen && (
+                <Modal onClose={() => setModalOpen(false)}>
+                    <img
+                        src={selectedImage}
+                        alt="Enlarged Question"
+                        className="max-w-full h-auto"
+                    />
+                </Modal>
+            )}
         </div>
     );
 }

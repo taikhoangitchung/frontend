@@ -27,7 +27,7 @@ import TypeService from '../../services/TypeService'
 import DifficultyService from '../../services/DifficultyService'
 import {initialAnswers} from '../../util/defaultAnswers'
 import {cn} from '../../lib/utils'
-import {typeVietSub} from "../../util/typeVietsub";
+import {typeVietSub} from "../../util/typeVietsub"
 
 export default function CreateQuestionForm() {
     const router = useRouter()
@@ -36,6 +36,7 @@ export default function CreateQuestionForm() {
     const [difficulties, setDifficulties] = useState([])
     const [loading, setLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [image, setImage] = useState(null)
 
     const fetchDropdowns = async () => {
         try {
@@ -102,6 +103,10 @@ export default function CreateQuestionForm() {
         formik.setFieldValue(field, value)
     }
 
+    const handleImageChange = (e) => {
+        setImage(e.target.files[0])
+    }
+
     const handleSubmit = async () => {
         const errors = await formik.validateForm()
         if (Object.keys(errors).length > 0) {
@@ -119,15 +124,24 @@ export default function CreateQuestionForm() {
         }
         try {
             setIsSubmitting(true)
-            const payload = {
-                ...formik.values,
-                answers: formik.values.answers.map(({id, ...rest}) => rest)
+            const formData = new FormData()
+            formData.append('content', formik.values.content)
+            formData.append('category', formik.values.category)
+            formData.append('type', formik.values.type)
+            formData.append('difficulty', formik.values.difficulty)
+            formik.values.answers.forEach((answer, index) => {
+                formData.append(`answers[${index}].content`, answer.content)
+                formData.append(`answers[${index}].correct`, answer.correct)
+            })
+            if (image) {
+                formData.append('image', image)
             }
-            console.log(payload)
-            await QuestionService.create(payload)
+
+            await QuestionService.create(formData)
             toast.success('Tạo câu hỏi thành công! 🎉')
+            router.push('/users/questions')
         } catch (err) {
-            toast.error(err.response?.data)
+            toast.error(err.response?.data || 'Tạo câu hỏi thất bại')
         } finally {
             setIsSubmitting(false)
         }
@@ -205,6 +219,14 @@ export default function CreateQuestionForm() {
                         onChange={formik.handleChange}
                         className="bg-transparent border-none text-white placeholder:text-white/60 text-xl resize-none min-h-[100px]"
                     />
+                    <div className="mt-4">
+                        <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="bg-transparent border-none text-white placeholder:text-white/60"
+                        />
+                    </div>
                 </Card>
 
                 {/* Đáp án */}
