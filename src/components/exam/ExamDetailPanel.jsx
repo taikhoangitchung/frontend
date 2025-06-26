@@ -5,20 +5,29 @@ import {X} from "lucide-react"
 
 export default function ExamDetailPanel({ data, onClose }) {
     const panelRef = useRef(null)
+    console.log(data)
+    const handleOverlayClick = (e) => {
+        if (panelRef.current && !panelRef.current.contains(e.target)) {
+            onClose()
+        }
+    }
 
     return (
-        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center"
+             onClick={handleOverlayClick}
+        >
+
             <div
                 ref={panelRef}
-                className="relative bg-white rounded-xl shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto text-black"
+                className="bg-white rounded-xl shadow-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto text-black relative"
             >
-                {/* Nút X để đóng */}
+                {/* Nút X ở góc trên bên phải */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center hover:bg-gray-200 rounded-full text-gray-600 hover:text-gray-900 focus:outline-none"
+                    className="absolute top-4 right-4 rounded-full p-1 text-gray-500 transition-colors duration-200 ease-in-out hover:bg-red-500 hover:text-white focus:outline-none z-50 cursor-pointer"
                     aria-label="Đóng"
                 >
-                    <X className="w-6 h-6" />
+                    <X size={20} />
                 </button>
 
                 <h2 className="text-2xl font-bold mb-4 text-purple-900">Chi tiết bài làm</h2>
