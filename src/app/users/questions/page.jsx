@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { Separator } from "../../../components/ui/separator";
-import { Search, Plus, Edit, X, Check } from "lucide-react";
+import { Search, Plus, Edit, X, Check, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import QuestionService from "../../../services/QuestionService";
 import { toast } from "sonner";
-import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import {
     Select,
     SelectContent,
@@ -17,8 +16,28 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../../../components/ui/select";
+
+const Modal = ({ onClose, children }) => {
+    return (
+        <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white p-4 rounded-md relative max-w-lg"
+                onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click từ việc đóng modal
+            >
+                <button className="absolute top-2 right-2" onClick={onClose}>
+                    <X className="w-5 h-5" />
+                </button>
+                {children}
+            </div>
+        </div>
+    );
+};
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 
 export default function QuizInterface() {
     const router = useRouter();
@@ -31,6 +50,8 @@ export default function QuizInterface() {
     const [totalPage, setTotalPage] = useState(1);
     const [userId, setUserId] = useState(undefined);
     const questionPerPage = 20;
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState("");
 
     useEffect(() => {
         const storedId = parseInt(localStorage.getItem("id") || "0");
@@ -42,7 +63,6 @@ export default function QuizInterface() {
         setLoading(true);
         try {
             const res = await QuestionService.getAll();
-
             const filtered = res.data.filter((q) => {
                 const matchesSearch =
                     q.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -50,17 +70,14 @@ export default function QuizInterface() {
                         a.content.toLowerCase().includes(searchTerm.toLowerCase())
                     ) ||
                     q.user.username?.toLowerCase().includes(searchTerm.toLowerCase());
-
                 const matchesOwner =
                     ownerFilter === "all"
                         ? true
                         : ownerFilter === "mine"
                             ? q.user.id === userId
                             : q.user.id !== userId;
-
                 return matchesSearch && matchesOwner;
             });
-
             setAllFilteredQuestions(filtered);
             const total = Math.ceil(filtered.length / questionPerPage);
             setTotalPage(total);
@@ -81,7 +98,7 @@ export default function QuizInterface() {
         } finally {
             setLoading(false);
         }
-    }, [searchTerm, ownerFilter, page, userId]);
+    }, [searchTerm, ownerFilter, page, questionPerPage, userId, router]);
 
     useEffect(() => {
         if (userId !== undefined) {
@@ -102,10 +119,17 @@ export default function QuizInterface() {
         }
     };
 
+    const imageBaseUrl = "http://localhost:8080"; // Tiền tố cho đường dẫn ảnh
+
+    const handleImageClick = (image) => {
+        setSelectedImage(image);
+        setModalOpen(true);
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 py-6">
             <div className="max-w-6xl mx-auto px-6">
-                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
                     <div className="flex items-center gap-3 flex-wrap">
                         <h1 className="text-2xl font-semibold text-gray-900">
                             Tìm kiếm câu hỏi
@@ -117,28 +141,28 @@ export default function QuizInterface() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer hover:bg-gray-50 active:scale-[0.98] transition-all duration-200">
                                 <SelectValue placeholder="Lọc theo tác giả" />
                             </SelectTrigger>
                             <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem value="all">Tất cả</SelectItem>
-                                <SelectItem value="mine">Của tôi</SelectItem>
-                                <SelectItem value="others">Của người khác</SelectItem>
+                                <SelectItem value="all" className="cursor-pointer hover:bg-gray-100">Tất cả</SelectItem>
+                                <SelectItem value="mine" className="cursor-pointer hover:bg-gray-100">Của tôi</SelectItem>
+                                <SelectItem value="others" className="cursor-pointer hover:bg-gray-100">Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
                     <Button
                         onClick={() => router.push("/users/dashboard")}
-                        className="bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 h-9 px-4 py-2 cursor-pointer transition-all duration-200"
+                        className="bg-gray-700 text-white hover:bg-gray-600 cursor-pointer hover:shadow-md active:scale-[0.98] transition-all duration-200"
                     >
-                        <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 mr-2" />
-                        <span>Quay lại</span>
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Quay lại
                     </Button>
                 </div>
 
-                <div className="relative w-full mb-4">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <div className="relative w-full mb-8">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4" />
                     <Input
                         placeholder="Nhập nội dung câu hỏi, người tạo hoặc đáp án..."
                         value={searchTerm}
@@ -146,7 +170,7 @@ export default function QuizInterface() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 cursor-pointer transition-all duration-200"
+                        className="pl-10 border border-gray-200 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition-all duration-200"
                     />
                 </div>
 
@@ -159,8 +183,7 @@ export default function QuizInterface() {
                         </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
-                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300 cursor-pointer transition-all duration-200"
-                            variant="outline"
+                            className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer hover:shadow-md active:scale-[0.98] transition-all duration-200"
                         >
                             <Plus className="w-4 h-4 mr-2" />
                             Tạo mới
@@ -181,7 +204,7 @@ export default function QuizInterface() {
                         questions.map((question, index) => (
                             <Card
                                 key={question.id}
-                                className="border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
+                                className="border border-gray-200 cursor-default hover:shadow-md hover:bg-gray-50 active:scale-[0.98] transition-all duration-200"
                             >
                                 <CardHeader className="pb-0">
                                     <div className="flex items-start justify-between">
@@ -194,17 +217,35 @@ export default function QuizInterface() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="p-1"
+                                                    className="p-1 cursor-pointer hover:bg-gray-100 active:scale-[0.98] transition-all duration-200"
                                                     onClick={() =>
-                                                        router.push(`/users/questions/${question.id}/edit`)
+                                                        router.push(
+                                                            `/users/questions/${question.id}/edit`
+                                                        )
                                                     }
                                                 >
-                                                    <Edit className="w-6 h-6"/>
+                                                    <Edit className="w-6 h-6" />
                                                 </Button>
-                                                <DeleteButton id={question.id} handleDelete={handleDelete}/>
+                                                <DeleteButton
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="p-1 cursor-pointer hover:bg-red-100 active:scale-[0.98] transition-all duration-200 text-red-500"
+                                                    id={question.id}
+                                                    handleDelete={handleDelete}
+                                                />
                                             </div>
                                         )}
                                     </div>
+                                    {question.image && (
+                                        <div className="mt-2 flex justify-center">
+                                            <img
+                                                src={`${imageBaseUrl}${question.image}`}
+                                                alt="Question image"
+                                                className="max-w-[33%] h-auto cursor-pointer transition-transform duration-200 hover:scale-105"
+                                                onClick={() => handleImageClick(`${imageBaseUrl}${question.image}`)}
+                                            />
+                                        </div>
+                                    )}
                                 </CardHeader>
 
                                 <CardContent className="space-y-4 mt-2">
@@ -244,13 +285,13 @@ export default function QuizInterface() {
                         <Button
                             variant="outline"
                             onClick={() => setPage(page - 1)}
-                            className="text-sm cursor-pointer transition-all duration-200"
+                            className="text-sm cursor-pointer hover:bg-gray-100 hover:shadow-md active:scale-[0.98] transition-all duration-200"
                         >
                             Trang trước
                         </Button>
                     )}
                     <Button
-                        className="text-blue-700 cursor-pointer transition-all duration-200"
+                        className="text-blue-700 cursor-pointer"
                         disabled
                     >
                         {page}/{totalPage}
@@ -259,13 +300,24 @@ export default function QuizInterface() {
                         <Button
                             variant="outline"
                             onClick={() => setPage(page + 1)}
-                            className="text-sm cursor-pointer transition-all duration-200"
+                            className="text-sm cursor-pointer hover:bg-gray-100 hover:shadow-md active:scale-[0.98] transition-all duration-200"
                         >
                             Trang sau
                         </Button>
                     )}
                 </div>
             </div>
+
+            {/* Modal cho hình ảnh lớn */}
+            {modalOpen && (
+                <Modal onClose={() => setModalOpen(false)}>
+                    <img
+                        src={selectedImage}
+                        alt="Enlarged Question"
+                        className="max-w-full h-auto"
+                    />
+                </Modal>
+            )}
         </div>
     );
 }
