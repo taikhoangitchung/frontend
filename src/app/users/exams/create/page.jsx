@@ -75,6 +75,7 @@ export default function CreateExam({id}) {
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
     const [userId, setUserId] = useState(Number(localStorage.getItem("id")))
     const [file, setFile] = useState(null);
+    const [reload, setReload] = useState(false);
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [showImportDialog, setShowImportDialog] = useState(false)
@@ -135,9 +136,13 @@ export default function CreateExam({id}) {
         QuestionService.filterByCategoryAndSource(formik.values.categoryId, questionSource, userId, searchTerm)
             .then((res) => {
                 setQuestionBank(res.data)
-            })
-            .catch((err) => toast.error(err.response.data))
-    }, [formik.values.categoryId, questionSource, userId, searchTerm])
+            }).catch((err) => {
+                const message = err?.response?.data
+                toast.error(message !== null ? message : "Lỗi khi fetch data")
+            }).finally(() => {
+                if (reload) setReload(false);
+        })
+    }, [formik.values.categoryId, questionSource, userId, searchTerm, reload])
 
     useEffect(() => {
         const countQuestions = formik.values.questions.length
@@ -146,6 +151,10 @@ export default function CreateExam({id}) {
             toast.warning(`Bạn đang thêm thừa ${countQuestions - countQuestionLimit} câu hỏi`)
         }
     }, [formik.values.questionLimit]);
+
+    useEffect(() => {
+        if (file !== null) toast.info("File Added");
+    }, [file]);
 
     const handleSubmit = async (values) => {
         setIsSubmitting(true)
@@ -334,8 +343,12 @@ export default function CreateExam({id}) {
         try {
             const response = await QuestionService.import(file, userId);
             toast.success(response.data, {id: idLoading});
+            setReload(true);
+            setShowImportDialog(false);
+            setFile(null);
         } catch (error) {
-            toast.error(error?.response?.data);
+            const message = error?.response?.data;
+            toast.error(message ? "Lỗi khi import file" : message, {id: idLoading});
         } finally {
             setIsSubmitting(false);
         }
@@ -824,13 +837,15 @@ export default function CreateExam({id}) {
                                                         <div
                                                             className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer"
                                                         >
-                                                            <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                                                            <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4"/>
                                                             {file ? (
                                                                 <p className="text-gray-600 font-medium">{file.name}</p>
                                                             ) : (
                                                                 <>
-                                                                    <p className="text-gray-600 mb-2">Kéo thả file Excel vào đây</p>
-                                                                    <p className="text-sm text-gray-500">hoặc click để chọn file</p>
+                                                                    <p className="text-gray-600 mb-2">Kéo thả file Excel
+                                                                        vào đây</p>
+                                                                    <p className="text-sm text-gray-500">hoặc click để
+                                                                        chọn file</p>
                                                                 </>
                                                             )}
 
@@ -851,7 +866,7 @@ export default function CreateExam({id}) {
                                                             className="cursor-pointer bg-white text-purple-600 border-purple-300 hover:bg-purple-50 flex items-center gap-2"
                                                             onClick={handleOpenNewTab}
                                                         >
-                                                            <ExternalLink className="h-4 w-4" />
+                                                            <ExternalLink className="h-4 w-4"/>
                                                             Xem mẫu Excel
                                                         </Button>
                                                     </div>

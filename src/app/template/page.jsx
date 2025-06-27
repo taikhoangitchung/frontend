@@ -122,30 +122,26 @@ export default function QuizInterface() {
                 { wch: 15 },
                 { wch: 15 },
                 { wch: 30 },
-                { wch: 10 }, 
+                { wch: 10 },
             ]
 
             XLSX.utils.book_append_sheet(workbook, templateSheet, "Quiz Template")
 
-            // Categories reference sheet
             const categoriesData = [["Available Categories"], ...categories.map((cat) => [cat.name])]
             const categoriesSheet = XLSX.utils.aoa_to_sheet(categoriesData)
             categoriesSheet["!cols"] = [{ wch: 20 }]
             XLSX.utils.book_append_sheet(workbook, categoriesSheet, "Categories")
 
-            // Difficulties reference sheet
             const difficultiesData = [["Available Difficulties"], ...difficulties.map((diff) => [diff.name])]
             const difficultiesSheet = XLSX.utils.aoa_to_sheet(difficultiesData)
             difficultiesSheet["!cols"] = [{ wch: 20 }]
             XLSX.utils.book_append_sheet(workbook, difficultiesSheet, "Difficulties")
 
-            // Types reference sheet
             const typesData = [["Available Types"], ...types.map((type) => [type.name])]
             const typesSheet = XLSX.utils.aoa_to_sheet(typesData)
             typesSheet["!cols"] = [{ wch: 20 }]
             XLSX.utils.book_append_sheet(workbook, typesSheet, "Types")
 
-            // Generate and download the file
             const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
             const blob = new Blob([excelBuffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
