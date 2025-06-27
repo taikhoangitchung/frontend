@@ -54,7 +54,7 @@ export function AppHeader() {
     }
 
     return (
-        <header className="h-16 border-b bg-white flex items-center justify-end px-6 shadow-sm">
+        <header className="min-h-[50px] border-b bg-white flex items-center justify-end px-6 shadow-sm">
             <div className="flex items-center gap-4">
                 {/* Nút thông báo */}
                 <Button
@@ -67,9 +67,9 @@ export function AppHeader() {
                     disabled={isLoading.notifications}
                 >
                     {isLoading.notifications ? (
-                        <Loader2 className="w-6 h-6 animate-spin" />
+                        <Loader2 className="w-6 h-6 animate-spin"/>
                     ) : (
-                        <Bell className="w-6 h-6" />
+                        <Bell className="w-6 h-6"/>
                     )}
                 </Button>
 
@@ -85,7 +85,7 @@ export function AppHeader() {
                             <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
                                 <span className="text-white font-semibold text-sm">{email?.[0]?.toUpperCase()}</span>
                             </div>
-                            <ChevronDown className="w-5 h-5 text-gray-500" />
+                            <ChevronDown className="w-5 h-5 text-gray-500"/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -101,7 +101,7 @@ export function AppHeader() {
                             </div>
                         </div>
 
-                        <DropdownMenuSeparator className="my-2 bg-gray-100" />
+                        <DropdownMenuSeparator className="my-2 bg-gray-100"/>
 
                         <DropdownMenuItem
                             onClick={() => handleNavigation("profile", "/profile")}
@@ -109,9 +109,9 @@ export function AppHeader() {
                             disabled={isLoading.profile}
                         >
                             {isLoading.profile ? (
-                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin"/>
                             ) : (
-                                <User className="w-5 h-5 text-gray-600" />
+                                <User className="w-5 h-5 text-gray-600"/>
                             )}
                             <span className="text-sm text-left w-full">Hồ sơ</span>
                         </DropdownMenuItem>
@@ -122,9 +122,9 @@ export function AppHeader() {
                             disabled={isLoading.changePassword}
                         >
                             {isLoading.changePassword ? (
-                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin"/>
                             ) : (
-                                <Lock className="w-5 h-5 text-gray-600" />
+                                <Lock className="w-5 h-5 text-gray-600"/>
                             )}
                             <span className="text-sm text-left w-full">Đổi mật khẩu</span>
                         </DropdownMenuItem>
@@ -135,9 +135,9 @@ export function AppHeader() {
                             disabled={isLoading.logout}
                         >
                             {isLoading.logout ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <Loader2 className="w-5 h-5 animate-spin"/>
                             ) : (
-                                <LogOut className="w-5 h-5" />
+                                <LogOut className="w-5 h-5"/>
                             )}
                             <span className="text-sm text-left w-full">Đăng xuất</span>
                         </DropdownMenuItem>
