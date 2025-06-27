@@ -41,6 +41,7 @@
     "tailwind": "^4.0.0",
     "tailwind-merge": "^3.3.1",
     "ui": "^0.2.4",
+    "xlsx": "^0.18.5",
     "yup": "^1.6.1"
   },
   "devDependencies": {
