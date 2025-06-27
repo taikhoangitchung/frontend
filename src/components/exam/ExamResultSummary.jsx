@@ -1,14 +1,14 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { Button } from "../ui/button"
-import { useRouter } from "next/navigation"
-import { Eye, RefreshCw, LogOut, X } from "lucide-react"
+import {useEffect, useState, useRef} from "react"
+import {Button} from "../ui/button"
+import {useRouter} from "next/navigation"
+import {Eye, RefreshCw, LogOut, X} from "lucide-react"
 import HistoryService from "../../services/HistoryService"
 import ExamDetailPanel from "./ExamDetailPanel"
 import RankStars from "../icon/rank"
 
-export default function ExamResultSummary({ isOnline, onReplay, historyId, onClose }) {
+export default function ExamResultSummary({isOnline, onReplay, historyId, onClose}) {
     const [showPanel, setShowPanel] = useState(false)
     const router = useRouter()
     const [data, setData] = useState(null)
@@ -31,12 +31,6 @@ export default function ExamResultSummary({ isOnline, onReplay, historyId, onClo
         fetchData()
     }, [historyId])
 
-    const handleOverlayClick = (e) => {
-        if (panelRef.current && !panelRef.current.contains(e.target)) {
-            if (onClose) onClose()
-        }
-    }
-
     const avgTimePerQ =
         data && data.correct + data.wrong > 0
             ? Math.round(data.timeTaken / (data.correct + data.wrong))
@@ -55,16 +49,7 @@ export default function ExamResultSummary({ isOnline, onReplay, historyId, onClo
     }
 
     return (
-        <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            onClick={handleOverlayClick}
-        >
-            <button
-                onClick={() => router.push("/users/dashboard")}
-                className="absolute top-6 left-6 rounded-full p-2 text-white transition-colors duration-200 ease-in-out hover:bg-red-500 focus:outline-none z-50 cursor-pointer">
-                <X className="w-12 h-12" />
-            </button>
-
+        <div className="bg-purple-900 w-full max-w-xl rounded-xl p-6 shadow-lg text-center space-y-6">
             <div ref={panelRef} className="relative">
                 <div className="bg-purple-900 w-full max-w-xl rounded-xl p-6 shadow-lg text-center space-y-6">
                     <h2 className="text-lg text-purple-200">
@@ -116,7 +101,7 @@ export default function ExamResultSummary({ isOnline, onReplay, historyId, onClo
                                                     <span>{r.rank}.</span>
                                                     <span>{r.username}</span>
                                                 </div>
-                                                <RankStars rank={r.rank} />
+                                                <RankStars rank={r.rank}/>
                                             </div>
                                         )
                                     })}
@@ -130,7 +115,7 @@ export default function ExamResultSummary({ isOnline, onReplay, historyId, onClo
                             onClick={showDetail}
                             className="bg-white text-purple-900 rounded-full px-6 py-2 font-semibold mt-2 flex items-center justify-center gap-2 cursor-pointer"
                         >
-                            <Eye size={18} />
+                            <Eye size={18}/>
                             Xem chi tiết
                         </Button>
 
@@ -139,7 +124,7 @@ export default function ExamResultSummary({ isOnline, onReplay, historyId, onClo
                                 onClick={onReplay}
                                 className="bg-purple-500 hover:bg-purple-600 text-white rounded-full font-semibold py-2 flex items-center gap-2 justify-center cursor-pointer"
                             >
-                                <RefreshCw size={18} />
+                                <RefreshCw size={18}/>
                                 Chơi lại
                             </Button>
                         )}
@@ -148,7 +133,7 @@ export default function ExamResultSummary({ isOnline, onReplay, historyId, onClo
                             className="bg-white text-purple-900 rounded-full font-semibold py-2 flex items-center justify-center gap-2 cursor-pointer"
                             onClick={() => router.push("/users/dashboard")}
                         >
-                            <LogOut size={18} />
+                            <LogOut size={18}/>
                             Thoát
                         </Button>
                     </div>

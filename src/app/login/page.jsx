@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
 import UserService from "../../services/UserService"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
@@ -18,7 +18,6 @@ import { jwtDecode } from "jwt-decode"
 
 const Login = () => {
     const router = useRouter()
-    const searchParams = useSearchParams()
     const [showPassword, setShowPassword] = useState(false)
     const [isReady, setIsReady] = useState(false)
     const [showEmailForm, setShowEmailForm] = useState(false)

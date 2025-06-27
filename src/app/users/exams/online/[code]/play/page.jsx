@@ -34,14 +34,13 @@ export default function PlayExamFormOnline() {
     const [waitingForOthers, setWaitingForOthers] = useState(true);
     const [resultData, setResultData] = useState(null);
     const [historyId, setHistoryId] = useState(null);
-    const [ranking, setRanking] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [isHost, setIsHost] = useState(false);
 
     const socketRef = useRef(null);
     const timerRef = useRef(null);
 
     const email = localStorage.getItem("email");
-    const isHost = localStorage.getItem("hostEmail") === email;
 
     const fetchLatestResult = async () => {
         try {
@@ -73,7 +72,7 @@ export default function PlayExamFormOnline() {
                 setDuration(res.data.duration);
                 setTimeLeft(res.data.duration * 60);
                 setCandidates(res.data.candidates);
-
+                setIsHost(res.data.hostEmail === email);
                 let counter = 3;
                 const interval = setInterval(() => {
                     counter -= 1;
@@ -98,24 +97,12 @@ export default function PlayExamFormOnline() {
 
         const {socket, cleanup} = createExamSocket({
             code,
-            onSubmit: (data) => {
-                if (isHost) {
-                    toast.success(`${data.username} đã nộp bài`);
-                    setSubmittedUsers((prev) => [...new Set([...prev, data.email])])
-                }
+            onSubmit: (users) => {
+                setSubmittedUsers(users);
             },
             onEnd: async () => {
                 setWaitingForOthers(false);
                 setSubmitting(true);
-                setLoading(true)
-                try {
-                    const response = await HistoryService.getRankByRoomCode(code);
-                    setRanking(response.data);
-                } catch (error) {
-                    console.error(error);
-                } finally {
-                    setLoading(false);
-                }
             },
         });
 
@@ -123,10 +110,8 @@ export default function PlayExamFormOnline() {
 
         return () => {
             cleanup();
-            console.log("❌ WS đóng tại play form");
         };
     }, [code, email]);
-
 
     useEffect(() => {
         if (ready && !submitted) {
@@ -141,7 +126,6 @@ export default function PlayExamFormOnline() {
                 });
                 setTimeSpent((prev) => prev + 1);
             }, 1000);
-
             return () => clearInterval(timerRef.current);
         }
     }, [ready]);
@@ -173,16 +157,8 @@ export default function PlayExamFormOnline() {
 
     const handleSubmitQuiz = async (isAutoSubmit = false) => {
         if (submitted || submitting) return;
-
-        const hasAnyAnswer = Object.values(userAnswers).some((a) => a.length > 0);
-        if (!isAutoSubmit && !hasAnyAnswer) {
-            toast.error("Bạn cần chọn ít nhất một đáp án trước khi nộp!");
-            return;
-        }
-
         clearInterval(timerRef.current);
         setSubmitting(true);
-
         try {
             setLoading(true);
             const submissionData = {
@@ -194,15 +170,12 @@ export default function PlayExamFormOnline() {
                     answerIds: userAnswers[i] || [],
                 })),
             };
-
             const response = await HistoryService.add(submissionData);
             setSubmitted(true);
             setHistoryId(response.data)
-
             if (socketRef.current?.readyState === WebSocket.OPEN) {
                 socketRef.current.send(`SUBMIT:${code}`);
             }
-
             setWaitingForOthers(true);
             toast.success(isAutoSubmit ? "Tự động nộp bài!" : "Đã nộp bài!");
         } catch (err) {
@@ -282,7 +255,6 @@ export default function PlayExamFormOnline() {
 
             {!waitingForOthers && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
-                    {/* Nút đóng góc trái dùng Lucide */}
                     <button
                         onClick={() => router.push("/users/dashboard")}
                         className="absolute top-4 left-4 text-white hover:text-red-500 p-2 rounded-full z-50 bg-black/30"
@@ -290,13 +262,20 @@ export default function PlayExamFormOnline() {
                         <X className="w-10 h-10" />
                     </button>
 
-                    <div className={`rounded-xl p-6 max-w-6xl w-full grid gap-6 overflow-y-auto max-h-[90vh] ${
-                        isHost ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
-                    }`}>
+                    <div
+                        className={`rounded-xl p-6 max-w-6xl w-full grid gap-6 overflow-y-auto max-h-[90vh] ${
+                            isHost ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+                        }`}
+                    >
                         {!isHost && historyId && (
-                            <ExamResultSummary historyId={historyId} isOnline={true} />
+                            <div className="min-w-0">
+                                <ExamResultSummary historyId={historyId} isOnline={true} />
+                            </div>
                         )}
-                        <RoomRankingPanel code={code} />
+
+                        <div className="min-w-0">
+                            <RoomRankingPanel code={code} />
+                        </div>
                     </div>
                 </div>
             )}
