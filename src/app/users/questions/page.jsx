@@ -19,26 +19,31 @@ import QuestionService from "../../../services/QuestionService";
 import CategoryService from "../../../services/CategoryService";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 
-const Modal = ({onClose, children}) => (
-    <div
-        className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-        onClick={onClose}
-    >
+const Modal = ({ onClose, children }) => {
+    return (
         <div
-            className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+            onClick={onClose}
         >
-            <Button
-                variant="ghost"
-                className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white z-10 transition-all duration-200 cursor-pointer"
-                onClick={onClose}
+            <div
+                className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
             >
-                ✕
-            </Button>
-            {children}
+                <Button
+                    variant="ghost"
+                    className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white text-1xl font-semibold z-10 transition-all duration-200 cursor-pointer rounded-full w-9 h-9 flex items-center justify-center"
+                    onClick={onClose}
+                >
+                    ✕
+                </Button>
+                {children}
+            </div>
         </div>
-    </div>
-);
+    );
+};
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 
 export default function QuizInterface() {
     const router = useRouter();

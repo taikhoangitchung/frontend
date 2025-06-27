@@ -151,7 +151,7 @@ export default function CreateQuestionForm() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6 pb-10">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center gap-4 mb-6">
                     <Button
@@ -165,7 +165,7 @@ export default function CreateQuestionForm() {
                     <h1 className="text-2xl font-semibold text-white">Tạo câu hỏi mới</h1>
                 </div>
 
-                <div className="flex flex-wrap gap-4 mb-6">
+                <div className="flex flex-wrap gap-4 mb-8">
                     <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
                         <SelectTrigger
                             className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
@@ -262,7 +262,7 @@ export default function CreateQuestionForm() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-all duration-200 cursor-pointer"
+                                    className="font-semibold absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-all duration-200 cursor-pointer"
                                     onClick={() => setImage(null)}
                                 >
                                     ✕
@@ -280,7 +280,7 @@ export default function CreateQuestionForm() {
                             value={formik.values.content}
                             onChange={formik.handleChange}
                             spellCheck="false"
-                            className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-none h-[200px]"
+                            className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 resize-none h-[200px]"
                             style={{fontSize: "1.25rem"}}
                         />
                     </Card>
@@ -312,7 +312,7 @@ export default function CreateQuestionForm() {
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 transition-all duration-200 hover:bg-white/20 focus:bg-white/20 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
                                         style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
                                     />
                                 </div>
@@ -357,7 +357,7 @@ export default function CreateQuestionForm() {
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 transition-all duration-200 hover:bg-white/20 focus:bg-white/20 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
                                         style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
                                     />
                                 </div>
@@ -396,7 +396,7 @@ export default function CreateQuestionForm() {
                         <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden">
                             <Button
                                 variant="ghost"
-                                className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white z-10 transition-all duration-200 cursor-pointer"
+                                className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white text-1xl font-semibold z-10 transition-all duration-200 cursor-pointer rounded-full w-9 h-9 flex items-center justify-center"
                                 onClick={() => setShowImageModal(false)}
                             >
                                 ✕
