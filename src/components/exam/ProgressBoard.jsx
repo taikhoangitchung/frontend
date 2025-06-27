@@ -6,6 +6,9 @@ export default function ProgressBoard({candidates = [], submittedUsers = []}) {
     const total = candidates.length;
     const submitted = submittedUsers.length;
 
+    const hasSubmitted = (email) =>
+        submittedUsers.some((user) => user.email === email);
+
     return (
         <div className="w-full max-w-xl bg-purple-900 p-6 rounded-xl shadow-lg space-y-6 text-white">
             <div className="space-y-1">
@@ -20,7 +23,7 @@ export default function ProgressBoard({candidates = [], submittedUsers = []}) {
 
             <div className="max-h-72 overflow-y-auto space-y-1 pr-1">
                 {candidates.map((item, idx) => {
-                    const isSubmitted = submittedUsers.includes(item.email);
+                    const isSubmitted = hasSubmitted(item.email);
                     return (
                         <div
                             key={idx}

@@ -1,33 +1,48 @@
-export default function createExamSocket({ code, onStart, onSubmit, onEnd, onJoin, onLeave}) {
+export default function createExamSocket({ code, onStart, onSubmit, onEnd, onJoin, onLeave }) {
     const socket = new WebSocket("ws://localhost:8080/ws/rooms");
     const email = localStorage.getItem("email");
     const username = localStorage.getItem("username");
-    socket.addEventListener("open", () => {
-        console.log("✅ Socket connected");
-        socket.send(`JOIN:${code}:${email}:${username}`);
-    });
 
-    socket.addEventListener("message", (event) => {
+    socket.onopen = () => {
+        console.log("✅ Socket connected");
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(`JOIN:${code}:${email}:${username}`);
+        }
+    };
+
+    socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            if (data.type === "START") {
-                console.log("🚀 Received START");
-                onStart?.();
-            }else if (data.type === "SUBMIT") {
-                console.log("Received SUBMIT");
-                onSubmit?.(data);
-            }else if (data.type === "END") {
-                console.log("🚀 Received END");
-                onEnd?.();
-            }else if (data.type === "JOIN") {
-                onJoin?.(data.username);
-            }else if (data.type === "LEAVE") {
-                onLeave?.(data.username);
+            console.log("📨 Received:", data);
+
+            switch (data.type) {
+                case "START":
+                    console.log("🚀 Received START");
+                    onStart?.();
+                    break;
+                case "SUBMIT":
+                    console.log("📤 Received SUBMIT");
+                    onSubmit?.(data.users);
+                    break;
+                case "END":
+                    console.log("🏁 Received END");
+                    onEnd?.();
+                    break;
+                case "JOIN":
+                    console.log("👤 User joined:", data);
+                    onJoin?.(data);
+                    break;
+                case "LEAVE":
+                    console.log("👋 User left:", data);
+                    onLeave?.(data);
+                    break;
+                default:
+                    console.warn("⚠️ Unknown message type:", data.type);
             }
         } catch (err) {
-            console.error("❌ Lỗi parse message:", err);
+            console.error("❌ Lỗi parse message:", err, " - Raw:", event.data);
         }
-    });
+    };
 
     const cleanup = () => {
         if (socket.readyState === WebSocket.OPEN) {

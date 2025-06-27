@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Input } from "../../../../components/ui/input"
-import { Label } from "../../../../components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
-import { Badge } from "../../../../components/ui/badge"
+import {useEffect, useState} from "react"
+import {Input} from "../../../../components/ui/input"
+import {Label} from "../../../../components/ui/label"
+import {Card, CardContent, CardHeader, CardTitle} from "../../../../components/ui/card"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../../../../components/ui/select"
+import {Badge} from "../../../../components/ui/badge"
 import {
     ArrowLeft,
     BookOpen,
@@ -31,17 +31,17 @@ import {
     Zap,
     Save,
 } from "lucide-react"
-import { Button } from "../../../../components/ui/button"
-import { FaFireAlt } from "react-icons/fa"
+import {Button} from "../../../../components/ui/button"
+import {FaFireAlt} from "react-icons/fa"
 import CategoryService from "../../../../services/CategoryService"
 import DifficultyService from "../../../../services/DifficultyService"
-import { useFormik } from "formik"
+import {useFormik} from "formik"
 import * as Yup from "yup"
-import { toast } from "sonner"
+import {toast} from "sonner"
 import QuestionService from "../../../../services/QuestionService"
 import ExamService from "../../../../services/ExamService"
-import { useRouter } from "next/navigation"
-import { FaCircleQuestion } from "react-icons/fa6"
+import {useRouter} from "next/navigation"
+import {FaCircleQuestion} from "react-icons/fa6"
 import {
     Dialog,
     DialogContent,
@@ -53,13 +53,13 @@ import {
 } from "../../../../components/ui/dialog"
 
 const questionLimits = [
-    { value: 30, label: "30 câu" },
-    { value: 40, label: "40 câu" },
-    { value: 50, label: "50 câu" },
-    { value: 10000, label: "Không giới hạn" },
+    {value: 30, label: "30 câu"},
+    {value: 40, label: "40 câu"},
+    {value: 50, label: "50 câu"},
+    {value: 10000, label: "Không giới hạn"},
 ]
 
-export default function CreateExam({ id }) {
+export default function CreateExam({id}) {
     const isEdit = id
     const router = useRouter()
     const [oldTitle, setOldTitle] = useState("")
@@ -74,6 +74,8 @@ export default function CreateExam({ id }) {
 
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
     const [userId, setUserId] = useState(Number(localStorage.getItem("id")))
+    const [file, setFile] = useState(null);
+    const [reload, setReload] = useState(false);
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [showImportDialog, setShowImportDialog] = useState(false)
@@ -119,24 +121,37 @@ export default function CreateExam({ id }) {
 
     useEffect(() => {
         if (isEdit) fetchForEdit()
-
         formik.setFieldValue("authorId", userId)
 
-        CategoryService.getAll()
-            .then((res) => setCategories(res.data))
-            .catch((err) => toast.error(err.response.data))
-        DifficultyService.getAll()
-            .then((res) => setDifficulties(res.data))
-            .catch((err) => toast.error(err.response.data))
+        const fetchData = async () => {
+            try {
+                const resCategory = await CategoryService.getAll();
+                setCategories(resCategory.data);
+
+                const resDifficulty = await DifficultyService.getAll();
+                setDifficulties(resDifficulty.data);
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi fetch category hoặc difficulty")
+            }
+        }
+
+        fetchData();
     }, [])
 
     useEffect(() => {
-        QuestionService.filterByCategoryAndSource(formik.values.categoryId, questionSource, userId, searchTerm)
-            .then((res) => {
-                setQuestionBank(res.data)
-            })
-            .catch((err) => toast.error(err.response.data))
-    }, [formik.values.categoryId, questionSource, userId, searchTerm])
+        const filterData = async () => {
+            try {
+                const resFilter = await QuestionService.filterByCategoryAndSource(
+                    formik.values.categoryId,
+                    questionSource, userId, searchTerm)
+                setQuestionBank(resFilter.data)
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi fetch data")
+            }
+        }
+
+        filterData();
+    }, [formik.values.categoryId, questionSource, userId, searchTerm, reload])
 
     useEffect(() => {
         const countQuestions = formik.values.questions.length
@@ -145,6 +160,10 @@ export default function CreateExam({ id }) {
             toast.warning(`Bạn đang thêm thừa ${countQuestions - countQuestionLimit} câu hỏi`)
         }
     }, [formik.values.questionLimit]);
+
+    useEffect(() => {
+        if (file !== null) toast.info("File Added");
+    }, [file]);
 
     const handleSubmit = async (values) => {
         setIsSubmitting(true)
@@ -205,7 +224,7 @@ export default function CreateExam({ id }) {
                 formik.setFieldValue("questions", res.data.questions)
             })
             .catch((err) => {
-                toast.error(err.response.data)
+                toast.error(err?.response?.data || "Lỗi khi lấy dữ liệu bài thi")
                 router.push("/")
             })
     }
@@ -242,7 +261,7 @@ export default function CreateExam({ id }) {
             if (newMap.has(questionId)) {
                 newMap.delete(questionId)
             } else {
-                newMap.set(questionId, { added: added })
+                newMap.set(questionId, {added: added})
             }
             return newMap
         })
@@ -318,6 +337,32 @@ export default function CreateExam({ id }) {
         return value;
     }
 
+    const handleOpenNewTab = () => {
+        window.open('/template', '_blank');
+    };
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+    }
+
+    const handleImport = async () => {
+        setIsSubmitting(true);
+        const idLoading = toast.loading("File is importing ...");
+
+        try {
+            const response = await QuestionService.import(file, userId);
+            toast.success(response.data, {id: idLoading});
+            setReload(!reload);
+        } catch (error) {
+            toast.error(error?.response?.data || "Lỗi khi import file", {id: idLoading})
+        } finally {
+            setFile(null);
+            setShowImportDialog(false);
+            setIsSubmitting(false);
+        }
+    }
+
+
     const QuestionCard = ({question, index, showRemove = false, onRemove, onToggleSelect, displayAdded}) => {
         const added = formik.values.questions.find((q) => q.id === question.id) !== undefined
         const isExpanded = expandedQuestions.has(question.id) && added === displayAdded
@@ -342,11 +387,11 @@ export default function CreateExam({ id }) {
                         {!displayAdded && (
                             <div className="mt-1">
                                 {isAlreadyAdded ? (
-                                    <CheckCircle2 className="h-5 w-5 text-gray-400" />
+                                    <CheckCircle2 className="h-5 w-5 text-gray-400"/>
                                 ) : isToggleSelected ? (
-                                    <CheckCircle2 className="h-5 w-5 text-teal-600" />
+                                    <CheckCircle2 className="h-5 w-5 text-teal-600"/>
                                 ) : (
-                                    <Circle className="h-5 w-5 text-gray-400" />
+                                    <Circle className="h-5 w-5 text-gray-400"/>
                                 )}
                             </div>
                         )}
@@ -394,7 +439,7 @@ export default function CreateExam({ id }) {
                                 className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-teal-50 p-1 transition-all duration-200"
                                 title={isExpanded ? "Thu gọn" : "Xem đáp án"}
                             >
-                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                {isExpanded ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
                             </Button>
                             {question.user.id === userId && (
                                 <Button
@@ -420,7 +465,7 @@ export default function CreateExam({ id }) {
                                     size="sm"
                                     className="cursor-pointer text-red-500 hover:text-red-700 hover:bg-red-50 p-1 transition-all duration-200"
                                 >
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="h-4 w-4"/>
                                 </Button>
                             )}
                         </div>
@@ -441,11 +486,13 @@ export default function CreateExam({ id }) {
                                         }`}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <span className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}>
+                                            <span
+                                                className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}>
                                                 {String.fromCharCode(65 + option.id)}.
                                             </span>
                                             <span>{option.name}</span>
-                                            {option.correct && <CheckCircle2 className="h-4 w-4 ml-auto text-teal-600" />}
+                                            {option.correct &&
+                                                <CheckCircle2 className="h-4 w-4 ml-auto text-teal-600"/>}
                                         </div>
                                     </div>
                                 ))}
@@ -465,7 +512,7 @@ export default function CreateExam({ id }) {
                         onClick={() => router.back()}
                         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-4 h-4"/>
                         <span className="text-white">Quay lại</span>
                     </button>
                     <Button
@@ -473,16 +520,16 @@ export default function CreateExam({ id }) {
                         className="cursor-pointer bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 font-semibold rounded-lg shadow-md transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
                         disabled={isSubmitting}
                     >
-                        <Save className="h-4 w-4" />
+                        <Save className="h-4 w-4"/>
                         {isSubmitting ? "Đang lưu..." : (id ? "Cập nhật bài kiểm tra" : "Lưu bài kiểm tra")}
                     </Button>
                 </div>
 
                 <div className="text-center py-1 pb-3">
                     <h1 className="text-3xl font-bold text-gray-800 flex items-center justify-center gap-3">
-                        <Sparkles className="h-7 w-7 text-purple-600" />
+                        <Sparkles className="h-7 w-7 text-purple-600"/>
                         Tạo Bài Kiểm Tra
-                        <Zap className="h-7 w-7 text-teal-500" />
+                        <Zap className="h-7 w-7 text-teal-500"/>
                     </h1>
                 </div>
 
@@ -491,15 +538,16 @@ export default function CreateExam({ id }) {
                         <Card className="p-0 shadow-lg border-gray-200 bg-white">
                             <CardHeader className="bg-purple-600 text-white rounded-t-lg">
                                 <CardTitle className="flex items-center gap-3 text-lg py-3">
-                                    <BookOpen className="h-5 w-5" />
+                                    <BookOpen className="h-5 w-5"/>
                                     Thông Tin Cơ Bản
-                                    <Trophy className="h-4 w-4 ml-auto" />
+                                    <Trophy className="h-4 w-4 ml-auto"/>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 space-y-4 bg-white">
                                 <div className="space-y-2">
-                                    <Label htmlFor="title" className="text-gray-700 font-medium flex items-center gap-2">
-                                        <Star className="h-4 w-4 text-teal-600" />
+                                    <Label htmlFor="title"
+                                           className="text-gray-700 font-medium flex items-center gap-2">
+                                        <Star className="h-4 w-4 text-teal-600"/>
                                         Tiêu đề bài kiểm tra
                                     </Label>
                                     <Input
@@ -643,7 +691,7 @@ export default function CreateExam({ id }) {
                             <CardHeader className="bg-teal-500 text-white rounded-t-lg">
                                 <CardTitle className="flex items-center justify-between text-lg py-3">
                                     <div className="flex items-center gap-3">
-                                        <ListIcon className="h-5 w-5" />
+                                        <ListIcon className="h-5 w-5"/>
                                         Câu Hỏi Đã Chọn ({formik.values.questions.length})
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -659,17 +707,19 @@ export default function CreateExam({ id }) {
                                                         className="text-white hover:bg-white/20 p-2 cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                                         title="Xóa tất cả câu hỏi"
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-4 w-4"/>
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent className="bg-white">
                                                     <DialogHeader>
                                                         <DialogTitle className="flex items-center gap-2 text-red-600">
-                                                            <Trash2 className="h-5 w-5" />
+                                                            <Trash2 className="h-5 w-5"/>
                                                             Xác nhận xóa
                                                         </DialogTitle>
                                                         <DialogDescription>
-                                                            Bạn có chắc chắn muốn xóa tất cả {formik.values.questions.length} câu hỏi đã chọn không? Hành động này không thể hoàn tác.
+                                                            Bạn có chắc chắn muốn xóa tất
+                                                            cả {formik.values.questions.length} câu hỏi đã chọn không?
+                                                            Hành động này không thể hoàn tác.
                                                         </DialogDescription>
                                                     </DialogHeader>
                                                     <DialogFooter className="gap-2">
@@ -685,7 +735,7 @@ export default function CreateExam({ id }) {
                                                             onClick={clearAllQuestions}
                                                             className="bg-red-600 hover:bg-red-700 text-white"
                                                         >
-                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            <Trash2 className="h-4 w-4 mr-2"/>
                                                             Xóa tất cả
                                                         </Button>
                                                     </DialogFooter>
@@ -699,7 +749,7 @@ export default function CreateExam({ id }) {
                                 <div className="flex-1 overflow-y-auto max-h-96">
                                     {formik.values.questions.length === 0 ? (
                                         <div className="text-center py-12 text-gray-500">
-                                            <Circle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                            <Circle className="h-12 w-12 mx-auto mb-4 opacity-50"/>
                                             <p>Chưa có câu hỏi nào được chọn</p>
                                             <p className="text-sm">Hãy chọn câu hỏi từ ngân hàng bên phải!</p>
                                         </div>
@@ -725,12 +775,13 @@ export default function CreateExam({ id }) {
                         <Card className="p-0 shadow-lg border-gray-200 bg-white">
                             <CardHeader className="bg-teal-500 text-white rounded-t-lg">
                                 <CardTitle className="flex items-center gap-3 text-lg py-3">
-                                    <Search className="h-5 w-5" />
+                                    <Search className="h-5 w-5"/>
                                     Ngân Hàng Câu Hỏi
                                     <div className="flex items-center gap-2 ml-auto">
                                         <Badge className="bg-white/20 text-white border-white/30">
                                             {`${selectedQuestion.length} đã chọn`}
                                         </Badge>
+
                                         <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
                                             <DialogTrigger asChild>
                                                 <Button
@@ -742,6 +793,7 @@ export default function CreateExam({ id }) {
                                                     <Upload className="h-4 w-4"/>
                                                 </Button>
                                             </DialogTrigger>
+
                                             <DialogContent className="bg-white max-w-md">
                                                 <DialogHeader>
                                                     <DialogTitle className="flex items-center gap-2 text-purple-600">
@@ -753,44 +805,67 @@ export default function CreateExam({ id }) {
                                                         thống.
                                                     </DialogDescription>
                                                 </DialogHeader>
+
                                                 <div className="space-y-4">
-                                                    <div
-                                                        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors">
-                                                        <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4"/>
-                                                        <p className="text-gray-600 mb-2">Kéo thả file Excel vào đây</p>
-                                                        <p className="text-sm text-gray-500">hoặc click để chọn file</p>
-                                                        <input
-                                                            type="file"
-                                                            accept=".xlsx,.xls"
-                                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                        />
-                                                    </div>
-                                                    <div className="flex justify-center">
+                                                    <label htmlFor="excel-upload">
+                                                        <div
+                                                            className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer"
+                                                        >
+                                                            <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4"/>
+                                                            {file ? (
+                                                                <p className="text-gray-600 font-medium">{file.name}</p>
+                                                            ) : (
+                                                                <>
+                                                                    <p className="text-gray-600 mb-2">Kéo thả file Excel
+                                                                        vào đây</p>
+                                                                    <p className="text-sm text-gray-500">hoặc click để
+                                                                        chọn file</p>
+                                                                </>
+                                                            )}
+
+                                                            <input
+                                                                id="excel-upload"
+                                                                type="file"
+                                                                accept=".xlsx"
+                                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                                onChange={handleFileChange}
+                                                            />
+                                                        </div>
+                                                    </label>
+
+                                                    <div className="flex justify-center mt-4">
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            className="bg-white text-purple-600 border-purple-300 hover:bg-purple-50 flex items-center gap-2 cursor-pointer transition-all duration-200"
+                                                            className="cursor-pointer bg-white text-purple-600 border-purple-300 hover:bg-purple-50 flex items-center gap-2"
+                                                            onClick={handleOpenNewTab}
                                                         >
                                                             <ExternalLink className="h-4 w-4"/>
                                                             Xem mẫu Excel
                                                         </Button>
                                                     </div>
                                                 </div>
+
                                                 <DialogFooter className="gap-2">
                                                     <Button
                                                         variant="outline"
                                                         onClick={() => setShowImportDialog(false)}
-                                                        className="bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                                        className="cursor-pointer bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                                                     >
                                                         Hủy
                                                     </Button>
-                                                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                                                    <Button
+                                                        className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white"
+                                                        onClick={handleImport}
+                                                        disabled={isSubmitting}
+                                                    >
                                                         <Upload className="h-4 w-4 mr-2"/>
                                                         Import
                                                     </Button>
                                                 </DialogFooter>
                                             </DialogContent>
                                         </Dialog>
+
                                     </div>
                                 </CardTitle>
                             </CardHeader>
@@ -798,34 +873,34 @@ export default function CreateExam({ id }) {
                                 <div className="flex flex-col md:flex-row gap-4 w-full">
                                     <div className="space-y-2 w-full md:w-auto flex-shrink-0">
                                         <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                                            <Globe className="h-4 w-4 text-teal-600" />
+                                            <Globe className="h-4 w-4 text-teal-600"/>
                                             Nguồn câu hỏi
                                         </Label>
                                         <Select value={questionSource} onValueChange={setQuestionSource}>
                                             <SelectTrigger
                                                 className="w-full border-gray-300 bg-gray-50 focus:border-teal-500 cursor-pointer transition-all duration-200 hover:bg-gray-100"
                                             >
-                                                <SelectValue placeholder="Chọn nguồn câu hỏi" />
+                                                <SelectValue placeholder="Chọn nguồn câu hỏi"/>
                                             </SelectTrigger>
                                             <SelectContent className="bg-white">
                                                 <SelectItem value={`${formik.values.authorId}`}
                                                             className="hover:bg-gray-100 cursor-pointer transition-all duration-200">
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4" />
+                                                        <User className="h-4 w-4"/>
                                                         Câu hỏi của tôi
                                                     </div>
                                                 </SelectItem>
                                                 <SelectItem value={"-1"}
                                                             className="hover:bg-gray-100 cursor-pointer transition-all duration-200">
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4" />
+                                                        <User className="h-4 w-4"/>
                                                         Câu hỏi của người khác
                                                     </div>
                                                 </SelectItem>
                                                 <SelectItem value={"-999"}
                                                             className="hover:bg-gray-100 cursor-pointer transition-all duration-200">
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4" />
+                                                        <User className="h-4 w-4"/>
                                                         Tất cả
                                                     </div>
                                                 </SelectItem>
@@ -834,11 +909,12 @@ export default function CreateExam({ id }) {
                                     </div>
                                     <div className="space-y-2 w-full">
                                         <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                                            <Search className="h-4 w-4 text-purple-600" />
+                                            <Search className="h-4 w-4 text-purple-600"/>
                                             Tìm kiếm
                                         </Label>
                                         <div className="relative">
-                                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <Search
+                                                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"/>
                                             <Input
                                                 placeholder="Tìm kiếm theo username"
                                                 value={searchTerm}
@@ -853,7 +929,7 @@ export default function CreateExam({ id }) {
                                         onClick={addSelectedQuestions}
                                         className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                     >
-                                        <Plus className="h-4 w-4 mr-2" />
+                                        <Plus className="h-4 w-4 mr-2"/>
                                         Thêm {selectedQuestion.length} câu hỏi đã chọn
                                     </Button>
                                 )}
@@ -863,7 +939,7 @@ export default function CreateExam({ id }) {
                             <CardHeader className="bg-purple-600 text-white rounded-t-lg">
                                 <CardTitle className="flex items-center justify-between text-lg py-3">
                                     <div className="flex items-center gap-3">
-                                        <ListIcon className="h-5 w-5" />
+                                        <ListIcon className="h-5 w-5"/>
                                         Danh Sách Câu Hỏi ({questionBank.length})
                                     </div>
                                 </CardTitle>
@@ -872,7 +948,7 @@ export default function CreateExam({ id }) {
                                 <div className="flex-1 overflow-y-auto max-h-96 space-y-3">
                                     {questionBank.length === 0 ? (
                                         <div className="text-center py-12 text-gray-500">
-                                            <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                            <Search className="h-12 w-12 mx-auto mb-4 opacity-50"/>
                                             <p>Không tìm thấy câu hỏi nào</p>
                                         </div>
                                     ) : (

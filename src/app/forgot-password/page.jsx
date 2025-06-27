@@ -24,7 +24,7 @@ const ForgotPassword = () => {
             email: "",
         },
         validationSchema: ForgotPasswordSchema,
-        onSubmit: (values) => {
+        onSubmit: async (values) => {
             setIsSubmitting(true)
             const idLoading = toast.loading("Đang gửi thông tin về Email của bạn")
             const token = crypto.randomUUID()
@@ -46,16 +46,17 @@ const ForgotPassword = () => {
                 html: htmlString,
                 token: token,
             }
-            EmailService.sendMail(params)
-                .then((res) => {
-                    toast.success(res.data, { id: idLoading })
-                    router.push("/")
-                    setIsSubmitting(false)
-                })
-                .catch((err) => {
-                    toast.error(err.response.data)
-                    setIsSubmitting(false)
-                })
+
+            try {
+                const response = await EmailService.sendMail(params);
+                toast.success(response.data, { id: idLoading })
+                router.push("/")
+            } catch (error) {
+                const message = error?.response?.data;
+                toast.error(message);
+            } finally {
+                setIsSubmitting(false)
+            }
         },
     })
 

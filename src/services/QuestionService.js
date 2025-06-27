@@ -1,6 +1,19 @@
 import axiosInstance from "../config/axiosConfig";
 
 class QuestionService {
+    static async import(file,userId) {
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("userId", userId);
+            return await axiosInstance.post("/questions/import", formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async create(questionData) {
         try {
             return await axiosInstance.post("/questions", questionData, {
