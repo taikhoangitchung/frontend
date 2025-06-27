@@ -11,16 +11,7 @@ import { Button } from "../../../../../components/ui/button";
 import HistoryService from "../../../../../services/HistoryService";
 import { X } from "lucide-react"
 import { Card } from "../../../../../components/ui/card"
-
-const fallbackColors = [
-    "from-orange-300 to-orange-400",
-    "from-green-400 to-green-600",
-    "from-blue-400 to-blue-600",
-    "from-pink-400 to-pink-600",
-    "from-purple-400 to-purple-600",
-    "from-yellow-400 to-yellow-600",
-    "from-teal-400 to-teal-600",
-];
+import {defaultColor} from "../../../../../util/defaultColors";
 
 export default function OfflineExamForm() {
     const { id } = useParams()
@@ -42,7 +33,6 @@ export default function OfflineExamForm() {
     const currentQuestion = questions[questionIndex] || {}
     const isMultipleChoice = currentQuestion?.type?.name === "multiple"
 
-    // Định nghĩa base URL cho ảnh, tương tự như trong Question.jsx
     const imageBaseUrl = "http://localhost:8080";
 
     useEffect(() => {
@@ -162,7 +152,7 @@ export default function OfflineExamForm() {
         const disabled = submitted || submitting;
         const state = disabled ? "opacity-50 cursor-not-allowed" : "";
 
-        const color = fallbackColors[index % fallbackColors.length];
+        const color = defaultColor()[index % defaultColor().length];
 
         return selected
             ? `${base} ${state} bg-gradient-to-br ${color} ring-4 ring-white scale-105 shadow-lg`
