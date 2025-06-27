@@ -66,7 +66,7 @@ export default function Page() {
                     {/* Left - Join Quiz */}
                     <div className="flex-1 flex flex-col">
                         <Card
-                            className="bg-gradient-to-br from-white to-purple-50/30 shadow-xl rounded-2xl border border-purple-100/50 overflow-hidden backdrop-blur-sm cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105"
+                            className="bg-gradient-to-br from-white to-purple-50/30 shadow-xl rounded-2xl border border-purple-100/50 overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:scale-105"
                         >
                             <CardContent className="p-0 flex flex-col justify-center">
                                 <div className="space-y-5 max-w-md w-full mx-auto">
@@ -78,9 +78,14 @@ export default function Page() {
 
                                     <Input
                                         placeholder="Nhập mã quiz để vào phòng thi"
-                                        className="h-14 text-xl text-center font-mono border-2 border-purple-200 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 rounded-xl uppercase cursor-pointer transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white/90"
+                                        className="h-14 text-xl text-center font-mono border-2 border-purple-200 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 rounded-xl uppercase transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white/90"
                                         maxLength={8}
                                         onChange={handleInput}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleJoinRoom();
+                                            }
+                                        }}
                                     />
                                     <Button
                                         className="w-full h-14 text-xl font-medium bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 text-white rounded-xl shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 disabled:cursor-not-allowed"
