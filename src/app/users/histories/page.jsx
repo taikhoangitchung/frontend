@@ -30,6 +30,7 @@ const HistoryPage = () => {
             try {
                 const response = await HistoryService.getAll();
                 const histories = response.data;
+                console.log("histories", histories);
                 setAllHistories(histories);
                 setTotalPages(Math.ceil(histories.length / pageSize));
                 setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
@@ -139,11 +140,11 @@ const HistoryPage = () => {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                            {historyList.map((history) => (
+                            {historyList.map((history, index) => (
                                 <div
-                                    key={history.id}
+                                    key={index}
                                     className="bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden cursor-pointer"
-                                    onClick={() => router.push(`/users/histories/${history.id}`)}
+                                    onClick={() => router.push(`/users/histories/${history.historyId}`)}
                                 >
                                     <div className="w-full h-36 rounded-t-xl overflow-hidden relative group">
                                         <img

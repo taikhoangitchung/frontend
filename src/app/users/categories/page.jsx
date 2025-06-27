@@ -1,9 +1,6 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Button } from "../../../components/ui/button"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons"
 import CategoryTable from "../../../components/list/CategoryTable"
 import React from "react";
 import {ArrowLeft} from "lucide-react";

@@ -9,7 +9,18 @@ import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDial
 import formatTime from "../../../../../util/formatTime";
 import { Button } from "../../../../../components/ui/button";
 import HistoryService from "../../../../../services/HistoryService";
-import { X } from "lucide-react" // Thêm icon X
+import { X } from "lucide-react"
+import { Card } from "../../../../../components/ui/card"
+
+const fallbackColors = [
+    "from-orange-300 to-orange-400",
+    "from-green-400 to-green-600",
+    "from-blue-400 to-blue-600",
+    "from-pink-400 to-pink-600",
+    "from-purple-400 to-purple-600",
+    "from-yellow-400 to-yellow-600",
+    "from-teal-400 to-teal-600",
+];
 
 export default function OfflineExamForm() {
     const { id } = useParams()
@@ -25,10 +36,14 @@ export default function OfflineExamForm() {
     const [timeSpent, setTimeSpent] = useState(0)
     const [resultData, setResultData] = useState(null)
     const [userAnswers, setUserAnswers] = useState({})
+    const [showImageModal, setShowImageModal] = useState(false)
     const timerRef = useRef(null)
 
     const currentQuestion = questions[questionIndex] || {}
     const isMultipleChoice = currentQuestion?.type?.name === "multiple"
+
+    // Định nghĩa base URL cho ảnh, tương tự như trong Question.jsx
+    const imageBaseUrl = "http://localhost:8080";
 
     useEffect(() => {
         const fetchQuizData = async () => {
@@ -137,15 +152,22 @@ export default function OfflineExamForm() {
         return Math.round((count / questions.length) * 100)
     }
 
-    const getAnswerButtonStyle = (answer) => {
-        const base = `relative w-full h-full min-h-[14rem] md:min-h-[20rem] rounded-2xl flex items-center justify-center text-white font-semibold text-base sm:text-lg md:text-xl transition-all duration-300 cursor-pointer`
-        const selected = userAnswers[questionIndex]?.includes(answer.id)
-        const disabled = submitted || submitting
-        const state = disabled ? "opacity-50 cursor-not-allowed" : ""
+    const getAnswerButtonStyle = (answer, index) => {
+        const base = `relative w-full h-full min-h-[14rem] md:min-h-[20rem] 
+        rounded-2xl flex items-center justify-center 
+        text-white font-semibold text-base sm:text-lg md:text-xl 
+        transition-all duration-300 cursor-pointer`;
+
+        const selected = userAnswers[questionIndex]?.includes(answer.id);
+        const disabled = submitted || submitting;
+        const state = disabled ? "opacity-50 cursor-not-allowed" : "";
+
+        const color = fallbackColors[index % fallbackColors.length];
+
         return selected
-            ? `${base} ${state} bg-gradient-to-br ${answer.color} ring-4 ring-white scale-105 shadow-lg`
-            : `${base} ${state} bg-gradient-to-br ${answer.color} ${!disabled ? "hover:scale-105 hover:shadow-lg" : ""}`
-    }
+            ? `${base} ${state} bg-gradient-to-br ${color} ring-4 ring-white scale-105 shadow-lg`
+            : `${base} ${state} bg-gradient-to-br ${color} ${!disabled ? "hover:scale-105 hover:shadow-lg" : ""}`;
+    };
 
     const getQuestionButtonStyle = (index) => {
         const isCurrent = questionIndex === index
@@ -176,13 +198,12 @@ export default function OfflineExamForm() {
             )}
             <div className="flex items-center justify-between">
                 <ConfirmDialog
-                    triggerLabel={
-                        <div className="flex items-center gap-2">
-                            <X size={18} /> {/* Thêm icon X */}
+                    trigger={
+                        <div className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 cursor-pointer">
+                            <X className="w-5 h-5" />
                             Thoát ra
                         </div>
                     }
-                    triggerClass="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2"
                     title="Bạn có chắc chắn muốn thoát?"
                     description="Bài làm sẽ không được lưu lại nếu chưa nộp."
                     actionLabel="Thoát ngay"
@@ -198,26 +219,55 @@ export default function OfflineExamForm() {
                     <Button
                         onClick={() => handleSubmitQuiz(false)}
                         disabled={submitting || submitted}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
+                        className="bg-green-600 hover:bg-green-700 cursor-pointer text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
                     >
                         {submitting ? "Đang nộp..." : "Nộp bài"}
                     </Button>
                 </div>
             </div>
 
-            <div className="text-center text-xl bg-black/20 rounded-2xl p-6">
-                {currentQuestion?.content}
-                <div className="text-lg text-purple-200 font-normal">
-                    ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
+            {/* Question and Image Section */}
+            {currentQuestion?.image ? (
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
+                    {/* Left Section - Image Display (3/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-3">
+                        <div
+                            className="border-2 border-white/30 rounded-lg bg-white/5 cursor-pointer hover:scale-105 transition-all duration-200"
+                            onClick={() => setShowImageModal(true)}
+                        >
+                            <img
+                                src={`${imageBaseUrl}${currentQuestion.image}`}
+                                alt="Question image"
+                                className="w-full h-[163px] object-cover rounded-lg"
+                            />
+                        </div>
+                    </Card>
+
+                    {/* Right Section - Question Content (7/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-7">
+                        <div className="text-xl bg-white/10 border-white/30 text-white p-4 rounded-lg">
+                            {currentQuestion.content}
+                            <div className="text-lg text-purple-200 font-normal">
+                                ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
+                            </div>
+                        </div>
+                    </Card>
                 </div>
-            </div>
+            ) : (
+                <div className="text-center text-xl bg-black/20 rounded-2xl p-6">
+                    {currentQuestion?.content}
+                    <div className="text-lg text-purple-200 font-normal">
+                        ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
+                    </div>
+                </div>
+            )}
 
             <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
                 {currentQuestion?.answers?.map((answer, index) => (
                     <button
                         key={index}
                         onClick={() => handleAnswerSelect(index)}
-                        className={getAnswerButtonStyle(answer)}
+                        className={getAnswerButtonStyle(answer, index)}
                         disabled={submitting || submitted}
                     >
                         <span className="text-center px-4">{answer.content}</span>
@@ -228,7 +278,7 @@ export default function OfflineExamForm() {
                                     <svg className="w-5 h-5 text-purple-900" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd"
                                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                              clipRule="evenodd" />
+                                              clipRule="evenodd"/>
                                     </svg>
                                 </div>
                             </div>
@@ -244,7 +294,7 @@ export default function OfflineExamForm() {
                         <button
                             key={index}
                             onClick={() => changeQuestion(index)}
-                            className={`w-10 h-10 rounded-lg font-semibold text-sm ${getQuestionButtonStyle(index)}`}
+                            className={`w-10 h-10 rounded-lg hover:cursor-pointer font-semibold text-sm ${getQuestionButtonStyle(index)}`}
                             disabled={submitting || submitted}
                         >
                             {index + 1}
@@ -252,7 +302,6 @@ export default function OfflineExamForm() {
                     ))}
                 </div>
 
-                {/* 👇 Chú thích màu sắc */}
                 <div className="mt-4 flex justify-center gap-6 text-xs">
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-white rounded"></div>
@@ -273,18 +322,42 @@ export default function OfflineExamForm() {
                 <Button
                     onClick={() => changeQuestion(questionIndex - 1)}
                     disabled={questionIndex === 0 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                    className="bg-white text-purple-900 hover:bg-gray-200 cursor-pointer font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu trước
                 </Button>
                 <Button
                     onClick={() => changeQuestion(questionIndex + 1)}
                     disabled={questionIndex >= questions.length - 1 || submitting || submitted}
-                    className="bg-white text-purple-900 hover:bg-gray-200 font-semibold px-6 py-2 rounded-full disabled:opacity-50"
+                    className="bg-white text-purple-900 hover:bg-gray-200 cursor-pointer font-semibold px-6 py-2 rounded-full disabled:opacity-50"
                 >
                     Câu tiếp theo
                 </Button>
             </div>
+
+            {/* Image Modal */}
+            {showImageModal && currentQuestion?.image && (
+                <div
+                    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+                    onClick={() => setShowImageModal(false)}
+                >
+                    <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden">
+                        <Button
+                            variant="ghost"
+                            className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white z-10 transition-all duration-200 cursor-pointer"
+                            onClick={() => setShowImageModal(false)}
+                        >
+                            ✕
+                        </Button>
+                        <img
+                            src={`${imageBaseUrl}${currentQuestion.image}`}
+                            alt="Full size preview"
+                            className="w-full h-full max-h-[90vh] object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
