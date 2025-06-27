@@ -119,30 +119,38 @@ export default function CreateExam({id}) {
         },
     })
 
-    useEffect(async () => {
+    useEffect(() => {
         if (isEdit) fetchForEdit()
-        await formik.setFieldValue("authorId", userId)
+        formik.setFieldValue("authorId", userId)
 
-        try {
-            const resCategory = await CategoryService.getAll();
-            setCategories(resCategory.data);
+        const fetchData = async () => {
+            try {
+                const resCategory = await CategoryService.getAll();
+                setCategories(resCategory.data);
 
-            const resDifficulty = await DifficultyService.getAll();
-            setDifficulties(resDifficulty.data);
-        } catch (error) {
-            toast.error(error?.response?.data || "Lỗi khi fetch category hoặc difficulty")
+                const resDifficulty = await DifficultyService.getAll();
+                setDifficulties(resDifficulty.data);
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi fetch category hoặc difficulty")
+            }
         }
+
+        fetchData();
     }, [])
 
-    useEffect(async () => {
-        try {
-            const resFilter = await QuestionService.filterByCategoryAndSource(
-                formik.values.categoryId,
-                questionSource, userId, searchTerm)
-            setQuestionBank(resFilter.data)
-        } catch (error) {
-            toast.error(error?.response?.data || "Lỗi khi fetch data")
+    useEffect(() => {
+        const filterData = async () => {
+            try {
+                const resFilter = await QuestionService.filterByCategoryAndSource(
+                    formik.values.categoryId,
+                    questionSource, userId, searchTerm)
+                setQuestionBank(resFilter.data)
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi fetch data")
+            }
         }
+
+        filterData();
     }, [formik.values.categoryId, questionSource, userId, searchTerm, reload])
 
     useEffect(() => {
@@ -345,11 +353,11 @@ export default function CreateExam({id}) {
             const response = await QuestionService.import(file, userId);
             toast.success(response.data, {id: idLoading});
             setReload(!reload);
-            setShowImportDialog(false);
-            setFile(null);
         } catch (error) {
             toast.error(error?.response?.data || "Lỗi khi import file", {id: idLoading})
         } finally {
+            setFile(null);
+            setShowImportDialog(false);
             setIsSubmitting(false);
         }
     }
@@ -798,40 +806,6 @@ export default function CreateExam({id}) {
                                                     </DialogDescription>
                                                 </DialogHeader>
 
-                                                {/*<div className="space-y-4">*/}
-                                                {/*    <label htmlFor="excel-upload">*/}
-                                                {/*        <div*/}
-                                                {/*            className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer"*/}
-                                                {/*        >*/}
-                                                {/*            <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4"/>*/}
-                                                {/*            <p className="text-gray-600 mb-2">Kéo thả file Excel vào*/}
-                                                {/*                đây</p>*/}
-                                                {/*            <p className="text-sm text-gray-500">hoặc click để chọn*/}
-                                                {/*                file</p>*/}
-                                                {/*            <input*/}
-                                                {/*                id="excel-upload"*/}
-                                                {/*                type="file"*/}
-                                                {/*                accept=".xlsx,.xls,.csv"*/}
-                                                {/*                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"*/}
-                                                {/*                onChange={handleFileChange}*/}
-                                                {/*            />*/}
-                                                {/*        </div>*/}
-                                                {/*    </label>*/}
-
-                                                {/*    <div className="flex justify-center mt-4">*/}
-                                                {/*        <Button*/}
-                                                {/*            variant="outline"*/}
-                                                {/*            size="sm"*/}
-                                                {/*            className="cursor-pointer bg-white text-purple-600 border-purple-300 hover:bg-purple-50 flex items-center gap-2"*/}
-                                                {/*            onClick={handleOpenNewTab}*/}
-                                                {/*        >*/}
-                                                {/*            <ExternalLink className="h-4 w-4"/>*/}
-                                                {/*            Xem mẫu Excel*/}
-                                                {/*        </Button>*/}
-                                                {/*    </div>*/}
-
-                                                {/*</div>*/}
-
                                                 <div className="space-y-4">
                                                     <label htmlFor="excel-upload">
                                                         <div
@@ -852,7 +826,7 @@ export default function CreateExam({id}) {
                                                             <input
                                                                 id="excel-upload"
                                                                 type="file"
-                                                                accept=".xlsx,.xls,.csv"
+                                                                accept=".xlsx"
                                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                                                 onChange={handleFileChange}
                                                             />

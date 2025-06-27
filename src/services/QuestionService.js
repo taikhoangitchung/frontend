@@ -10,7 +10,7 @@ class QuestionService {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
         } catch (error) {
-            return error;
+            throw error;
         }
     }
 
