@@ -57,10 +57,11 @@ export default function createExamSocket({ code, onStart, onSubmit, onEnd, onJoi
 
 
 
-export const useKickSocket = ({email, onKick}) => {
+export const kickSocket = ({email, onKick}) => {
     const socket = new WebSocket(`ws://localhost:8080/ws/kick?email=${email}`);
 
     socket.onmessage = (event) => {
+        console.log("message", event.data);
         onKick?.(event.data);
     };
 

@@ -6,22 +6,17 @@ import * as Yup from "yup"
 import UserService from "../../services/UserService"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {
-    faEye,
-    faEyeSlash,
-    faEnvelope,
-    faArrowLeft,
-    faLock,
-} from "@fortawesome/free-solid-svg-icons"
+import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react"
+
 import { jwtDecode } from "jwt-decode"
 
 const Login = () => {
     const router = useRouter()
     const [showPassword, setShowPassword] = useState(false)
-    const [isReady, setIsReady] = useState(false)
     const [showEmailForm, setShowEmailForm] = useState(false)
     const [initialValues, setInitialValues] = useState({ email: "", password: "" })
+    const [errorMessage, setErrorMessage] = useState("")
+    const [isRedirecting, setIsRedirecting] = useState(false)
 
     useEffect(() => {
         const autoLogin = localStorage.getItem("autoLogin")
@@ -31,10 +26,15 @@ const Login = () => {
             localStorage.removeItem("autoLogin")
         }
 
-        // Xử lý token từ URL nếu có
         const params = new URLSearchParams(window.location.search)
+        const error = params.get("error")
         const token = params.get("accessToken")
         const refreshToken = params.get("refreshToken")
+
+        if (error) {
+            setErrorMessage(decodeURIComponent(error)) // 👈 gán vào state
+            return
+        }
 
         if (token && refreshToken) {
             const decoded = jwtDecode(token)
@@ -45,22 +45,27 @@ const Login = () => {
             localStorage.setItem("role", decoded.role)
             localStorage.setItem("username", decoded.username)
 
-            // Thêm thông báo đăng nhập Google thành công
             toast.success("Đăng nhập thành công! Chào mừng bạn trở lại.", {
-                autoClose: 2000,
+                duration: 2000,
                 className: "bg-green-100 text-green-800 border border-green-300 rounded-lg shadow-md",
             })
+
             const nextPage = decoded.role === "ADMIN" ? "/admin/dashboard" : "/users/dashboard"
-
-            // ✅ Xóa query sau khi xử lý xong
-            const cleanUrl = window.location.origin + window.location.pathname
-            window.history.replaceState({}, document.title, cleanUrl)
-
-            setTimeout(() => router.push(nextPage), 1500)
+            setTimeout(() => router.push(nextPage), 2000)
         }
-
-        setIsReady(true)
     }, [])
+
+    useEffect(() => {
+        if (errorMessage) {
+            toast.error(errorMessage, {
+                duration: 3000,
+                className: "bg-red-100 text-red-800 border border-red-300 rounded-lg shadow-md",
+            })
+            setTimeout(() => {
+                router.replace("/login")
+            }, 500)
+        }
+    }, [errorMessage])
 
     const validationSchema = Yup.object({
         email: Yup.string()
@@ -114,10 +119,11 @@ const Login = () => {
     }
 
     const handleGoogleLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google"
+        setIsRedirecting(true)
+        setTimeout(() => {
+            window.location.href = "http://localhost:8080/oauth2/authorization/google"
+        }, 300)
     }
-
-    if (!isReady) return <div>Loading...</div>
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
@@ -138,10 +144,10 @@ const Login = () => {
                                         onClick={handleGoogleLogin}
                                     >
                                         <div className="flex items-center">
-                                            <div className="w-5 h-5 mr-3 text-red-500 font-bold">G</div>
+                                            <div className="w-5 h-5 mr-3 text-red-500 font-bold text-lg">G</div>
                                             <span className="text-gray-700 font-medium">Tiếp tục với Google</span>
                                         </div>
-                                        <FontAwesomeIcon icon={faArrowLeft} className="rotate-180 text-gray-400" />
+                                        <ArrowLeft className="w-5 h-5 text-gray-400 rotate-180" />
                                     </button>
 
                                     {/* Email Login Button */}
@@ -150,10 +156,10 @@ const Login = () => {
                                         onClick={() => setShowEmailForm(true)}
                                     >
                                         <div className="flex items-center">
-                                            <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 mr-3 text-gray-600" />
+                                            <Mail className="w-5 h-5 mr-3 text-gray-600" />
                                             <span className="text-gray-700 font-medium">Tiếp tục với Email</span>
                                         </div>
-                                        <FontAwesomeIcon icon={faArrowLeft} className="rotate-180 text-gray-400" />
+                                        <ArrowLeft className="w-5 h-5 text-gray-400 rotate-180" />
                                     </button>
                                 </div>
 
@@ -175,7 +181,7 @@ const Login = () => {
                                     onClick={() => setShowEmailForm(false)}
                                     className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                                 >
-                                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                                    <ArrowLeft className="w-5 h-5 mr-2" />
                                     Quay lại
                                 </button>
 
@@ -190,10 +196,7 @@ const Login = () => {
                                         <Form className="space-y-4">
                                             <div>
                                                 <div className="relative">
-                                                    <FontAwesomeIcon
-                                                        icon={faEnvelope}
-                                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                                    />
+                                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                                     <Field
                                                         type="email"
                                                         name="email"
@@ -210,10 +213,7 @@ const Login = () => {
 
                                             <div>
                                                 <div className="relative">
-                                                    <FontAwesomeIcon
-                                                        icon={faLock}
-                                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                                    />
+                                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                                     <Field
                                                         type={showPassword ? "text" : "password"}
                                                         name="password"
@@ -223,9 +223,9 @@ const Login = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200"
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                                     >
-                                                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                                     </button>
                                                 </div>
                                                 <ErrorMessage
@@ -288,6 +288,13 @@ const Login = () => {
                     </div>
                 </div>
             </div>
+            {isRedirecting && (
+                <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+                    <div className="text-purple-600 font-semibold text-lg animate-pulse">
+                        Đang chuyển hướng tới Google...
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
