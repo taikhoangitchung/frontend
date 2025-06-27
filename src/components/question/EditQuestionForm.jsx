@@ -161,7 +161,10 @@ export default function EditQuestionForm() {
         try {
             setIsSubmitting(true)
             const payload = {
-                ...formik.values,
+                content: formik.values.content,
+                category: formik.values.category,
+                type: formik.values.type,
+                difficulty: formik.values.difficulty,
                 answers: formik.values.answers.map(({ id, ...rest }) => rest),
             }
             const formData = new FormData();
@@ -182,7 +185,7 @@ export default function EditQuestionForm() {
             toast.success("Cập nhật câu hỏi thành công!")
             router.push("/users/questions")
         } catch (err) {
-            toast.error(err.response?.data)
+            toast.error(err.response?.data || "Cập nhật câu hỏi thất bại")
         } finally {
             setIsSubmitting(false)
         }
@@ -319,7 +322,6 @@ export default function EditQuestionForm() {
                             spellCheck="false"
                             className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 resize-none h-[200px]"
                             style={{fontSize: "1.25rem"}}
-
                         />
                     </Card>
                 </div>
