@@ -163,7 +163,7 @@ export default function QuizInterface() {
             setPage(1);
             await fetchQuestions();
         } catch (err) {
-            toast.error("Xoá thất bại");
+            toast.error(err.response.data);
         }
     };
 
