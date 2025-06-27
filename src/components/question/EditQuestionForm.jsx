@@ -22,6 +22,7 @@ import DifficultyService from "../../services/DifficultyService"
 import { initialAnswers } from "../../util/defaultAnswers"
 import { cn } from "../../lib/utils"
 import { typeVietSub } from "../../util/typeVietsub"
+import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 
 export default function EditQuestionForm() {
     const router = useRouter()
@@ -329,7 +330,7 @@ export default function EditQuestionForm() {
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
+                                className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
                                 <div className="absolute top-3 right-3">
                                     <Checkbox
@@ -373,7 +374,7 @@ export default function EditQuestionForm() {
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
+                                className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
                                 <div className="absolute top-3 right-3">
                                     <RadioGroupItem

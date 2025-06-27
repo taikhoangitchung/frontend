@@ -41,9 +41,6 @@ const Modal = ({ onClose, children }) => {
         </div>
     );
 };
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 
 export default function QuizInterface() {
     const router = useRouter();

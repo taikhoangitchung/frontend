@@ -1,27 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useFormik } from "formik"
+import {useEffect, useState} from "react"
+import {useFormik} from "formik"
 import * as Yup from "yup"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import {useRouter} from "next/navigation"
+import {toast} from "sonner"
 
-import { Loader2, Send, ArrowLeft } from "lucide-react"
-import { Button } from "../ui/button"
-import { Card } from "../ui/card"
-import { Textarea } from "../ui/textarea"
-import { Input } from "../ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Checkbox } from "../ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
+import {Loader2, Send, ArrowLeft} from "lucide-react"
+import {Button} from "../ui/button"
+import {Card} from "../ui/card"
+import {Textarea} from "../ui/textarea"
+import {Input} from "../ui/input"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select"
+import {Checkbox} from "../ui/checkbox"
+import {RadioGroup, RadioGroupItem} from "../ui/radio-group"
 
 import QuestionService from "../../services/QuestionService"
 import CategoryService from "../../services/CategoryService"
 import TypeService from "../../services/TypeService"
 import DifficultyService from "../../services/DifficultyService"
-import { initialAnswers } from "../../util/defaultAnswers"
-import { cn } from "../../lib/utils"
-import { typeVietSub } from "../../util/typeVietsub"
+import {initialAnswers} from "../../util/defaultAnswers"
+import {cn} from "../../lib/utils"
+import {typeVietSub} from "../../util/typeVietsub"
+import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 
 export default function CreateQuestionForm() {
     const router = useRouter()
@@ -145,7 +146,7 @@ export default function CreateQuestionForm() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-purple-900">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
             </div>
         )
     }
@@ -291,8 +292,8 @@ export default function CreateQuestionForm() {
                     <div className="grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                         {formik.values.answers.map((answer, index) => (
                             <Card key={answer.id}
-                                  className={`bg-gradient-to-br ${answer.color} border-none h-60 relative`}>
-                                <div className="absolute top-3 right-3">
+                                  className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative`}>
+                            <div className="absolute top-3 right-3">
                                     <Checkbox
                                         checked={answer.correct}
                                         onCheckedChange={(checked) => {
@@ -333,7 +334,7 @@ export default function CreateQuestionForm() {
                     >
                         {formik.values.answers.map((answer, index) => (
                             <Card key={answer.id}
-                                  className={`bg-gradient-to-br ${answer.color} border-none h-60 relative`}>
+                                  className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative`}>
                                 <div className="absolute top-3 right-3">
                                     <RadioGroupItem
                                         value={answer.id.toString()}

@@ -186,15 +186,15 @@ export default function PlayExamFormOnline() {
         }
     };
 
-    const getAnswerButtonStyle = (answer) => {
+    const getAnswerButtonStyle = (answer, index) => {
         const base = `relative w-full h-full min-h-[14rem] md:min-h-[20rem] rounded-2xl flex items-center justify-center text-white font-semibold text-base sm:text-lg md:text-xl transition-all duration-300 cursor-pointer`;
         const selected = userAnswers[questionIndex]?.includes(answer.id);
         const disabled = submitted || submitting;
 
         if (selected) {
-            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${answer.color} ring-4 ring-white ring-opacity-60 scale-105 shadow-lg`;
+            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${getAnswerButtonStyle(index)} ring-4 ring-white ring-opacity-60 scale-105 shadow-lg`;
         } else {
-            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${answer.color} hover:scale-105 hover:shadow-lg`;
+            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${getAnswerButtonStyle(index)} hover:scale-105 hover:shadow-lg`;
         }
     };
 
@@ -329,7 +329,7 @@ export default function PlayExamFormOnline() {
                     {currentQuestion?.answers?.map((answer, index) => (
                         <button
                             key={index}
-                            className={getAnswerButtonStyle(answer)}
+                            className={getAnswerButtonStyle(answer, index)}
                             onClick={() => handleAnswerSelect(index)}
                             disabled={submitted || submitting}
                         >
