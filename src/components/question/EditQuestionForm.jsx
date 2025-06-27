@@ -22,6 +22,7 @@ import DifficultyService from "../../services/DifficultyService"
 import { initialAnswers } from "../../util/defaultAnswers"
 import { cn } from "../../lib/utils"
 import { typeVietSub } from "../../util/typeVietsub"
+import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 
 export default function EditQuestionForm() {
     const router = useRouter()
@@ -161,7 +162,10 @@ export default function EditQuestionForm() {
         try {
             setIsSubmitting(true)
             const payload = {
-                ...formik.values,
+                content: formik.values.content,
+                category: formik.values.category,
+                type: formik.values.type,
+                difficulty: formik.values.difficulty,
                 answers: formik.values.answers.map(({ id, ...rest }) => rest),
             }
             const formData = new FormData();
@@ -182,7 +186,7 @@ export default function EditQuestionForm() {
             toast.success("Cập nhật câu hỏi thành công!")
             router.push("/users/questions")
         } catch (err) {
-            toast.error(err.response?.data)
+            toast.error(err.response?.data || "Cập nhật câu hỏi thất bại")
         } finally {
             setIsSubmitting(false)
         }
@@ -319,7 +323,6 @@ export default function EditQuestionForm() {
                             spellCheck="false"
                             className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 resize-none h-[200px]"
                             style={{fontSize: "1.25rem"}}
-
                         />
                     </Card>
                 </div>
@@ -329,7 +332,7 @@ export default function EditQuestionForm() {
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
+                                className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
                                 <div className="absolute top-3 right-3">
                                     <Checkbox
@@ -373,7 +376,7 @@ export default function EditQuestionForm() {
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
+                                className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
                                 <div className="absolute top-3 right-3">
                                     <RadioGroupItem
