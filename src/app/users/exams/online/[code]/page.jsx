@@ -19,7 +19,7 @@ export default function WaitingRoom() {
     const [copiedCode, setCopiedCode] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [isHost, setIsHost] = useState(false);
+    const [hostEmail, setHostEmail] = useState("");
 
     const socketRef = useRef(null);
     const cleanupRef = useRef(null);
@@ -28,11 +28,9 @@ export default function WaitingRoom() {
     const fetchRoomData = async () => {
         try {
             const response = await RoomService.join(code);
-            setCandidates(response.data.candidateNames);
             setExamTitle(response.data.examTitle);
             setAuthorName(response.data.authorName);
-            setIsHost(response.data.hostEmail === storedEmail);
-            localStorage.setItem("hostEmail", response.data.hostEmail);
+            setHostEmail(response.data.hostEmail);
         } catch (error) {
             if (error.response?.status === 409 || error.response?.status === 404) {
                 toast.error(error.response.data + ", trở về trang chủ...");
@@ -47,35 +45,37 @@ export default function WaitingRoom() {
 
     useEffect(() => {
         if (!code || !storedEmail) return;
-
         fetchRoomData();
+    }, [code]);
 
+    useEffect(() => {
+        if (!hostEmail || !storedEmail || !code) return;
+        const isHost = hostEmail === storedEmail;
         const {socket, cleanup} = createExamSocket({
             code,
             onStart: () => {
                 router.push(`/users/exams/online/${code}/play`);
             },
-            onJoin: (username) => {
-                setCandidates((prev) => [...new Set([...prev, username])]);
-                if (isHost) {
+            onJoin: ({username, email, candidates}) => {
+                if (isHost && email !== hostEmail) {
                     toast.success(`${username} đã vào phòng`);
                 }
+                setCandidates(candidates);
             },
-            onLeave: (username) => {
-                setCandidates((prev) => prev.filter(name => name !== username));
-                if (isHost) {
+            onLeave: ({username, email, candidates}) => {
+                if (isHost && (email !== hostEmail)) {
                     toast.error(`${username} đã rời phòng`);
                 }
+                setCandidates(candidates);
             }
         });
-
         socketRef.current = socket;
         cleanupRef.current = cleanup;
 
         return () => {
             cleanup();
         };
-    }, [code, storedEmail]);
+    }, [hostEmail, storedEmail, code]);
 
     const handleCopyCode = () => {
         navigator.clipboard.writeText(code);
@@ -102,10 +102,11 @@ export default function WaitingRoom() {
     const handleLeaveRoom = async () => {
         setLoading(true);
         try {
-            await RoomService.leave(code);
+            const response = await RoomService.leave(code);
+            setCandidates(response.data.candidateNames);
             router.push("/users/dashboard");
         } catch (error) {
-            toast.error("Lỗi khi rời phòng");
+            console.log(error);
         } finally {
             setLoading(false);
         }
@@ -153,8 +154,7 @@ export default function WaitingRoom() {
                     <p className="text-sm font-semibold text-gray-400">Mã phòng</p>
                     <div className="text-4xl font-bold tracking-widest">{code}</div>
                     <p className="text-sm font-semibold text-gray-400">Xin đợi các thí sinh khác cùng tham gia...</p>
-
-                    {isHost && (
+                    {hostEmail === storedEmail && (
                         <Button
                             className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white text-lg font-semibold"
                             onClick={handleStartExam}
@@ -193,16 +193,16 @@ export default function WaitingRoom() {
                 <div className="flex-1 overflow-y-auto">
                     <h2 className="text-white font-semibold mb-2 flex items-center gap-2">
                         <Users className="w-5 h-5"/>
-                        Danh sách thí sinh ({candidates.length})
+                        Danh sách thí sinh ({candidates?.length})
                     </h2>
 
                     <div className="space-y-1">
-                        {candidates.map((name, index) => (
+                        {candidates?.map((name, index) => (
                             <div key={index} className="bg-gray-800 px-3 py-2 rounded text-sm">
                                 {name}
                             </div>
                         ))}
-                        {candidates.length === 0 && (
+                        {!candidates && (
                             <div className="text-sm text-gray-400 italic">Chưa có thí sinh nào...</div>
                         )}
                     </div>
