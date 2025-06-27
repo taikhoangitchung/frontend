@@ -121,27 +121,36 @@ export default function CreateExam({id}) {
 
     useEffect(() => {
         if (isEdit) fetchForEdit()
-
         formik.setFieldValue("authorId", userId)
 
-        CategoryService.getAll()
-            .then((res) => setCategories(res.data))
-            .catch((err) => toast.error(err.response.data))
-        DifficultyService.getAll()
-            .then((res) => setDifficulties(res.data))
-            .catch((err) => toast.error(err.response.data))
+        const fetchData = async () => {
+            try {
+                const resCategory = await CategoryService.getAll();
+                setCategories(resCategory.data);
+
+                const resDifficulty = await DifficultyService.getAll();
+                setDifficulties(resDifficulty.data);
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi fetch category hoặc difficulty")
+            }
+        }
+
+        fetchData();
     }, [])
 
     useEffect(() => {
-        QuestionService.filterByCategoryAndSource(formik.values.categoryId, questionSource, userId, searchTerm)
-            .then((res) => {
-                setQuestionBank(res.data)
-            }).catch((err) => {
-                const message = err?.response?.data
-                toast.error(message !== null ? message : "Lỗi khi fetch data")
-            }).finally(() => {
-                if (reload) setReload(false);
-        })
+        const filterData = async () => {
+            try {
+                const resFilter = await QuestionService.filterByCategoryAndSource(
+                    formik.values.categoryId,
+                    questionSource, userId, searchTerm)
+                setQuestionBank(resFilter.data)
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi fetch data")
+            }
+        }
+
+        filterData();
     }, [formik.values.categoryId, questionSource, userId, searchTerm, reload])
 
     useEffect(() => {
@@ -215,7 +224,7 @@ export default function CreateExam({id}) {
                 formik.setFieldValue("questions", res.data.questions)
             })
             .catch((err) => {
-                toast.error(err.response.data)
+                toast.error(err?.response?.data || "Lỗi khi lấy dữ liệu bài thi")
                 router.push("/")
             })
     }
@@ -343,13 +352,12 @@ export default function CreateExam({id}) {
         try {
             const response = await QuestionService.import(file, userId);
             toast.success(response.data, {id: idLoading});
-            setReload(true);
-            setShowImportDialog(false);
-            setFile(null);
+            setReload(!reload);
         } catch (error) {
-            const message = error?.response?.data;
-            toast.error(message ? "Lỗi khi import file" : message, {id: idLoading});
+            toast.error(error?.response?.data || "Lỗi khi import file", {id: idLoading})
         } finally {
+            setFile(null);
+            setShowImportDialog(false);
             setIsSubmitting(false);
         }
     }
