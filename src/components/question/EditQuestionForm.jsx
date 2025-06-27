@@ -22,6 +22,7 @@ import DifficultyService from "../../services/DifficultyService"
 import { initialAnswers } from "../../util/defaultAnswers"
 import { cn } from "../../lib/utils"
 import { typeVietSub } from "../../util/typeVietsub"
+import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 
 export default function EditQuestionForm() {
     const router = useRouter()
@@ -34,6 +35,8 @@ export default function EditQuestionForm() {
     const [editingQuestion, setEditingQuestion] = useState(null)
     const [initialTypeSet, setInitialTypeSet] = useState(false)
     const [initialType, setInitialType] = useState(null)
+    const [image, setImage] = useState(null)
+    const [showImageModal, setShowImageModal] = useState(false)
 
     const fetchDropdowns = async () => {
         try {
@@ -74,8 +77,10 @@ export default function EditQuestionForm() {
                     }))
                     : initialAnswers(q.type.name || "single"),
             }
-            console.log(cleanedQuestion)
             setEditingQuestion(cleanedQuestion)
+            if (q.image) {
+                setImage({ preview: `http://localhost:8080${q.image}` });
+            }
         } catch (e) {
             toast.error("Không thể tải câu hỏi")
         }
@@ -135,6 +140,10 @@ export default function EditQuestionForm() {
         formik.setFieldValue(field, value)
     }
 
+    const handleImageChange = (e) => {
+        setImage(e.target.files[0] ? { file: e.target.files[0], preview: URL.createObjectURL(e.target.files[0]) } : null);
+    }
+
     const handleSubmit = async () => {
         const errors = await formik.validateForm()
         if (Object.keys(errors).length > 0) {
@@ -153,15 +162,31 @@ export default function EditQuestionForm() {
         try {
             setIsSubmitting(true)
             const payload = {
-                ...formik.values,
+                content: formik.values.content,
+                category: formik.values.category,
+                type: formik.values.type,
+                difficulty: formik.values.difficulty,
                 answers: formik.values.answers.map(({ id, ...rest }) => rest),
             }
-            console.log(payload)
-            await QuestionService.update(id, payload)
+            const formData = new FormData();
+            Object.entries(payload).forEach(([key, value]) => {
+                if (key === "answers") {
+                    value.forEach((answer, index) => {
+                        formData.append(`answers[${index}].content`, answer.content);
+                        formData.append(`answers[${index}].correct`, answer.correct);
+                    });
+                } else {
+                    formData.append(key, value);
+                }
+            });
+            if (image?.file) {
+                formData.append("image", image.file);
+            }
+            await QuestionService.update(id, formData)
             toast.success("Cập nhật câu hỏi thành công!")
             router.push("/users/questions")
         } catch (err) {
-            toast.error(err.response?.data)
+            toast.error(err.response?.data || "Cập nhật câu hỏi thất bại")
         } finally {
             setIsSubmitting(false)
         }
@@ -176,28 +201,30 @@ export default function EditQuestionForm() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6 pb-10">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center gap-4 mb-6">
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => router.push("/users/questions")}
-                        className="p-2 text-white hover:bg-white/10 hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer"
+                        className="p-2 text-white hover:bg-red-500 hover:scale-105 transition-all duration-200 cursor-pointer"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-4 h-4"/>
                     </Button>
-                    <h1 className="text-3xl font-bold text-white tracking-wide">Điều chỉnh câu hỏi & đáp án</h1>
+                    <h1 className="text-2xl font-semibold text-white">Điều chỉnh câu hỏi & đáp án</h1>
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-8">
                     <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
-                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer">
-                            <SelectValue placeholder="Chọn chủ đề" />
+                        <SelectTrigger
+                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
+                            <SelectValue placeholder="Chọn chủ đề"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.name} className="text-base font-medium py-3 hover:bg-white/10 cursor-pointer">
+                                <SelectItem key={cat.id} value={cat.name}
+                                            className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg">
                                     {cat.name}
                                 </SelectItem>
                             ))}
@@ -205,12 +232,14 @@ export default function EditQuestionForm() {
                     </Select>
 
                     <Select value={formik.values.difficulty} onValueChange={handleSelectChange("difficulty")}>
-                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer">
-                            <SelectValue placeholder="Chọn độ khó" />
+                        <SelectTrigger
+                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
+                            <SelectValue placeholder="Chọn độ khó"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {difficulties.map((diff) => (
-                                <SelectItem key={diff.id} value={diff.name} className="text-base font-medium py-3 hover:bg-white/10 cursor-pointer">
+                                <SelectItem key={diff.id} value={diff.name}
+                                            className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg">
                                     {diff.name}
                                 </SelectItem>
                             ))}
@@ -218,12 +247,14 @@ export default function EditQuestionForm() {
                     </Select>
 
                     <Select value={formik.values.type} onValueChange={handleSelectChange("type")}>
-                        <SelectTrigger className="w-[220px] h-12 bg-white/20 text-white border-white/20 text-base font-medium hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer">
-                            <SelectValue placeholder="Chọn loại câu hỏi" />
+                        <SelectTrigger
+                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
+                            <SelectValue placeholder="Chọn loại câu hỏi"/>
                         </SelectTrigger>
                         <SelectContent className="bg-purple-900 text-white border-white/20">
                             {types.map((type) => (
-                                <SelectItem key={type.id} value={type.name} className="text-base font-medium py-3 hover:bg-white/10 cursor-pointer">
+                                <SelectItem key={type.id} value={type.name}
+                                            className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg">
                                     {typeVietSub(type.name)}
                                 </SelectItem>
                             ))}
@@ -231,24 +262,79 @@ export default function EditQuestionForm() {
                     </Select>
                 </div>
 
-                <Card className="bg-white/10 border-white/20 backdrop-blur-sm mb-8 p-8">
-                    <Textarea
-                        name="content"
-                        placeholder="Nhập nội dung câu hỏi"
-                        value={formik.values.content}
-                        onChange={formik.handleChange}
-                        className="bg-transparent border-none text-white placeholder:text-white/60 text-2xl font-medium resize-none min-h-[120px] leading-relaxed"
-                    />
-                </Card>
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
+                    {/* Left Section - Image Upload (3/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-3">
+                        <h3 className="text-white font-semibold text-lg">Upload hình ảnh</h3>
+                        {!image ? (
+                            <div
+                                className="border-2 border-dashed border-white/30 rounded-lg p-8 text-center hover:border-white/50 hover:bg-white/5 transition-all duration-200 cursor-pointer h-[200px] flex flex-col justify-center"
+                                onDragOver={(e) => e.preventDefault()}
+                                onDragEnter={(e) => e.preventDefault()}
+                                onDragLeave={(e) => e.preventDefault()}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    const file = e.dataTransfer.files[0];
+                                    if (file && file.type.startsWith('image/')) {
+                                        handleImageChange({target: {files: [file]}});
+                                    }
+                                }}
+                            >
+                                <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden"
+                                       id="image-upload"/>
+                                <label htmlFor="image-upload" className="cursor-pointer block">
+                                    <div className="w-12 h-6 text-white/70 mx-auto mb-3">📁</div>
+                                    <p className="text-white/80 mb-2">Chọn tệp</p>
+                                    <p className="text-white/60 text-sm">Kéo thả hoặc click để chọn ảnh</p>
+                                </label>
+                            </div>
+                        ) : (
+                            <div className="relative">
+                                <div
+                                    className="border-2 border-white/30 rounded-lg p-4 bg-white/5 cursor-pointer hover:scale-105 transition-all duration-200"
+                                    onClick={() => setShowImageModal(true)}
+                                >
+                                    <img
+                                        src={image.preview}
+                                        alt="Preview"
+                                        className="w-full h-[163px] object-cover rounded-lg"
+                                    />
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="font-semibold absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-all duration-200 cursor-pointer"
+                                    onClick={() => setImage(null)}
+                                >
+                                    ✕
+                                </Button>
+                            </div>
+                        )}
+                    </Card>
+
+                    {/* Right Section - Question Input (7/10) */}
+                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-7">
+                        <h3 className="text-white font-semibold text-lg">Nội dung câu hỏi</h3>
+                        <Textarea
+                            name="content"
+                            placeholder="Nhập nội dung câu hỏi"
+                            value={formik.values.content}
+                            onChange={formik.handleChange}
+                            spellCheck="false"
+                            className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 resize-none h-[200px]"
+                            style={{fontSize: "1.25rem"}}
+                        />
+                    </Card>
+                </div>
 
                 {formik.values.type === "multiple" ? (
                     <div className="grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-80 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
+                                className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
-                                <div className="absolute top-4 right-4">
+                                <div className="absolute top-3 right-3">
                                     <Checkbox
                                         checked={answer.correct}
                                         onCheckedChange={(checked) => {
@@ -256,11 +342,11 @@ export default function EditQuestionForm() {
                                             updated[index].correct = checked
                                             formik.setFieldValue("answers", updated)
                                         }}
-                                        className="w-6 h-6 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900 hover:scale-[1.05] transition-transform duration-150 ease-in-out cursor-pointer"
+                                        className="w-6 h-6 border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-purple-900 hover:scale-110 transition-all duration-200 cursor-pointer"
                                     />
                                 </div>
-                                <div className="p-4 h-full flex flex-col justify-center">
-                                    <Input
+                                <div className="p-5 pb-0 h-full flex flex-col justify-center">
+                                    <Textarea
                                         value={answer.content}
                                         onChange={(e) => {
                                             const updated = [...formik.values.answers]
@@ -268,7 +354,8 @@ export default function EditQuestionForm() {
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-transparent border-none text-white placeholder:text-white/60 text-lg font-medium h-full text-center leading-relaxed"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        style={{fontSize: "1.25rem"}}
                                     />
                                 </div>
                             </Card>
@@ -289,32 +376,33 @@ export default function EditQuestionForm() {
                         {formik.values.answers.map((answer, index) => (
                             <Card
                                 key={answer.id}
-                                className={`bg-gradient-to-br ${answer.color} border-none h-80 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
+                                className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer`}
                             >
-                                <div className="absolute top-4 right-4">
+                                <div className="absolute top-3 right-3">
                                     <RadioGroupItem
                                         value={answer.id.toString()}
                                         id={`answer-${answer.id}`}
                                         className={cn(
-                                            "w-7 h-7 rounded-full border-2 border-white/40 text-white relative transition-colors",
+                                            "w-6 h-6 rounded-full border-2 border-white/40 text-white relative transition-all duration-200 cursor-pointer hover:scale-110",
                                             "data-[state=checked]:bg-white data-[state=checked]:border-white",
-                                            "after:content-['✓'] after:absolute after:text-purple-900 after:font-bold after:text-base",
+                                            "after:content-['✓'] after:absolute after:text-purple-900 after:font-bold after:text-sm",
                                             "after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
                                             "data-[state=unchecked]:after:content-none",
-                                            "hover:scale-[1.05] transition-transform duration-150 ease-in-out cursor-pointer"
                                         )}
                                     />
                                 </div>
-                                <div className="p-4 h-full flex flex-col justify-center">
-                                    <Input
+                                <div className="p-5 pb-0 h-full flex flex-col justify-center">
+                                    <Textarea
                                         value={answer.content}
+                                        spellCheck="false"
                                         onChange={(e) => {
                                             const updated = [...formik.values.answers]
                                             updated[index].content = e.target.value
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-transparent border-none text-white placeholder:text-white/60 text-lg font-medium h-full text-center leading-relaxed"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        style={{fontSize: "1.25rem"}}
                                     />
                                 </div>
                             </Card>
@@ -328,21 +416,44 @@ export default function EditQuestionForm() {
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-10 py-3 text-lg font-semibold rounded-lg hover:scale-[1.02] transition-transform duration-200 ease-in-out cursor-pointer"
+                        className="bg-purple-500 hover:bg-purple-600 hover:scale-105 text-white px-8 text-base font-semibold transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isSubmitting ? (
                             <>
-                                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                                <Loader2 className="mr-3 h-5 w-5 animate-spin"/>
                                 Đang lưu
                             </>
                         ) : (
                             <>
-                                <Send className="mr-3 h-5 w-5" />
-                                Lưu
+                                <Send className="mr-3 h-5 w-5"/>
+                                Lưu thay đổi
                             </>
                         )}
                     </Button>
                 </div>
+                {/* Image Modal */}
+                {showImageModal && image && (
+                    <div
+                        className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+                        onClick={() => setShowImageModal(false)}
+                    >
+                        <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden">
+                            <Button
+                                variant="ghost"
+                                className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white text-1xl font-semibold z-10 transition-all duration-200 cursor-pointer rounded-full w-9 h-9 flex items-center justify-center"
+                                onClick={() => setShowImageModal(false)}
+                            >
+                                ✕
+                            </Button>
+                            <img
+                                src={image.preview}
+                                alt="Full size preview"
+                                className="w-full h-full max-h-[90vh] object-contain"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

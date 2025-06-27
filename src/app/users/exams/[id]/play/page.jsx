@@ -11,16 +11,7 @@ import { Button } from "../../../../../components/ui/button";
 import HistoryService from "../../../../../services/HistoryService";
 import { X } from "lucide-react"
 import { Card } from "../../../../../components/ui/card"
-
-const fallbackColors = [
-    "from-orange-300 to-orange-400",
-    "from-green-400 to-green-600",
-    "from-blue-400 to-blue-600",
-    "from-pink-400 to-pink-600",
-    "from-purple-400 to-purple-600",
-    "from-yellow-400 to-yellow-600",
-    "from-teal-400 to-teal-600",
-];
+import {defaultColor} from "../../../../../util/defaultColors";
 
 export default function OfflineExamForm() {
     const { id } = useParams()
@@ -42,7 +33,6 @@ export default function OfflineExamForm() {
     const currentQuestion = questions[questionIndex] || {}
     const isMultipleChoice = currentQuestion?.type?.name === "multiple"
 
-    // Định nghĩa base URL cho ảnh, tương tự như trong Question.jsx
     const imageBaseUrl = "http://localhost:8080";
 
     useEffect(() => {
@@ -153,7 +143,7 @@ export default function OfflineExamForm() {
     }
 
     const getAnswerButtonStyle = (answer, index) => {
-        const base = `relative w-full h-full min-h-[14rem] md:min-h-[20rem] 
+        const base = `relative w-full h-full min-h-[14rem] md:min-h-[14rem] 
         rounded-2xl flex items-center justify-center 
         text-white font-semibold text-base sm:text-lg md:text-xl 
         transition-all duration-300 cursor-pointer`;
@@ -162,7 +152,7 @@ export default function OfflineExamForm() {
         const disabled = submitted || submitting;
         const state = disabled ? "opacity-50 cursor-not-allowed" : "";
 
-        const color = fallbackColors[index % fallbackColors.length];
+        const color = defaultColor()[index % defaultColor().length];
 
         return selected
             ? `${base} ${state} bg-gradient-to-br ${color} ring-4 ring-white scale-105 shadow-lg`
@@ -190,7 +180,7 @@ export default function OfflineExamForm() {
 
     return (
         <div
-            className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white p-6 flex flex-col gap-6 relative">
+            className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white p-6 flex flex-col gap-6 relative pb-10">
             {submitted && resultData && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <ExamResultSummary historyId={resultData} onReplay={handleReplay} isOnline={false} />
@@ -228,17 +218,17 @@ export default function OfflineExamForm() {
 
             {/* Question and Image Section */}
             {currentQuestion?.image ? (
-                <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
                     {/* Left Section - Image Display (3/10) */}
-                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-3">
+                    <Card className="bg-black/20 border-none p-0 lg:col-span-3">
                         <div
-                            className="border-2 border-white/30 rounded-lg bg-white/5 cursor-pointer hover:scale-105 transition-all duration-200"
+                            className="border-2 border-yellow-300 rounded-lg bg-white/10 cursor-pointer hover:scale-105 transition-all duration-200"
                             onClick={() => setShowImageModal(true)}
                         >
                             <img
                                 src={`${imageBaseUrl}${currentQuestion.image}`}
                                 alt="Question image"
-                                className="w-full h-[163px] object-cover rounded-lg"
+                                className="w-full h-[220px] object-cover rounded-lg"
                             />
                         </div>
                     </Card>
@@ -318,7 +308,7 @@ export default function OfflineExamForm() {
                 </div>
             </div>
 
-            <div className="flex justify-center gap-4 mt-4">
+            <div className="flex justify-center gap-4">
                 <Button
                     onClick={() => changeQuestion(questionIndex - 1)}
                     disabled={questionIndex === 0 || submitting || submitted}

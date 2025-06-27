@@ -1,27 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useFormik } from "formik"
+import {useEffect, useState} from "react"
+import {useFormik} from "formik"
 import * as Yup from "yup"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import {useRouter} from "next/navigation"
+import {toast} from "sonner"
 
-import { Loader2, Send, ArrowLeft } from "lucide-react"
-import { Button } from "../ui/button"
-import { Card } from "../ui/card"
-import { Textarea } from "../ui/textarea"
-import { Input } from "../ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Checkbox } from "../ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
+import {Loader2, Send, ArrowLeft} from "lucide-react"
+import {Button} from "../ui/button"
+import {Card} from "../ui/card"
+import {Textarea} from "../ui/textarea"
+import {Input} from "../ui/input"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select"
+import {Checkbox} from "../ui/checkbox"
+import {RadioGroup, RadioGroupItem} from "../ui/radio-group"
 
 import QuestionService from "../../services/QuestionService"
 import CategoryService from "../../services/CategoryService"
 import TypeService from "../../services/TypeService"
 import DifficultyService from "../../services/DifficultyService"
-import { initialAnswers } from "../../util/defaultAnswers"
-import { cn } from "../../lib/utils"
-import { typeVietSub } from "../../util/typeVietsub"
+import {initialAnswers} from "../../util/defaultAnswers"
+import {cn} from "../../lib/utils"
+import {typeVietSub} from "../../util/typeVietsub"
+import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 
 export default function CreateQuestionForm() {
     const router = useRouter()
@@ -145,13 +146,13 @@ export default function CreateQuestionForm() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-purple-900">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 p-6 pb-10">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center gap-4 mb-6">
                     <Button
@@ -165,7 +166,7 @@ export default function CreateQuestionForm() {
                     <h1 className="text-2xl font-semibold text-white">Tạo câu hỏi mới</h1>
                 </div>
 
-                <div className="flex flex-wrap gap-4 mb-6">
+                <div className="flex flex-wrap gap-4 mb-8">
                     <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
                         <SelectTrigger
                             className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
@@ -262,7 +263,7 @@ export default function CreateQuestionForm() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-all duration-200 cursor-pointer"
+                                    className="font-semibold absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-all duration-200 cursor-pointer"
                                     onClick={() => setImage(null)}
                                 >
                                     ✕
@@ -280,7 +281,7 @@ export default function CreateQuestionForm() {
                             value={formik.values.content}
                             onChange={formik.handleChange}
                             spellCheck="false"
-                            className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-none h-[200px]"
+                            className="bg-white/10 border-white/30 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 resize-none h-[200px]"
                             style={{fontSize: "1.25rem"}}
                         />
                     </Card>
@@ -291,8 +292,8 @@ export default function CreateQuestionForm() {
                     <div className="grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                         {formik.values.answers.map((answer, index) => (
                             <Card key={answer.id}
-                                  className={`bg-gradient-to-br ${answer.color} border-none h-60 relative`}>
-                                <div className="absolute top-3 right-3">
+                                  className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative`}>
+                            <div className="absolute top-3 right-3">
                                     <Checkbox
                                         checked={answer.correct}
                                         onCheckedChange={(checked) => {
@@ -312,7 +313,7 @@ export default function CreateQuestionForm() {
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 transition-all duration-200 hover:bg-white/20 focus:bg-white/20 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
                                         style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
                                     />
                                 </div>
@@ -333,7 +334,7 @@ export default function CreateQuestionForm() {
                     >
                         {formik.values.answers.map((answer, index) => (
                             <Card key={answer.id}
-                                  className={`bg-gradient-to-br ${answer.color} border-none h-60 relative`}>
+                                  className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative`}>
                                 <div className="absolute top-3 right-3">
                                     <RadioGroupItem
                                         value={answer.id.toString()}
@@ -357,7 +358,7 @@ export default function CreateQuestionForm() {
                                             formik.setFieldValue("answers", updated)
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
-                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 hover:bg-white/20 focus:bg-white/20 transition-all duration-200 cursor-pointer resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
+                                        className="bg-white/10 border-white/50 text-white placeholder:text-white/70 transition-all duration-200 hover:bg-white/20 focus:bg-white/20 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
                                         style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
                                     />
                                 </div>
@@ -396,7 +397,7 @@ export default function CreateQuestionForm() {
                         <div className="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden">
                             <Button
                                 variant="ghost"
-                                className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white z-10 transition-all duration-200 cursor-pointer"
+                                className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white text-1xl font-semibold z-10 transition-all duration-200 cursor-pointer rounded-full w-9 h-9 flex items-center justify-center"
                                 onClick={() => setShowImageModal(false)}
                             >
                                 ✕
