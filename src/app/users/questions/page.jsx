@@ -29,7 +29,7 @@ const Modal = ({ onClose, children }) => {
             >
                 <Button
                     variant="ghost"
-                    className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white z-10 transition-all duration-200 cursor-pointer"
+                    className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white text-1xl font-semibold z-10 transition-all duration-200 cursor-pointer rounded-full w-9 h-9 flex items-center justify-center"
                     onClick={onClose}
                 >
                     ✕
