@@ -13,6 +13,7 @@ import createExamSocket from "../../../../../../config/socketConfig";
 import ProgressBoard from "../../../../../../components/exam/ProgressBoard";
 import {Loader2, X} from "lucide-react";
 import RoomRankingPanel from "../../../../../../components/exam/RankingList";
+import {getAnswerButtonColor} from "../../../../../../util/getAnswerButtonColor";
 
 export default function PlayExamFormOnline() {
     const {code} = useParams();
@@ -35,12 +36,12 @@ export default function PlayExamFormOnline() {
     const [resultData, setResultData] = useState(null);
     const [historyId, setHistoryId] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [isHost, setIsHost] = useState(false);
+    const [hostEmail, setHostEmail] = useState("");
 
     const socketRef = useRef(null);
     const timerRef = useRef(null);
 
-    const email = localStorage.getItem("email");
+    const storedEmail = localStorage.getItem("email");
 
     const fetchLatestResult = async () => {
         try {
@@ -72,7 +73,8 @@ export default function PlayExamFormOnline() {
                 setDuration(res.data.duration);
                 setTimeLeft(res.data.duration * 60);
                 setCandidates(res.data.candidates);
-                setIsHost(res.data.hostEmail === email);
+                console.log(res.data.candidates);
+                setHostEmail(res.data.hostEmail);
                 let counter = 3;
                 const interval = setInterval(() => {
                     counter -= 1;
@@ -93,10 +95,15 @@ export default function PlayExamFormOnline() {
     }, [code]);
 
     useEffect(() => {
-        if (!code || !email) return;
-
+        if (!code || !storedEmail || !hostEmail) return;
+        const isHost = storedEmail === hostEmail;
         const {socket, cleanup} = createExamSocket({
             code,
+            onLeave: ({username, email, candidates}) => {
+                if (isHost && (email !== storedEmail)) {
+                    toast.error(`${username} đã rời phòng`);
+                }
+            },
             onSubmit: (users) => {
                 setSubmittedUsers(users);
             },
@@ -104,14 +111,13 @@ export default function PlayExamFormOnline() {
                 setWaitingForOthers(false);
                 setSubmitting(true);
             },
+            isHost
         });
-
         socketRef.current = socket;
-
         return () => {
             cleanup();
         };
-    }, [code, email]);
+    }, [code, storedEmail, hostEmail]);
 
     useEffect(() => {
         if (ready && !submitted) {
@@ -192,9 +198,9 @@ export default function PlayExamFormOnline() {
         const disabled = submitted || submitting;
 
         if (selected) {
-            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${getAnswerButtonStyle(index)} ring-4 ring-white ring-opacity-60 scale-105 shadow-lg`;
+            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${getAnswerButtonColor(index)} ring-4 ring-white ring-opacity-60 scale-105 shadow-lg`;
         } else {
-            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${getAnswerButtonStyle(index)} hover:scale-105 hover:shadow-lg`;
+            return `${base} ${disabled ? "opacity-50" : ""} bg-gradient-to-br ${getAnswerButtonColor(index)} hover:scale-105 hover:shadow-lg`;
         }
     };
 
@@ -259,22 +265,22 @@ export default function PlayExamFormOnline() {
                         onClick={() => router.push("/users/dashboard")}
                         className="absolute top-4 left-4 text-white hover:text-red-500 p-2 rounded-full z-50 bg-black/30"
                     >
-                        <X className="w-10 h-10" />
+                        <X className="w-10 h-10"/>
                     </button>
 
                     <div
                         className={`rounded-xl p-6 max-w-6xl w-full grid gap-6 overflow-y-auto max-h-[90vh] ${
-                            isHost ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+                            hostEmail === storedEmail ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
                         }`}
                     >
-                        {!isHost && historyId && (
+                        {!(hostEmail === storedEmail) && historyId && (
                             <div className="min-w-0">
-                                <ExamResultSummary historyId={historyId} isOnline={true} />
+                                <ExamResultSummary historyId={historyId} isOnline={true}/>
                             </div>
                         )}
 
                         <div className="min-w-0">
-                            <RoomRankingPanel code={code} />
+                            <RoomRankingPanel code={code}/>
                         </div>
                     </div>
                 </div>
@@ -282,7 +288,7 @@ export default function PlayExamFormOnline() {
 
             <div
                 className={
-                    isHost && waitingForOthers
+                    storedEmail === hostEmail && waitingForOthers
                         ? "blur-md brightness-50 pointer-events-none select-none transition-all duration-300"
                         : ""
                 }
@@ -399,7 +405,7 @@ export default function PlayExamFormOnline() {
                 </div>
             </div>
 
-            {isHost && waitingForOthers && (
+            {storedEmail === hostEmail && waitingForOthers && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
                     <ProgressBoard
                         candidates={candidates}
