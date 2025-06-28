@@ -43,7 +43,7 @@ const Modal = ({onClose, children}) => {
     );
 };
 
-export default function QuizInterface() {
+export default function QuestionTable() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -305,8 +305,9 @@ export default function QuizInterface() {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => router.push(`/users/questions/${q.id}/edit`)}
+                                                    className="hover:cursor-pointer"
                                                 >
-                                                    <Edit className="w-5 h-5 hover:cursor-pointer"/>
+                                                    <Edit className="w-5 h-5 "/>
                                                 </Button>
                                                 <DeleteButton
                                                     id={q.id}
