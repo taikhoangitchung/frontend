@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import HistoryService from "../../../../../services/HistoryService"
 import { Button } from "../../../../../components/ui/button"
@@ -12,7 +12,7 @@ import {
     CheckCircle2,
     TimerReset,
     Repeat2,
-    XCircle,
+    XCircle, ArrowLeft,
 } from "lucide-react"
 
 export default function ExamHistoryPage() {
@@ -50,10 +50,10 @@ export default function ExamHistoryPage() {
                     Lịch sử bài thi <span className="text-gray-800">"{histories[0]?.examTitle}"</span>
                 </h1>
                 <Button
-                    variant="outline"
-                    onClick={() => router.back()}
-                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                    onClick={() => router.push("/users/exams")}
+                    className="bg-gray-700 hover:bg-gray-600 cursor-pointer text-white"
                 >
+                    <ArrowLeft className="mr-2 w-2 h-4"/>
                     Quay lại
                 </Button>
             </div>

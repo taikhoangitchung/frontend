@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Card, CardContent, CardHeader } from "../../../components/ui/card";
-import { Separator } from "../../../components/ui/separator";
+import React, {useEffect, useState} from "react";
+import {Button} from "../../../components/ui/button";
+import {Input} from "../../../components/ui/input";
+import {Card, CardContent, CardHeader} from "../../../components/ui/card";
+import {Separator} from "../../../components/ui/separator";
 import {
     Search, Plus, Edit, BookOpen, Target, Clock, CheckCircle, HelpCircle, Flame,
     FileText, BarChart2, FlaskConical, ArrowLeft
 } from "lucide-react";
 import {useRouter, useSearchParams} from "next/navigation";
 import ExamService from "../../../services/ExamService";
-import { toast } from "sonner";
+import {toast} from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import RoomService from "../../../services/RoomService";
 import {
@@ -57,6 +57,7 @@ export default function ExamManager() {
                 console.error("Lỗi tải danh mục:", err);
             }
         }
+
         fetchCategories();
     }, []);
 
@@ -65,12 +66,10 @@ export default function ExamManager() {
         try {
             const res = await ExamService.getAll();
             let filtered = res.data;
-
-            // Sửa đoạn này:
+            filtered = filtered.filter((e) => e.public || e.author.id === currentUserId);
             if (categoryId) {
                 filtered = filtered.filter((e) => String(e.category.id) === categoryId);
             }
-
             if (searchTerm.trim()) {
                 const term = searchTerm.toLowerCase();
                 filtered = filtered.filter((e) =>
@@ -78,13 +77,11 @@ export default function ExamManager() {
                     e.category.name.toLowerCase().includes(term)
                 );
             }
-
             if (ownerFilter === "mine") {
                 filtered = filtered.filter((e) => e.author.id === currentUserId);
             } else if (ownerFilter === "others") {
                 filtered = filtered.filter((e) => e.author.id !== currentUserId);
             }
-
             setTotalExams(filtered.length);
             setTotalPage(Math.ceil(filtered.length / examPerPage));
             const start = (page - 1) * examPerPage;
@@ -96,7 +93,6 @@ export default function ExamManager() {
             setLoading(false);
         }
     };
-
 
     async function handleCreateRoom(id) {
         try {
@@ -134,10 +130,12 @@ export default function ExamManager() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
-                                <SelectValue placeholder="Lọc theo tác giả" />
+                            <SelectTrigger
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                                <SelectValue placeholder="Lọc theo tác giả"/>
                             </SelectTrigger>
-                            <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
+                            <SelectContent
+                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
                                 <SelectItem value="all">Tất cả tác giả</SelectItem>
                                 <SelectItem value="mine">Của tôi</SelectItem>
                                 <SelectItem value="others">Của người khác</SelectItem>
@@ -158,9 +156,10 @@ export default function ExamManager() {
                             }}
                         >
                             <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
-                                <SelectValue placeholder="Lọc theo danh mục" />
+                                <SelectValue placeholder="Lọc theo danh mục"/>
                             </SelectTrigger>
-                            <SelectContent className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
+                            <SelectContent
+                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
                                 <SelectItem value="all">Tất cả danh mục</SelectItem>
                                 {categories.map(cat => (
                                     <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
@@ -174,7 +173,7 @@ export default function ExamManager() {
                         onClick={() => router.push("/users/dashboard")}
                         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-4 h-4"/>
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
@@ -188,7 +187,7 @@ export default function ExamManager() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 border border-gray-200 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
+                        className="pl-10 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 
@@ -202,24 +201,26 @@ export default function ExamManager() {
                             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs h-9 px-4 py-2 has-[>svg]:px-3 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                             variant="outline"
                         >
-                            <Plus className="w-4 h-4 mr-2" />
+                            <Plus className="w-4 h-4 mr-2"/>
                             Tạo mới
                         </Button>
                     </div>
 
                     {loading ? (
                         <div className="flex justify-center items-center py-12">
-                            <div className="w-8 h-8 border-4 border-t-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"></div>
+                            <div
+                                className="w-8 h-8 border-4 border-t-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"></div>
                             <span className="ml-3 text-gray-500">Đang tải bài thi...</span>
                         </div>
                     ) : exams.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                            <Search className="w-12 h-12 mb-4 opacity-50" />
+                            <Search className="w-12 h-12 mb-4 opacity-50"/>
                             <p>Không tìm thấy bài thi nào phù hợp</p>
                         </div>
                     ) : (
                         exams.map((exam) => (
-                            <Card key={exam.id} className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white">
+                            <Card key={exam.id}
+                                  className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white">
                                 <CardHeader className="pb-0">
                                     <div className="flex justify-between items-start">
                                         <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{exam.title}</h2>
@@ -231,9 +232,9 @@ export default function ExamManager() {
                                                     className="p-1 cursor-pointer transition-all duration-200"
                                                     onClick={() => router.push(`/users/exams/${exam.id}/edit`)}
                                                 >
-                                                    <Edit className="w-6 h-6" />
+                                                    <Edit className="w-6 h-6"/>
                                                 </Button>
-                                                <DeleteButton id={exam.id} handleDelete={handleDeleteExam} />
+                                                <DeleteButton id={exam.id} handleDelete={handleDeleteExam}/>
                                             </div>
                                         )}
                                     </div>
@@ -242,27 +243,27 @@ export default function ExamManager() {
                                 <CardContent className="space-y-4 mt-2 text-sm text-gray-700">
                                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                                         <p className="flex items-center gap-1">
-                                            <BookOpen className="w-4 h-4" />
+                                            <BookOpen className="w-4 h-4"/>
                                             Danh mục: <strong>{exam.category.name}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
-                                            <Target className="w-4 h-4" />
+                                            <Target className="w-4 h-4"/>
                                             Độ khó: <strong>{exam.difficulty.name}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
-                                            <Clock className="w-4 h-4" />
+                                            <Clock className="w-4 h-4"/>
                                             Thời gian: <strong>{exam.duration} phút</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
-                                            <CheckCircle className="w-4 h-4" />
+                                            <CheckCircle className="w-4 h-4"/>
                                             Điểm đạt: <strong>{exam.passScore}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
-                                            <HelpCircle className="w-4 h-4" />
+                                            <HelpCircle className="w-4 h-4"/>
                                             Số câu hỏi: <strong>{exam.questions.length}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
-                                            <Flame className="w-4 h-4" />
+                                            <Flame className="w-4 h-4"/>
                                             Lượt chơi: <strong>{exam.playedTimes}</strong>
                                         </p>
                                     </div>
@@ -275,7 +276,7 @@ export default function ExamManager() {
                                                 className="text-purple-700 border-purple-300 hover:bg-purple-50 cursor-pointer transition-all duration-200"
                                                 onClick={() => router.push(`/users/exams/${exam.id}`)}
                                             >
-                                                <FileText className="w-4 h-4 mr-1" />
+                                                <FileText className="w-4 h-4 mr-1"/>
                                                 Xem danh sách câu hỏi
                                             </Button>
                                         )}
@@ -285,7 +286,7 @@ export default function ExamManager() {
                                             className="text-blue-500 border-blue-300 hover:bg-blue-50 cursor-pointer transition-all duration-200"
                                             onClick={() => router.push(`/users/exams/${exam.id}/history`)}
                                         >
-                                            <BarChart2 className="w-4 h-4 mr-1" />
+                                            <BarChart2 className="w-4 h-4 mr-1"/>
                                             Lịch sử thi
                                         </Button>
                                         <Button
@@ -294,7 +295,7 @@ export default function ExamManager() {
                                             className="text-green-600 border-green-300 hover:bg-green-50 cursor-pointer transition-all duration-200"
                                             onClick={() => handleCreateRoom(exam.id)}
                                         >
-                                            <FlaskConical className="w-4 h-4 mr-1" />
+                                            <FlaskConical className="w-4 h-4 mr-1"/>
                                             Tạo phòng thi online
                                         </Button>
                                     </div>

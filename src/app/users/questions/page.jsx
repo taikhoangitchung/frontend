@@ -6,7 +6,7 @@ import {Button} from "../../../components/ui/button";
 import {Input} from "../../../components/ui/input";
 import {Card, CardContent, CardHeader} from "../../../components/ui/card";
 import {Separator} from "../../../components/ui/separator";
-import {Search, Plus, Edit, X, Check, ArrowLeft} from "lucide-react";
+import {Search, Plus, Edit, X, Check, ArrowLeft, ChevronDown} from "lucide-react";
 import {toast} from "sonner";
 import {
     Select,
@@ -18,8 +18,9 @@ import {
 import QuestionService from "../../../services/QuestionService";
 import CategoryService from "../../../services/CategoryService";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
+import {Badge} from "../../../components/ui/badge";
 
-const Modal = ({ onClose, children }) => {
+const Modal = ({onClose, children}) => {
     return (
         <div
             className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
@@ -59,6 +60,7 @@ export default function QuizInterface() {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+    const [expandedIds, setExpandedIds] = useState([]);
     const questionPerPage = 20;
 
     const imageBaseUrl = "http://localhost:8080";
@@ -87,7 +89,6 @@ export default function QuizInterface() {
         fetchCategories();
     }, []);
 
-    // Đồng bộ categoryFilter với URL param
     useEffect(() => {
         const id = searchParams.get("categoryId") || "all";
         setCategoryFilter(id);
@@ -156,6 +157,12 @@ export default function QuizInterface() {
         setPage(1);
     };
 
+    const toggleExpand = (id) => {
+        setExpandedIds((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+        )
+    }
+
     const handleDelete = async (id) => {
         try {
             const res = await QuestionService.delete(id);
@@ -184,31 +191,31 @@ export default function QuizInterface() {
                                     setPage(1);
                                 }}
                             >
-                                <SelectTrigger className="min-w-36 h-9 border">
-                                    <SelectValue placeholder="Tác giả"/>
+                                <SelectTrigger className="min-w-36 h-9 border hover:shadow-sm hover:border-gray-400 transition-all cursor-pointer">
+                                    <SelectValue placeholder="Tác giả" />
                                 </SelectTrigger>
                                 <SelectContent
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all">Tất cả tác giả</SelectItem>
-                                    <SelectItem value="mine">Của tôi</SelectItem>
-                                    <SelectItem value="others">Của người khác</SelectItem>
+                                    <SelectItem value="all" className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả tác giả</SelectItem>
+                                    <SelectItem value="mine" className="cursor-pointer hover:bg-gray-100 transition-colors">Của tôi</SelectItem>
+                                    <SelectItem value="others" className="cursor-pointer hover:bg-gray-100 transition-colors">Của người khác</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="relative z-10">
                             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-                                <SelectTrigger className="min-w-48 h-9 border">
+                                <SelectTrigger className="min-w-48 h-9 border hover:shadow-sm hover:border-gray-400 transition-all cursor-pointer">
                                     <SelectValue placeholder="Danh mục"/>
                                 </SelectTrigger>
                                 <SelectContent
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all">Tất cả danh mục</SelectItem>
+                                    <SelectItem value="all" className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả danh mục</SelectItem>
                                     {categories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                                        <SelectItem key={cat.id} value={cat.id.toString()} className="cursor-pointer hover:bg-gray-100 transition-colors">
                                             {cat.name}
                                         </SelectItem>
                                     ))}
@@ -219,7 +226,7 @@ export default function QuizInterface() {
 
                     <Button
                         onClick={() => router.push("/users/dashboard")}
-                        className="bg-gray-700 hover:bg-gray-600 text-white"
+                        className="bg-gray-700 hover:bg-gray-600 cursor-pointer text-white"
                     >
                         <ArrowLeft className="mr-2 w-4 h-4"/>
                         Quay lại
@@ -250,7 +257,7 @@ export default function QuizInterface() {
             </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
-                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                            className="bg-purple-600 hover:bg-purple-700 cursor-pointer text-white"
                         >
                             <Plus className="w-4 h-4 mr-2"/>
                             Tạo mới
@@ -259,7 +266,7 @@ export default function QuizInterface() {
 
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {Array.from({ length: questionPerPage }).map((_, i) => (
+                            {Array.from({length: questionPerPage}).map((_, i) => (
                                 <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg"></div>
                             ))}
                         </div>
@@ -267,63 +274,106 @@ export default function QuizInterface() {
                         <div className="text-center py-8 text-gray-500">Không có dữ liệu</div>
                     ) : (
                         questions.map((q, idx) => (
-                            <Card key={q.id} className="bg-white hover:shadow">
-                                <CardHeader className="pb-2">
-                                    <div className="flex justify-between items-start">
-                                        <h2 className="text-lg font-semibold text-purple-800">
+                            <Card key={q.id} className="bg-white transition-all duration-200
+                            hover:shadow-lg
+                            hover:-translate-y-1 cursor-pointer
+                            hover:ring-1 hover:scale-[1.01]
+                            hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2">
+                                <CardHeader className="gap-0 !pb-0 px-6">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <h2 className="text-lg font-semibold text-purple-800 flex-1">
                                             {idx + 1 + (page - 1) * questionPerPage}. {q.content}
                                         </h2>
+
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => toggleExpand(q.id)}
+                                            className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-teal-50 px-2 py-1 transition-all duration-200"
+                                            title="Xem đáp án"
+                                        >
+                                            <ChevronDown
+                                                className={`h-4 w-4 transform transition-transform duration-200 ${
+                                                    expandedIds.includes(q.id) ? "rotate-180" : ""
+                                                }`}
+                                            />
+                                        </Button>
+
                                         {q.user.id === userId && (
                                             <div className="flex gap-2">
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() =>
-                                                        router.push(`/users/questions/${q.id}/edit`)
-                                                    }
+                                                    onClick={() => router.push(`/users/questions/${q.id}/edit`)}
                                                 >
-                                                    <Edit className="w-5 h-5"/>
+                                                    <Edit className="w-5 h-5 hover:cursor-pointer"/>
                                                 </Button>
                                                 <DeleteButton
                                                     id={q.id}
                                                     handleDelete={handleDelete}
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="text-red-500"
                                                 />
                                             </div>
                                         )}
                                     </div>
-                                    {q.image && (
-                                        <img
-                                            src={`${imageBaseUrl}${q.image}`}
-                                            className="max-w-[33%] mt-2 cursor-pointer hover:scale-105 transition-transform"
-                                            onClick={() => {
-                                                setSelectedImage(`${imageBaseUrl}${q.image}`);
-                                                setModalOpen(true);
-                                            }}
-                                        />
-                                    )}
                                 </CardHeader>
-                                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-                                    {q.answers.map((a) => (
-                                        <div
-                                            key={a.id}
-                                            className={`flex items-center gap-2 p-3 rounded-lg border ${
-                                                a.correct
-                                                    ? "bg-green-50 border-green-200"
-                                                    : "bg-red-50 bg-opacity-20 border-red-200"
-                                            }`}
-                                        >
-                                            {a.correct ? (
-                                                <Check className="w-4 h-4 text-green-600"/>
-                                            ) : (
-                                                <X className="w-4 h-4 text-red-400 opacity-50"/>
-                                            )}
-                                            <span className="text-sm">{a.content}</span>
+                                {expandedIds.includes(q.id) && (
+                                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {q.image && (
+                                            <div className="col-span-full">
+                                                <img
+                                                    src={`${imageBaseUrl}${q.image}`}
+                                                    className="max-w-[50%] mt-2 cursor-pointer hover:scale-105 transition-transform"
+                                                    onClick={() => {
+                                                        setSelectedImage(`${imageBaseUrl}${q.image}`);
+                                                        setModalOpen(true);
+                                                    }}
+                                                    alt="image"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {q.answers.map((a) => (
+                                            <div
+                                                key={a.id}
+                                                className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                                    a.correct
+                                                        ? "bg-green-50 border-green-200"
+                                                        : "bg-red-50 bg-opacity-20 border-red-200"
+                                                }`}
+                                            >
+                                                {a.correct ? (
+                                                    <Check className="w-4 h-4 text-green-600"/>
+                                                ) : (
+                                                    <X className="w-4 h-4 text-red-400 opacity-50"/>
+                                                )}
+                                                <span className="text-sm">{a.content}</span>
+                                            </div>
+                                        ))}
+
+                                        <div className="col-span-full flex flex-wrap gap-2 mt-1">
+                                            <Badge
+                                                variant="outline"
+                                                className="text-xs border-teal-300 text-teal-700 bg-teal-50"
+                                            >
+                                                {q.category.name}
+                                            </Badge>
+                                            <Badge
+                                                variant="outline"
+                                                className="text-xs border-purple-300 text-purple-700 bg-purple-50"
+                                            >
+                                                {q.difficulty.name}
+                                            </Badge>
+                                            <Badge
+                                                variant="outline"
+                                                className="text-xs border-gray-300 text-gray-600"
+                                            >
+                                                {q.user.id === userId ? "tôi" : q.user.username}
+                                            </Badge>
                                         </div>
-                                    ))}
-                                </CardContent>
+                                    </CardContent>
+                                )}
                             </Card>
                         ))
                     )}
@@ -332,7 +382,7 @@ export default function QuizInterface() {
                 {/* Pagination */}
                 <div className="flex justify-center gap-3 mt-6">
                     {page > 1 && (
-                        <Button variant="outline" onClick={() => setPage(page - 1)}>
+                        <Button variant="outline" onClick={() => setPage(page - 1)} className="hover:cursor-pointer">
                             Trang trước
                         </Button>
                     )}
@@ -340,7 +390,7 @@ export default function QuizInterface() {
                         {page}/{totalPage}
                     </Button>
                     {page < totalPage && (
-                        <Button variant="outline" onClick={() => setPage(page + 1)}>
+                        <Button variant="outline" onClick={() => setPage(page + 1)} className="hover:cursor-pointer">
                             Trang sau
                         </Button>
                     )}

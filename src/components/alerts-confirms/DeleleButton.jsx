@@ -12,7 +12,7 @@ export default function DeleteButton({
     return (
         <ConfirmDialog
             trigger={
-                <Button {...props} title="Xoá" className="text-red-500 hover:text-red-600">
+                <Button {...props} title="Xoá" className="text-red-500 hover:text-red-600 cursor-pointer">
                     <Trash2 className="w-4 h-4" />
                 </Button>
             }
