@@ -1,7 +1,7 @@
 import * as Yup from "yup"
 
 export const questionSchema = Yup.object().shape({
-    category: Yup.string().required("Vui lòng chọn chủ đề"),
+    category: Yup.string().required("Vui lòng chọn danh mục"),
     type: Yup.string().required("Vui lòng chọn loại câu hỏi"),
     difficulty: Yup.string().required("Vui lòng chọn độ khó"),
     content: Yup.string().required("Vui lòng nhập nội dung câu hỏi"),
