@@ -34,7 +34,7 @@ class ExamService {
     }
 
     static getByCategory(categoryId) {
-        return axiosInstance.get(`/exams/categories/${categoryId}/exams`);
+        return axiosInstance.get(`/exams/categories/${categoryId}`);
     }
 
     static async getToPlayById(id) {

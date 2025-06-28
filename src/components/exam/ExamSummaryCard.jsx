@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import CategoryService from "../../services/CategoryService";
 import ExamService from "../../services/ExamService";
 import ExamPrePlayCard from './ExamPrePlayCard';
-import {Crown, Star, Search} from "lucide-react";
+import {Crown, Search, Star} from "lucide-react";
 import {useRouter} from "next/navigation";
 
 
@@ -13,25 +13,31 @@ export default function ExamSummaryCard({search}) {
     const [showForm, setShowForm] = useState({visible: false, exam: null});
 
     useEffect(() => {
-        CategoryService.getAll()
-            .then((response) => {
+        const fetchData = async () => {
+            try {
+                const response = await CategoryService.getAll();
                 setCategories(response.data);
-                response.data.forEach((category) => {
-                    ExamService.getByCategory(category.id)
-                        .then((res) => {
-                            setExamsByCategory((prev) => ({
-                                ...prev,
-                                [category.id]: res.data,
-                            }));
-                        })
-                        .catch((error) => {
-                            console.error(`Lỗi khi lấy exam cho category ${category.id}:`, error);
-                        });
-                });
-            })
-            .catch((error) => {
+
+                const examsData = {};
+                const currentUserId = localStorage.getItem("id"); // hoặc từ context
+
+                for (const category of response.data) {
+                    try {
+                        const res = await ExamService.getByCategory(category.id);
+                        examsData[category.id] = res.data.filter((exam) =>
+                            exam.public === true || exam.authorId === Number(currentUserId)
+                        );
+                    } catch (error) {
+                        console.error(`Lỗi khi lấy exam cho category ${category.id}:`, error);
+                    }
+                }
+                setExamsByCategory(examsData);
+            } catch (error) {
                 console.error("Lỗi khi lấy danh mục:", error);
-            });
+            }
+        };
+
+        fetchData();
     }, []);
 
     const handleCardClick = (exam) => {
@@ -58,7 +64,6 @@ export default function ExamSummaryCard({search}) {
                 <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                     <Search className="w-12 h-12 mb-4 text-purple-400"/>
                     <p className="text-lg font-medium">Không tìm thấy bài quiz phù hợp</p>
-                    <p className="text-sm">Hãy thử nhập lại tên hoặc chọn danh mục khác</p>
                 </div>
             ) : (categories.map((category) => {
                 const lowerSearch = search?.toLowerCase() || "";
