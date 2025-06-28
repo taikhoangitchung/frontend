@@ -2,8 +2,6 @@
 
 import {useEffect, useState} from "react"
 import {useFormik} from "formik"
-import * as Yup from "yup"
-import {useRouter} from "next/navigation"
 import {toast} from "sonner"
 
 import {Loader2, Send, ArrowLeft} from "lucide-react"
@@ -11,7 +9,6 @@ import {Button} from "../ui/button"
 import {Card} from "../ui/card"
 import {Textarea} from "../ui/textarea"
 import {Input} from "../ui/input"
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select"
 import {Checkbox} from "../ui/checkbox"
 import {RadioGroup, RadioGroupItem} from "../ui/radio-group"
 
@@ -21,18 +18,23 @@ import TypeService from "../../services/TypeService"
 import DifficultyService from "../../services/DifficultyService"
 import {initialAnswers} from "../../util/defaultAnswers"
 import {cn} from "../../lib/utils"
-import {typeVietSub} from "../../util/typeVietsub"
 import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
+import {validateImage} from "../../util/validateImage";
+import FormSelect from "./FormSelect";
+import {questionSchema} from "../../yup/questionSchema";
+import {useRouter} from "next/navigation";
 
 export default function CreateQuestionForm() {
     const router = useRouter()
+    const [image, setImage] = useState(null)
+
     const [categories, setCategories] = useState([])
     const [types, setTypes] = useState([])
     const [difficulties, setDifficulties] = useState([])
-    const [loading, setLoading] = useState(true)
+
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [image, setImage] = useState(null)
     const [showImageModal, setShowImageModal] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     const fetchDropdowns = async () => {
         try {
@@ -68,25 +70,7 @@ export default function CreateQuestionForm() {
             difficulty: "",
             answers: [],
         },
-        validationSchema: Yup.object().shape({
-            category: Yup.string().required("Vui lòng chọn chủ đề"),
-            type: Yup.string().required("Vui lòng chọn loại câu hỏi"),
-            difficulty: Yup.string().required("Vui lòng chọn độ khó"),
-            content: Yup.string().required("Vui lòng nhập nội dung câu hỏi"),
-            answers: Yup.array()
-                .of(
-                    Yup.object().shape({
-                        content: Yup.string().trim().required("Vui lòng nhập nội dung đáp án"),
-                        correct: Yup.boolean(),
-                    }),
-                )
-                .test("validCorrectAnswers", "Số lượng đáp án đúng không hợp lệ", function (answers) {
-                    const type = this.parent.type
-                    const correctCount = answers.filter((a) => a.correct).length
-                    if (type === "multiple") return correctCount >= 2
-                    return correctCount === 1
-                }),
-        }),
+        validationSchema: questionSchema
     })
 
     useEffect(() => {
@@ -100,9 +84,14 @@ export default function CreateQuestionForm() {
     }
 
     const handleImageChange = (e) => {
-        setImage(e.target.files[0])
-    }
-
+        const file = e.target.files?.[0];
+        if (file && validateImage(file)) {
+            setImage({
+                file,
+                preview: URL.createObjectURL(file),
+            });
+        }
+    };
     const handleSubmit = async () => {
         const errors = await formik.validateForm()
         if (Object.keys(errors).length > 0) {
@@ -129,13 +118,12 @@ export default function CreateQuestionForm() {
                 formData.append(`answers[${index}].content`, answer.content)
                 formData.append(`answers[${index}].correct`, answer.correct)
             })
-            if (image) {
-                formData.append("image", image)
+            if (image?.file) {
+                formData.append("image", image.file)
             }
-
             await QuestionService.create(formData)
             toast.success("Tạo câu hỏi thành công! 🎉")
-            router.push("/users/questions")
+            router.push("/users/questions/create")
         } catch (err) {
             toast.error(err.response?.data || "Tạo câu hỏi thất bại")
         } finally {
@@ -167,61 +155,26 @@ export default function CreateQuestionForm() {
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-8">
-                    <Select value={formik.values.category} onValueChange={handleSelectChange("category")}>
-                        <SelectTrigger
-                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
-                            <SelectValue placeholder="Chọn chủ đề"/>
-                        </SelectTrigger>
-                        <SelectContent className="bg-purple-900 text-white border-white/20">
-                            {categories.map((cat) => (
-                                <SelectItem
-                                    key={cat.id}
-                                    value={cat.name}
-                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg"
-                                >
-                                    {cat.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Select value={formik.values.difficulty} onValueChange={handleSelectChange("difficulty")}>
-                        <SelectTrigger
-                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
-                            <SelectValue placeholder="Chọn độ khó"/>
-                        </SelectTrigger>
-                        <SelectContent className="bg-purple-900 text-white border-white/20">
-                            {difficulties.map((diff) => (
-                                <SelectItem
-                                    key={diff.id}
-                                    value={diff.name}
-                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg"
-                                >
-                                    {diff.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Select value={formik.values.type} onValueChange={handleSelectChange("type")}>
-                        <SelectTrigger
-                            className="w-[200px] bg-white/20 text-white border-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-200 cursor-pointer text-lg">
-                            <SelectValue placeholder="Một đáp án đúng"/>
-                        </SelectTrigger>
-                        <SelectContent className="bg-purple-900 text-white border-white/20">
-                            {types.map((type) => (
-                                <SelectItem
-                                    key={type.id}
-                                    value={type.name}
-                                    className="hover:bg-white/20 cursor-pointer transition-colors duration-200 text-lg"
-                                >
-                                    {typeVietSub(type.name)}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <FormSelect
+                        placeholder="Chọn danh mục"
+                        value={formik.values.category}
+                        options={categories}
+                        onChange={handleSelectChange("category")}
+                    />
+                    <FormSelect
+                        placeholder="Chọn độ khó"
+                        value={formik.values.difficulty}
+                        options={difficulties}
+                        onChange={handleSelectChange("difficulty")}
+                    />
+                    <FormSelect
+                        placeholder="Chọn thể loại"
+                        value={formik.values.type}
+                        options={types}
+                        onChange={handleSelectChange("type")}
+                        field="type"
+                    />
                 </div>
-
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
                     {/* Left Section - Image Upload (3/10) */}
                     <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-3">
@@ -235,8 +188,11 @@ export default function CreateQuestionForm() {
                                 onDrop={(e) => {
                                     e.preventDefault();
                                     const file = e.dataTransfer.files[0];
-                                    if (file && file.type.startsWith('image/')) {
-                                        handleImageChange({target: {files: [file]}});
+                                    if (file && validateImage(file)) {
+                                        setImage({
+                                            file,
+                                            preview: URL.createObjectURL(file),
+                                        });
                                     }
                                 }}
                             >
@@ -255,7 +211,7 @@ export default function CreateQuestionForm() {
                                     onClick={() => setShowImageModal(true)}
                                 >
                                     <img
-                                        src={URL.createObjectURL(image) || "/placeholder.svg"}
+                                        src={image?.preview || "/placeholder.svg"}
                                         alt="Preview"
                                         className="w-full h-[163px] object-cover rounded-lg"
                                     />
@@ -293,7 +249,7 @@ export default function CreateQuestionForm() {
                         {formik.values.answers.map((answer, index) => (
                             <Card key={answer.id}
                                   className={`bg-gradient-to-br ${getAnswerButtonColor(index)} border-none h-60 relative`}>
-                            <div className="absolute top-3 right-3">
+                                <div className="absolute top-3 right-3">
                                     <Checkbox
                                         checked={answer.correct}
                                         onCheckedChange={(checked) => {
