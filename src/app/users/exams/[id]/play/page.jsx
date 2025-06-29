@@ -1,20 +1,20 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { toast } from "sonner"
+import {useState, useEffect, useRef} from "react"
+import {useParams, useRouter} from "next/navigation"
+import {toast} from "sonner"
 import ExamService from "../../../../../services/ExamService";
 import ExamResultSummary from "../../../../../components/exam/ExamResultSummary";
 import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDialog";
 import formatTime from "../../../../../util/formatTime";
-import { Button } from "../../../../../components/ui/button";
+import {Button} from "../../../../../components/ui/button";
 import HistoryService from "../../../../../services/HistoryService";
-import { X } from "lucide-react"
-import { Card } from "../../../../../components/ui/card"
+import {X} from "lucide-react"
+import {Card} from "../../../../../components/ui/card"
 import {defaultColor} from "../../../../../util/defaultColors";
 
 export default function OfflineExamForm() {
-    const { id } = useParams()
+    const {id} = useParams()
     const router = useRouter()
     const [questions, setQuestions] = useState([])
     const [questionIndex, setQuestionIndex] = useState(0)
@@ -41,6 +41,7 @@ export default function OfflineExamForm() {
             try {
                 const response = await ExamService.getToPlayById(id)
                 setQuestions(response.data.questions)
+                console.log(questions)
                 setDuration(response.data.duration)
                 setTimeLeft(response.data.duration * 60)
             } catch (error) {
@@ -86,7 +87,7 @@ export default function OfflineExamForm() {
         } else {
             updatedAnswerIds = [answerId]
         }
-        setUserAnswers((prev) => ({ ...prev, [questionIndex]: updatedAnswerIds }))
+        setUserAnswers((prev) => ({...prev, [questionIndex]: updatedAnswerIds}))
     }
 
     const changeQuestion = (index) => {
@@ -183,14 +184,15 @@ export default function OfflineExamForm() {
             className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white p-6 flex flex-col gap-6 relative pb-10">
             {submitted && resultData && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <ExamResultSummary historyId={resultData} onReplay={handleReplay} isOnline={false} />
+                    <ExamResultSummary historyId={resultData} onReplay={handleReplay} isOnline={false}/>
                 </div>
             )}
             <div className="flex items-center justify-between">
                 <ConfirmDialog
                     trigger={
-                        <div className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 cursor-pointer">
-                            <X className="w-5 h-5" />
+                        <div
+                            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 cursor-pointer">
+                            <X className="w-5 h-5"/>
                             Thoát ra
                         </div>
                     }
@@ -251,30 +253,39 @@ export default function OfflineExamForm() {
                     </div>
                 </div>
             )}
-
-            <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
-                {currentQuestion?.answers?.map((answer, index) => (
-                    <button
-                        key={index}
-                        onClick={() => handleAnswerSelect(index)}
-                        className={getAnswerButtonStyle(answer, index)}
-                        disabled={submitting || submitted}
-                    >
-                        <span className="text-center px-4">{answer.content}</span>
-
-                        {userAnswers[questionIndex]?.includes(answer.id) && (
+            <div className={`grid gap-4`} style={{gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`}}>
+                {currentQuestion?.answers?.map((answer, index) => {
+                    const isSelected = userAnswers[questionIndex]?.includes(answer.id);
+                    const isMultipleChoice = currentQuestion.type?.name === "multiple";
+                    return (
+                        <button
+                            key={index}
+                            onClick={() => handleAnswerSelect(index)}
+                            className={getAnswerButtonStyle(answer, index)}
+                            disabled={submitting || submitted}
+                        >
+                            <span className="text-center px-4">{answer.content}</span>
                             <div className="absolute top-3 left-3">
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-purple-900" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd"
-                                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                              clipRule="evenodd"/>
+                                <div className={`w-8 h-8 flex items-center justify-center shadow transition-all duration-200
+                                ${isSelected ? "opacity-100 scale-100" : "opacity-10 scale-90"}
+                                ${isMultipleChoice ? "bg-white rounded-[4px]" : "bg-white rounded-full"}
+                                `}>
+                                    <svg
+                                        className="w-5 h-5 text-purple-900 transition-all duration-200"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clipRule="evenodd"
+                                        />
                                     </svg>
                                 </div>
                             </div>
-                        )}
-                    </button>
-                ))}
+                        </button>
+                    );
+                })}
             </div>
 
             <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 w-fit mx-auto border border-purple-600/30">
