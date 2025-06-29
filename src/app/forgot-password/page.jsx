@@ -3,8 +3,7 @@
 import { useFormik } from "formik"
 import * as Yup from "yup"
 import { useRouter } from "next/navigation"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowLeft, faEnvelope } from "@fortawesome/free-solid-svg-icons"
+import { ArrowLeft, Mail } from "lucide-react"
 import EmailService from "../../services/EmailService"
 import { toast } from "sonner"
 import EmailTemplate from "../../util/emailTemplate"
@@ -46,7 +45,6 @@ const ForgotPassword = () => {
                 html: htmlString,
                 token: token,
             }
-
             try {
                 const response = await EmailService.sendMail(params);
                 toast.success(response.data, { id: idLoading })
@@ -73,7 +71,7 @@ const ForgotPassword = () => {
                                 onClick={() => router.push("/login")}
                                 className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                             >
-                                <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                                <ArrowLeft className="mr-2" />
                                 Quay lại
                             </button>
 
@@ -87,8 +85,7 @@ const ForgotPassword = () => {
                             <form onSubmit={formik.handleSubmit} className="space-y-4">
                                 <div>
                                     <div className="relative">
-                                        <FontAwesomeIcon
-                                            icon={faEnvelope}
+                                        <Mail
                                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
                                         />
                                         <input

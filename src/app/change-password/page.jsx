@@ -6,8 +6,8 @@ import * as Yup from "yup"
 import UserService from "../../services/UserService"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faEye, faEyeSlash, faLock, faEnvelope, faArrowLeft } from "@fortawesome/free-solid-svg-icons"
+import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react"
+
 
 const ChangePassword = () => {
     const router = useRouter()
@@ -77,7 +77,7 @@ const ChangePassword = () => {
                                 onClick={() => router.back()}
                                 className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                             >
-                                <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                                <ArrowLeft className="mr-2" />
                                 Quay lại
                             </button>
 
@@ -86,7 +86,7 @@ const ChangePassword = () => {
                             {/* Display Email */}
                             <div className="mb-5 p-4 bg-gray-50 rounded-lg border">
                                 <div className="flex items-center">
-                                    <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 mr-3 text-gray-600" />
+                                    <Mail className="w-5 h-5 mr-3 text-gray-600" />
                                     <div>
                                         <p className="text-sm text-gray-600">Email tài khoản</p>
                                         <p className="font-medium text-gray-900">{userEmail}</p>
@@ -107,8 +107,7 @@ const ChangePassword = () => {
                                                 Mật khẩu cũ <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
-                                                <FontAwesomeIcon
-                                                    icon={faLock}
+                                                <Lock
                                                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                 />
                                                 <Field
@@ -122,7 +121,7 @@ const ChangePassword = () => {
                                                     onClick={() => setShowOldPassword(!showOldPassword)}
                                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                 >
-                                                    <FontAwesomeIcon icon={showOldPassword ? faEyeSlash : faEye} />
+                                                    {showOldPassword ? <Eye/> : <EyeOff/>}
                                                 </button>
                                             </div>
                                             <ErrorMessage name="oldPassword" component="p" className="text-red-500 text-sm mt-1" />
@@ -134,8 +133,7 @@ const ChangePassword = () => {
                                                 Mật khẩu mới <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
-                                                <FontAwesomeIcon
-                                                    icon={faLock}
+                                                <Lock
                                                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                 />
                                                 <Field
@@ -149,7 +147,7 @@ const ChangePassword = () => {
                                                     onClick={() => setShowNewPassword(!showNewPassword)}
                                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                 >
-                                                    <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
+                                                    {showNewPassword ? <Eye/> : <EyeOff/>}
                                                 </button>
                                             </div>
                                             <ErrorMessage name="newPassword" component="p" className="text-red-500 text-sm mt-1" />
@@ -161,8 +159,7 @@ const ChangePassword = () => {
                                                 Nhập lại mật khẩu <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
-                                                <FontAwesomeIcon
-                                                    icon={faLock}
+                                                <Lock
                                                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                 />
                                                 <Field
@@ -176,7 +173,7 @@ const ChangePassword = () => {
                                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                 >
-                                                    <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                                                    {showConfirmPassword ? <Eye/> : <EyeOff/>}
                                                 </button>
                                             </div>
                                             <ErrorMessage name="confirmPassword" component="p" className="text-red-500 text-sm mt-1" />

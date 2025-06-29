@@ -87,6 +87,14 @@ class QuestionService {
             throw error
         }
     }
+
+    static async checkEditable(id) {
+        try {
+            return await axiosInstance.get(`/questions/${id}/edit`)
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 export default QuestionService

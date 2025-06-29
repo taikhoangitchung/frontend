@@ -1,30 +1,23 @@
-'use client';
+'use client'
 
-import {AdminSidebar} from "../../../components/layout/AdminSidebar";
-import {AppHeader} from "../../../components/layout/AdminHeader";
-import UserTable from "../../../components/list/UserTable";
-import {useState} from "react";
-import CategoryTable from "../../../components/list/CategoryTable";
-import {Users} from "lucide-react";
+import {AdminSidebar} from "../../../components/layout/AdminSidebar"
+import {AdminHeader} from "../../../components/layout/AdminHeader"
+import UserTable from "../../../components/list/UserTable"
+import CategoryTable from "../../../components/list/CategoryTable"
+import {useSearchParams} from "next/navigation"
 
 export default function Page() {
-    const [selectedMenu, setSelectedMenu] = useState({
-        title: "Quản lý người dùng",
-        icon: Users,
-        component: "users",
-        active: false
-    });
+    const searchParams = useSearchParams()
+    const tab = searchParams.get("tab")
+
     return (
         <div className="flex h-screen bg-gray-50">
-            {/* Sidebar */}
-            <AdminSidebar onSelectMenu={(item) => setSelectedMenu(item)}/>
-
-            {/* Main content */}
+            <AdminSidebar currentTab={tab}/>
             <div className="flex-1 flex flex-col">
-                <AppHeader/>
+                <AdminHeader/>
                 <main className="flex-1 p-6">
-                    {selectedMenu?.component === "users" && (<UserTable/>)}
-                    {selectedMenu?.component === "categories" && (<CategoryTable/>)}
+                    {tab === "users" && <UserTable/>}
+                    {tab === "categories" && <CategoryTable/>}
                 </main>
             </div>
         </div>

@@ -7,7 +7,7 @@ import UserService from "../../services/UserService"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react"
-
+import { FaGoogle } from "react-icons/fa"
 import { jwtDecode } from "jwt-decode"
 
 const Login = () => {
@@ -144,7 +144,7 @@ const Login = () => {
                                         onClick={handleGoogleLogin}
                                     >
                                         <div className="flex items-center">
-                                            <div className="w-5 h-5 mr-3 text-red-500 font-bold text-lg">G</div>
+                                            <FaGoogle className="w-5 h-5 mr-3 text-red-500" />
                                             <span className="text-gray-700 font-medium">Tiếp tục với Google</span>
                                         </div>
                                         <ArrowLeft className="w-5 h-5 text-gray-400 rotate-180" />

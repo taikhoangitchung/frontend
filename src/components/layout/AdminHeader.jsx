@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useState } from "react"
 
-export function AppHeader() {
+export function AdminHeader() {
     const router = useRouter()
     const email = localStorage.getItem("email")
     const [isLoading, setIsLoading] = useState({

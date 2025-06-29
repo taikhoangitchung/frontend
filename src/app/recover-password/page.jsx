@@ -1,15 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faEye, faEyeSlash, faLock, faPaperPlane, faArrowLeft } from "@fortawesome/free-solid-svg-icons"
-import { Formik, Form, Field, ErrorMessage } from "formik"
+import {useEffect, useState} from "react"
+import {
+    Eye,
+    EyeOff,
+    Lock,
+    Send,
+    ArrowLeft,
+} from "lucide-react"
+
+import {Formik, Form, Field, ErrorMessage} from "formik"
 import * as Yup from "yup"
 import UserService from "../../services/UserService"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
+import {toast} from "sonner"
+import {useRouter} from "next/navigation"
 import EmailService from "../../services/EmailService"
-import { ReactDOMServerEdge } from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints"
+import {ReactDOMServerEdge} from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints"
 import EmailTemplate from "../../util/emailTemplate"
 
 export default function RecoverPassword() {
@@ -53,7 +59,7 @@ export default function RecoverPassword() {
         setIsSubmitting(true)
         const email = localStorage.getItem("currentUserEmail")
         const code = localStorage.getItem("code")
-        const param = { email: email, password: values.password, token: token }
+        const param = {email: email, password: values.password, token: token}
 
         if (code !== values.code) {
             toast.warning("Code không chính xác")
@@ -90,7 +96,7 @@ export default function RecoverPassword() {
         localStorage.setItem("code", code)
         const email = localStorage.getItem("currentUserEmail")
         const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
-            <EmailTemplate data={code} title={"Code Xác Nhận Lấy Lại Mật Khẩu"} description={""} openButton={false} />,
+            <EmailTemplate data={code} title={"Code Xác Nhận Lấy Lại Mật Khẩu"} description={""} openButton={false}/>,
         )
         const params = {
             to: email,
@@ -100,12 +106,12 @@ export default function RecoverPassword() {
         EmailService.sendCode(params)
             .then((res) => {
                 if (res !== undefined) {
-                    toast.success(res.data, { id: idLoading })
+                    toast.success(res.data, {id: idLoading})
                     setIsSending(false)
                 }
             })
             .catch((err) => {
-                toast.error(err.toString(), { id: idLoading })
+                toast.error(err.toString(), {id: idLoading})
                 setIsSending(false)
             })
     }
@@ -115,7 +121,7 @@ export default function RecoverPassword() {
             <div className="flex items-start justify-center px-6 py-10">
                 <div
                     className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex"
-                    style={{ minHeight: "500px" }}
+                    style={{minHeight: "500px"}}
                 >
                     <div className="flex-1 p-5">
                         <div className="max-w-md mx-auto py-1">
@@ -123,7 +129,7 @@ export default function RecoverPassword() {
                             <p className="text-gray-600 mb-4">Nhập mật khẩu mới của bạn để hoàn tất việc đặt lại.</p>
 
                             <Formik
-                                initialValues={{ password: "", confirmPassword: "", code: "" }}
+                                initialValues={{password: "", confirmPassword: "", code: ""}}
                                 validationSchema={ResetPasswordSchema}
                                 onSubmit={handleSubmit}
                             >
@@ -131,8 +137,7 @@ export default function RecoverPassword() {
                                     <Form className="space-y-4">
                                         <div>
                                             <div className="relative">
-                                                <FontAwesomeIcon
-                                                    icon={faLock}
+                                                <Lock
                                                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                 />
                                                 <Field
@@ -147,16 +152,16 @@ export default function RecoverPassword() {
                                                     onClick={() => setShowPassword(!showPassword)}
                                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                 >
-                                                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                                                    {showPassword ? <Eye/> : <EyeOff/>}
                                                 </button>
                                             </div>
-                                            <ErrorMessage name="password" component="p" className="text-red-500 text-sm mt-1" />
+                                            <ErrorMessage name="password" component="p"
+                                                          className="text-red-500 text-sm mt-1"/>
                                         </div>
 
                                         <div>
                                             <div className="relative">
-                                                <FontAwesomeIcon
-                                                    icon={faLock}
+                                                <Lock
                                                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                 />
                                                 <Field
@@ -171,17 +176,11 @@ export default function RecoverPassword() {
                                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                 >
-                                                    <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                                                    {showConfirmPassword ? <Eye/> : <EyeOff/>}
                                                 </button>
                                             </div>
-                                            <ErrorMessage name="confirmPassword" component="p" className="text-red-500 text-sm mt-1" />
-                                        </div>
-
-                                        <div className="text-sm text-gray-500 space-y-1">
-                                            <p>Mật khẩu phải có ít nhất:</p>
-                                            <ul className="list-disc list-inside space-y-1 ml-2">
-                                                <li>6 ký tự</li>
-                                            </ul>
+                                            <ErrorMessage name="confirmPassword" component="p"
+                                                          className="text-red-500 text-sm mt-1"/>
                                         </div>
 
                                         <div>
@@ -199,10 +198,11 @@ export default function RecoverPassword() {
                                                     disabled={isSending}
                                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-600 cursor-pointer transition-all duration-200"
                                                 >
-                                                    <FontAwesomeIcon icon={faPaperPlane} />
+                                                    <Send/>
                                                 </button>
                                             </div>
-                                            <ErrorMessage name="code" component="p" className="text-red-500 text-sm mt-1" />
+                                            <ErrorMessage name="code" component="p"
+                                                          className="text-red-500 text-sm mt-1"/>
                                         </div>
 
                                         <button
@@ -219,13 +219,16 @@ export default function RecoverPassword() {
                     </div>
 
                     <div className="flex-1 bg-gradient-to-br from-orange-100 to-blue-100 relative overflow-hidden">
-                        <img src="/photo-login.jpg" alt="Quizizz Hero" className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
+                        <img src="/photo-login.jpg" alt="Quizizz Hero"
+                             className="absolute inset-0 w-full h-full object-cover"/>
+                        <div
+                            className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
                             <div className="flex items-center mb-2">
                                 <span className="text-lg">Thầy cô yêu chúng tôi</span>
                                 <span className="ml-2">😍</span>
                             </div>
-                            <p className="text-sm opacity-90">Tham gia cùng hơn 200 triệu nhà sư phạm và người học trên QuizGym</p>
+                            <p className="text-sm opacity-90">Tham gia cùng hơn 200 triệu nhà sư phạm và người học trên
+                                QuizGym</p>
                         </div>
                     </div>
                 </div>
