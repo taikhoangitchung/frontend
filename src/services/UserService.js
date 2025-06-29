@@ -133,6 +133,14 @@ class UserService {
             throw error;
         }
     }
+
+    static async getAvatar() {
+        try {
+            return await axiosInstance.get(`/users/avatar`);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default UserService;

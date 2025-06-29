@@ -1,64 +1,61 @@
 'use client'
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
-import { jwtDecode } from "jwt-decode"
-import { kickSocket } from "../../config/socketConfig"
+import {useEffect, useState} from "react"
+import {useRouter} from "next/navigation"
+import {Loader2} from "lucide-react"
+import {jwtDecode} from "jwt-decode"
+import {kickSocket} from "../../config/socketConfig"
+import UserService from "../../services/UserService"
 
-export default function UserLayout({ children }) {
+export default function UserLayout({children}) {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
-    const [email, setEmail] = useState("")
 
     useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (!token) {
-            router.replace("/forbidden")
-            return
-        }
+        const init = async () => {
+            const token = localStorage.getItem("token")
+            if (!token) return redirectHome()
 
-        try {
-            const decoded = jwtDecode(token)
-            const role = decoded.role
-            if (role !== "USER") {
-                router.replace("/forbidden")
-                return
-            }
-            const storedEmail = localStorage.getItem("email")
-            if (storedEmail) {
-                setEmail(storedEmail)
-            }
-        } catch (e) {
-            console.error("Invalid token:", e)
-            router.replace("/forbidden")
-            return
-        }
+            try {
+                const decoded = jwtDecode(token)
+                if (decoded.role !== "USER") return redirectHome()
 
-        setLoading(false)
-    }, [])
-
-    useEffect(() => {
-        if (!email) return
-
-        const socket = kickSocket({
-            email,
-            onKick: (data) => {
-                if (data === "KICK") {
-                    localStorage.clear()
-                    router.push("/")
+                const email = localStorage.getItem("email")
+                if (!email) return redirectHome()
+                try {
+                    const res = await UserService.getAvatar()
+                    localStorage.setItem("avatar", res.data)
+                } catch (err) {
+                    console.warn("Không thể lấy avatar:", err)
                 }
+                const disconnect = kickSocket({
+                    email,
+                    onKick: (data) => {
+                        if (data === "KICK") {
+                            localStorage.clear()
+                            router.push("/")
+                        }
+                    }
+                })
+                return () => disconnect()
+            } catch (err) {
+                console.error("Token không hợp lệ:", err)
+                return redirectHome()
+            } finally {
+                setLoading(false)
             }
-        })
-        return () => {
-            socket()
         }
-    }, [email])
+
+        const redirectHome = () => {
+            router.replace("/forbidden")
+        }
+        init()
+    }, [])
 
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-purple-900">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
             </div>
         )
     }

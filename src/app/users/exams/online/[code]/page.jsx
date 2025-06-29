@@ -1,6 +1,6 @@
 "use client";
 
-import {motion, AnimatePresence} from "framer-motion";
+import {motion} from "framer-motion";
 import {useParams, useRouter} from "next/navigation";
 import {useEffect, useRef, useState} from "react";
 import RoomService from "../../../../../services/RoomService";
@@ -9,6 +9,7 @@ import {toast} from "sonner";
 import {Button} from "../../../../../components/ui/button";
 import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDialog";
 import createExamSocket from "../../../../../config/socketConfig";
+import {backendBaseUrl} from "../../../../../config/backendBaseUrl";
 
 export default function WaitingRoom() {
     const {code} = useParams();
@@ -20,7 +21,8 @@ export default function WaitingRoom() {
     const [examTitle, setExamTitle] = useState("");
     const [copiedCode, setCopiedCode] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
-    const [isStarted, setIsStarted] = useState(false);
+    const isStartedRef = useRef(false);
+
     const [loading, setLoading] = useState(true);
     const [hostEmail, setHostEmail] = useState("");
 
@@ -57,11 +59,11 @@ export default function WaitingRoom() {
         const {socket, cleanup} = createExamSocket({
             code,
             onStart: () => {
-                setIsStarted(true);
+                isStartedRef.current = true;
                 setIsTransitioning(true);
                 setTimeout(() => {
                     router.push(`/users/exams/online/${code}/play`);
-                }, 400);
+                }, 500);
             },
             onJoin: ({username, email, candidates}) => {
                 if (isHost && email !== hostEmail) {
@@ -70,7 +72,7 @@ export default function WaitingRoom() {
                 setCandidates(candidates);
             },
             onLeave: ({username, email, candidates}) => {
-                if (isHost && !isStarted) {
+                if (isHost && !isStartedRef.current) {
                     toast.error(`${username} đã rời phòng`);
                 }
                 setCandidates(candidates);
@@ -128,111 +130,115 @@ export default function WaitingRoom() {
     }
 
     return (
-        <AnimatePresence>
-            {!isTransitioning && (
-                <motion.div
-                    key="waiting-room"
-                    initial={{opacity: 1, y: 0}}
-                    exit={{opacity: 0, y: -30}}
-                    transition={{duration: 0.4}}
-                    className="flex h-screen bg-black text-white relative"
-                >
-                        {/* Nút Thoát */}
-                        <ConfirmDialog
-                            trigger={
+        <>
+            {isTransitioning ? (
+                <div className="flex items-center justify-center h-screen w-screen bg-black">
+                    <Loader2 className="h-10 w-10 animate-spin text-white"/>
+                </div>
+            ) : (
+                <div className="flex h-screen bg-black text-white relative">
+                    <ConfirmDialog
+                        trigger={
+                            <Button
+                                variant="outline"
+                                className="absolute top-4 right-4 z-10 px-3 py-1 text-sm flex items-center gap-1 cursor-pointer hover:bg-gray-500"
+                            >
+                                <X className="w-4 h-4"/> Thoát
+                            </Button>}
+                        title="Bạn có chắc muốn rời phòng?"
+                        description="Bạn sẽ bị đưa trở về bảng điều khiển. Nếu bạn là chủ phòng, những người khác vẫn sẽ ở lại phòng chờ."
+                        cancelLabel="Hủy"
+                        actionLabel="Rời phòng"
+                        onConfirm={handleLeaveRoom}
+                        actionClass="bg-red-600 hover:bg-red-700 text-white"
+                        cancelClass="bg-gray-100 hover:bg-gray-200 text-gray-800 border-0"
+                    />
+                    {/* Left: Slide preview */}
+                    <div className="flex-1 flex items-center justify-center bg-white rounded-r-3xl">
+                        <div className="text-center space-y-8">
+                            <h1 className="text-5xl font-bold text-purple-800">{examTitle}</h1>
+                            <p className="text-sm text-gray-500">Tác giả - {authorName}</p>
+                            <div className="border-t-4 border-purple-600 w-40 mx-auto"></div>
+                        </div>
+                    </div>
+
+                    {/* Right: Room Info */}
+                    <div className="w-[400px] bg-gray-900 p-6 space-y-6 flex flex-col">
+                        <div className="space-y-4">
+                            <p className="text-sm font-semibold text-gray-400">Mã phòng</p>
+                            <div className="text-4xl font-bold tracking-widest">{code}</div>
+                            <motion.p
+                                className="text-sm font-semibold text-gray-400"
+                                animate={{opacity: [1, 0.5, 1]}}
+                                transition={{duration: 2, repeat: Infinity}}
+                            >
+                                Xin đợi các thí sinh khác cùng tham gia...
+                            </motion.p>
+                            {hostEmail === storedEmail && (
                                 <Button
-                                    variant="outline"
-                                    className="absolute top-4 right-4 z-10 px-3 py-1 text-sm flex items-center gap-1 cursor-pointer hover:bg-gray-500"
+                                    className="w-full h-12 bg-purple-600 hover:bg-purple-700 cursor-pointer text-white text-lg font-semibold"
+                                    onClick={handleStartExam}
+                                    disabled={loading}
                                 >
-                                    <X className="w-4 h-4"/> Thoát
-                                </Button>}
-                            title="Bạn có chắc muốn rời phòng?"
-                            description="Bạn sẽ bị đưa trở về bảng điều khiển. Nếu bạn là chủ phòng, những người khác vẫn sẽ ở lại phòng chờ."
-                            cancelLabel="Hủy"
-                            actionLabel="Rời phòng"
-                            onConfirm={handleLeaveRoom}
-                            actionClass="bg-red-600 hover:bg-red-700 text-white"
-                            cancelClass="bg-gray-100 hover:bg-gray-200 text-gray-800 border-0"
-                        />
-                        {/* Left: Slide preview */}
-                        <div className="flex-1 flex items-center justify-center bg-white rounded-r-3xl">
-                            <div className="text-center space-y-8">
-                                <h1 className="text-5xl font-bold text-purple-800">{examTitle}</h1>
-                                <p className="text-sm text-gray-500">Tác giả - {authorName}</p>
-                                <div className="border-t-4 border-purple-600 w-40 mx-auto"></div>
-                            </div>
-                        </div>
+                                    {loading ? "ĐANG TẢI" : "BẮT ĐẦU"}
+                                </Button>
+                            )}
 
-                        {/* Right: Room Info */}
-                        <div className="w-[400px] bg-gray-900 p-6 space-y-6 flex flex-col">
-                            <div className="space-y-4">
-                                <p className="text-sm font-semibold text-gray-400">Mã phòng</p>
-                                <div className="text-4xl font-bold tracking-widest">{code}</div>
-                                <motion.p
-                                    className="text-sm font-semibold text-gray-400"
-                                    animate={{ opacity: [1, 0.5, 1] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                >
-                                    Xin đợi các thí sinh khác cùng tham gia...
-                                </motion.p>
-                                {hostEmail === storedEmail && (
-                                    <Button
-                                        className="w-full h-12 bg-purple-600 hover:bg-purple-700 cursor-pointer text-white text-lg font-semibold"
-                                        onClick={handleStartExam}
-                                        disabled={loading}
-                                    >
-                                        {loading ? "ĐANG TẢI" : "BẮT ĐẦU"}
+                            <div className="flex items-center justify-between">
+                                <div className="w-20 h-20 bg-white rounded p-2 flex items-center justify-center">
+                                    <QrCode className="w-14 h-14 text-black"/>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Button size="icon" variant="outline" className="h-12 w-12 cursor-pointer"
+                                            onClick={handleCopyLink}>
+                                        {copiedLink ? (
+                                            <span className="text-green-500 font-bold">✓</span>
+                                        ) : (
+                                            <LinkIcon className="w-5 h-5"/>
+                                        )}
                                     </Button>
-                                )}
 
-                                <div className="flex items-center justify-between">
-                                    <div className="w-20 h-20 bg-white rounded p-2 flex items-center justify-center">
-                                        <QrCode className="w-14 h-14 text-black"/>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <Button size="icon" variant="outline" className="h-12 w-12 cursor-pointer"
-                                                onClick={handleCopyLink}>
-                                            {copiedLink ? (
-                                                <span className="text-green-500 font-bold">✓</span>
-                                            ) : (
-                                                <LinkIcon className="w-5 h-5"/>
-                                            )}
-                                        </Button>
-
-                                        <Button size="icon" variant="outline" className="h-12 w-12 cursor-pointer"
-                                                onClick={handleCopyCode}>
-                                            {copiedCode ? (
-                                                <span className="text-green-500 font-bold">✓</span>
-                                            ) : (
-                                                <Copy className="w-5 h-5"/>
-                                            )}
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Participants List */}
-                            <div className="flex-1 overflow-y-auto">
-                                <h2 className="text-white font-semibold mb-2 flex items-center gap-2">
-                                    <Users className="w-5 h-5"/>
-                                    Danh sách thí sinh ({candidates?.length})
-                                </h2>
-
-                                <div className="space-y-1">
-                                    {candidates?.map((name, index) => (
-                                        <div key={index} className="bg-gray-800 px-3 py-2 rounded text-sm">
-                                            {name}
-                                        </div>
-                                    ))}
-                                    {!candidates && (
-                                        <div className="text-sm text-gray-400 italic">Chưa có thí sinh nào...</div>
-                                    )}
+                                    <Button size="icon" variant="outline" className="h-12 w-12 cursor-pointer"
+                                            onClick={handleCopyCode}>
+                                        {copiedCode ? (
+                                            <span className="text-green-500 font-bold">✓</span>
+                                        ) : (
+                                            <Copy className="w-5 h-5"/>
+                                        )}
+                                    </Button>
                                 </div>
                             </div>
                         </div>
-                </motion.div>
+
+                        {/* Participants List */}
+                        <div className="flex-1 overflow-y-auto">
+                            <h2 className="text-white font-semibold mb-2 flex items-center gap-2">
+                                <Users className="w-5 h-5"/>
+                                Danh sách thí sinh ({candidates?.length})
+                            </h2>
+
+                            <div className="space-y-1">
+                                {candidates?.map((item, index) => (
+                                    <div key={index}
+                                         className="flex items-center gap-2 bg-gray-800 px-3 py-2 rounded text-sm text-white">
+                                        <img
+                                            src={`${backendBaseUrl}${item.avatar}`}
+                                            alt={item.username}
+                                            className="w-6 h-6 rounded-full object-cover border border-white"
+                                        />
+                                        <span>{item.username}</span>
+                                    </div>
+                                ))}
+                                {!candidates && (
+                                    <div className="text-sm text-gray-400 italic">Chưa có thí sinh nào...</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
-        </AnimatePresence>
+        </>
     );
 }
+

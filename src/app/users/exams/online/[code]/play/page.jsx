@@ -73,7 +73,6 @@ export default function PlayExamFormOnline() {
                 setDuration(res.data.duration);
                 setTimeLeft(res.data.duration * 60);
                 setCandidates(res.data.candidates);
-                console.log(res.data.candidates);
                 setHostEmail(res.data.hostEmail);
                 let counter = 3;
                 const interval = setInterval(() => {
@@ -275,7 +274,7 @@ export default function PlayExamFormOnline() {
                     >
                         {!(hostEmail === storedEmail) && historyId && (
                             <div className="min-w-0">
-                                <ExamResultSummary historyId={historyId} isOnline={true}/>
+                                <ExamResultSummary historyId={historyId} viewMode={true}/>
                             </div>
                         )}
 
