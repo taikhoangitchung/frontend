@@ -61,7 +61,7 @@ export default function QuestionTable() {
     const [selectedImage, setSelectedImage] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [expandedIds, setExpandedIds] = useState([]);
-    const questionPerPage = 20;
+    const questionPerPage = 10;
 
     const imageBaseUrl = "http://localhost:8080";
 
@@ -112,15 +112,12 @@ export default function QuestionTable() {
                         : ownerFilter === "mine"
                             ? q.user.id === userId
                             : q.user.id !== userId;
-
                 const matchesCategory =
                     categoryFilter === "all"
                         ? true
                         : q.category?.id?.toString() === categoryFilter;
-
                 return matchesSearch && matchesOwner && matchesCategory;
             });
-
             setAllFilteredQuestions(filtered);
             const total = Math.ceil(filtered.length / questionPerPage);
             setTotalPage(total);
@@ -161,6 +158,16 @@ export default function QuestionTable() {
         setExpandedIds((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
         )
+    }
+
+    const handleEdit = async (id) => {
+        try {
+            await QuestionService.checkEditable(id)
+            router.push(`/users/questions/${id}/edit`)
+        } catch (error) {
+            toast.error(error.response.data);
+            console.log(error);
+        }
     }
 
     const handleDelete = async (id) => {
@@ -252,9 +259,9 @@ export default function QuestionTable() {
                 {/* List */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-            <span className="text-lg font-medium">
-              Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
-            </span>
+                        <span className="text-lg font-medium">
+                            Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
+                        </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
                             className="bg-purple-600 hover:bg-purple-700 cursor-pointer text-white"
@@ -284,7 +291,24 @@ export default function QuestionTable() {
                                         <h2 className="text-lg font-semibold text-purple-800 flex-1">
                                             {idx + 1 + (page - 1) * questionPerPage}. {q.content}
                                         </h2>
-
+                                        {q.user.id === userId && (
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEdit(q.id)}
+                                                    className="hover:cursor-pointer"
+                                                >
+                                                    <Edit className="w-5 h-5 "/>
+                                                </Button>
+                                                <DeleteButton
+                                                    id={q.id}
+                                                    handleDelete={handleDelete}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                />
+                                            </div>
+                                        )}
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -298,25 +322,6 @@ export default function QuestionTable() {
                                                 }`}
                                             />
                                         </Button>
-
-                                        {q.user.id === userId && (
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => router.push(`/users/questions/${q.id}/edit`)}
-                                                    className="hover:cursor-pointer"
-                                                >
-                                                    <Edit className="w-5 h-5 "/>
-                                                </Button>
-                                                <DeleteButton
-                                                    id={q.id}
-                                                    handleDelete={handleDelete}
-                                                    variant="ghost"
-                                                    size="sm"
-                                                />
-                                            </div>
-                                        )}
                                     </div>
                                 </CardHeader>
                                 {expandedIds.includes(q.id) && (
