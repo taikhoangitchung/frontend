@@ -1,6 +1,6 @@
 "use client"
 
-import {useEffect, useState} from "react"
+import {forwardRef, useEffect, useRef, useState} from "react"
 import {Input} from "../../../../components/ui/input"
 import {Label} from "../../../../components/ui/label"
 import {Card, CardContent, CardHeader, CardTitle} from "../../../../components/ui/card"
@@ -52,6 +52,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../../../../components/ui/dialog"
+import * as ExcelJS from "exceljs"
+import {ScrollArea} from "../../../../components/ui/scroll-area";
+import TypeService from "../../../../services/TypeService";
 
 const questionLimits = [
     {value: 30, label: "30 câu"},
@@ -66,12 +69,14 @@ export default function CreateExam({id}) {
     const [oldTitle, setOldTitle] = useState("")
     const [categories, setCategories] = useState([])
     const [difficulties, setDifficulties] = useState([])
+    const [types, setTypes] = useState([])
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [questionBank, setQuestionBank] = useState([])
     const [selectedQuestion, setSelectedQuestion] = useState([])
     const [questionSource, setQuestionSource] = useState("-999")
     const [searchTerm, setSearchTerm] = useState("")
+    const [questionsFromExcel, setQuestionsFromExcel] = useState([])
 
     const [expandedQuestions, setExpandedQuestions] = useState(new Map())
     const [userId, setUserId] = useState(Number(localStorage.getItem("id")))
@@ -80,6 +85,10 @@ export default function CreateExam({id}) {
 
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [showImportDialog, setShowImportDialog] = useState(false)
+    const [openQuestionsExcel, setOpenQuestionsExcel] = useState(false);
+    const errorRefs = useRef([])
+    const [currentErrorIndex, setCurrentErrorIndex] = useState(0)
+    const [errorQuestionIds, setErrorQuestionIds] = useState([])
 
     const ExamSchema = Yup.object({
         title: Yup.string().required("Tiêu đề không được để trống"),
@@ -173,6 +182,10 @@ export default function CreateExam({id}) {
         if (file !== null) toast.info("File Added")
     }, [file])
 
+    useEffect(() => {
+        errorRefs.current = []
+    }, [questionsFromExcel])
+
     const handleSubmit = async (values) => {
         setIsSubmitting(true)
 
@@ -263,13 +276,13 @@ export default function CreateExam({id}) {
         }
     }
 
-    const toggleQuestionExpansion = (questionId, added) => {
+    const toggleQuestionExpansion = (questionId) => {
         setExpandedQuestions((prev) => {
             const newMap = new Map(prev)
             if (newMap.has(questionId)) {
                 newMap.delete(questionId)
             } else {
-                newMap.set(questionId, {added: added})
+                newMap.set(questionId)
             }
             return newMap
         })
@@ -350,48 +363,176 @@ export default function CreateExam({id}) {
     }
 
     const handleFileChange = (e) => {
+        const fetchTypes = async () => {
+            try {
+                const response = await TypeService.getAll();
+                setTypes(response.data.map(type => type.name));
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi fetch types")
+            }
+        }
+        fetchTypes()
         setFile(e.target.files[0])
     }
 
-    const handleImport = async () => {
-        setIsSubmitting(true)
-        const idLoading = toast.loading("File is importing ...")
-
+    const handleReadFileExcel = async () => {
         try {
-            const response = await QuestionService.import(file, userId)
-            toast.success(response.data, {id: idLoading})
-            setReload(!reload)
+            if (!file) {
+                toast.warning("Bạn chưa thêm file .xlsx")
+                return
+            }
+
+            const arrayBuffer = await file.arrayBuffer()
+            const workbook = new ExcelJS.Workbook()
+            await workbook.xlsx.load(arrayBuffer)
+
+            const worksheet = workbook.getWorksheet("Câu hỏi") || workbook.worksheets[0]
+
+            const expectedKeys = [
+                "content",
+                "category",
+                "difficulty",
+                "type",
+                "answer1",
+                "answer2",
+                "answer3",
+                "answer4",
+                "correct"
+            ]
+
+            const data = []
+
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return
+
+                const values = row.values
+                const rawItem = {}
+                const errors = []
+
+                for (let i = 1; i <= expectedKeys.length; i++) {
+                    const value = values[i]
+                    if (value !== undefined && value !== null && value !== "") {
+                        rawItem[expectedKeys[i - 1]] = value.toString().trim()
+                    }
+                }
+
+                if (!rawItem.content || !rawItem.correct) return
+
+                const answers = []
+                for (let i = 1; i <= 4; i++) {
+                    const key = `answer${i}`
+                    if (rawItem[key]) {
+                        answers.push({
+                            id: i - 1,
+                            content: rawItem[key],
+                            correct: rawItem.correct.split(",").map(c => c.trim()).includes(i.toString())
+                        })
+                    }
+                }
+
+                if (rawItem.category && !categories.map(category => category.name).includes(rawItem.category)) {
+                    errors.push(`Danh mục không hợp lệ: "${rawItem.category}"`)
+                }
+
+                if (rawItem.difficulty && !difficulties.map(difficulty => difficulty.name).includes(rawItem.difficulty)) {
+                    errors.push(`Độ khó không hợp lệ: "${rawItem.difficulty}"`)
+                }
+
+                if (rawItem.type && !types.includes(rawItem.type)) {
+                    errors.push(`Loại câu hỏi không hợp lệ: "${rawItem.type}"`)
+                }
+
+                const correctCount = answers.filter((a) => a.correct).length
+
+                if (rawItem.type === types[1] && correctCount !== 1) {
+                    errors.push("Câu hỏi một lựa chọn phải có duy nhất 1 đáp án đúng")
+                }
+
+                if (rawItem.type === types[2]) {
+                    if (answers.length !== 2) {
+                        errors.push("Câu hỏi Đúng/Sai phải có đúng 2 đáp án")
+                    }
+                    if (correctCount !== 1) {
+                        errors.push("Câu hỏi Đúng/Sai phải có đúng 1 đáp án đúng")
+                    }
+                }
+
+                const item = {
+                    content: rawItem.content,
+                    category: rawItem.category || "",
+                    difficulty: rawItem.difficulty || "",
+                    type: rawItem.type || "",
+                    answers,
+                    ...(errors.length > 0 ? {errors} : {})
+                }
+
+                data.push(item)
+            })
+
+            const result = data.map(q => {
+                return {...q, id: -data.indexOf(q)}
+            })
+
+            setErrorQuestionIds(result.filter((q) => q.errors?.length > 0).map((q) => q.id))
+            setOpenQuestionsExcel(true)
+            setShowImportDialog(false);
+            setFile(null);
+            await setQuestionsFromExcel(result)
         } catch (error) {
-            toast.error(error?.response?.data || "Lỗi khi import file", {id: idLoading})
-        } finally {
-            setFile(null)
-            setShowImportDialog(false)
-            setIsSubmitting(false)
+            console.error("❌ Lỗi khi đọc file Excel:", error)
         }
     }
 
-    const QuestionCard = ({question, index, showRemove = false, onRemove, onToggleSelect, displayAdded}) => {
-        const added = formik.values.questions.find((q) => q.id === question.id) !== undefined
-        const isExpanded = expandedQuestions.has(question.id) && added === displayAdded
+    const handleImportQuestions = async () => {
+        try {
+            setIsSubmitting(true)
+            const response = await QuestionService.import(questionsFromExcel, userId)
+            toast.success(response?.data || `Thêm thành công ${questionsFromExcel.length} câu hỏi`)
+            setQuestionsFromExcel([]);
+            setOpenQuestionsExcel(false);
+        } catch (error) {
+            toast.error(error?.response?.data || "Lỗi khi tải lên danh sách câu hỏi")
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    const scrollToError = (index) => {
+        const el = errorRefs.current[index]
+        if (el) {
+            el.scrollIntoView({behavior: "smooth", block: "center"})
+            setCurrentErrorIndex(index)
+        }
+    }
+
+    const handlePrevError = () => {
+        if (currentErrorIndex > 0) scrollToError(currentErrorIndex - 1)
+    }
+
+    const handleNextError = (e) => {
+        if (currentErrorIndex < errorRefs.current.length - 1) scrollToError(currentErrorIndex + 1)
+    }
+
+    const QuestionCard = ({question, index, showRemove = false, onRemove, onToggleSelect}, ref) => {
+        const isExpanded = expandedQuestions.has(question.id)
         const isToggleSelected = selectedQuestion.find((q) => q.id === question.id) !== undefined
         const isAlreadyAdded = isQuestionAlreadyAdded(question.id)
 
         return (
-            <div
-                className={`border-2 rounded-lg transition-all duration-300 shadow-sm ${
-                    isAlreadyAdded
+            <div ref={ref} className={`border-2 rounded-lg transition-all duration-300 shadow-sm ${
+                errorQuestionIds.includes(question.id) ? "bg-white border-red-600 hover:shadow-md"
+                    : isAlreadyAdded
                         ? "bg-gray-100 border-gray-200 opacity-80"
                         : isToggleSelected
                             ? "bg-teal-100 border-teal-400 shadow-md"
                             : "bg-white border-gray-200 hover:border-teal-300 hover:shadow-md"
-                }`}
-            >
+            }`}>
                 <div
                     className={`p-4 ${!isAlreadyAdded && onToggleSelect ? "cursor-pointer" : ""}`}
                     onClick={!isAlreadyAdded && onToggleSelect ? () => onToggleSelect(question.id) : undefined}
                 >
                     <div className="flex items-start gap-3">
-                        {!displayAdded && (
+                        {!openQuestionsExcel &&
                             <div className="mt-1">
                                 {isAlreadyAdded ? (
                                     <CheckCircle2 className="h-5 w-5 text-gray-400"/>
@@ -401,9 +542,9 @@ export default function CreateExam({id}) {
                                     <Circle className="h-5 w-5 text-gray-400"/>
                                 )}
                             </div>
-                        )}
+                        }
                         {index !== undefined && !onToggleSelect &&
-                            <Badge className="bg-teal-600 text-white">{index + 1}</Badge>}
+                            <Badge className="bg-teal-600 text-white">{index < 0 ? -index + 1 : index + 1}</Badge>}
                         <div className="flex-1">
                             <h4 className={`font-medium text-sm mb-3 text-gray-800 ${isAlreadyAdded ? "opacity-50" : ""}`}>
                                 {question.content}
@@ -418,27 +559,28 @@ export default function CreateExam({id}) {
                                     variant="outline"
                                     className={`text-xs border-teal-300 text-teal-700 bg-teal-50 ${isAlreadyAdded ? "opacity-60" : ""}`}
                                 >
-                                    {question.category.name}
+                                    {question.category.name || question.category}
                                 </Badge>
                                 <Badge
                                     variant="outline"
                                     className={`text-xs border-purple-300 text-purple-700 bg-purple-50 ${isAlreadyAdded ? "opacity-60" : ""}`}
                                 >
-                                    {question.difficulty.name}
+                                    {question.difficulty.name || question.difficulty}
                                 </Badge>
-                                <Badge
-                                    variant="outline"
-                                    className={`text-xs border-gray-300 text-gray-600 ${isAlreadyAdded ? "opacity-60" : ""}`}
-                                >
-                                    {question.user.id === userId ? "tôi" : question.user.username}
-                                </Badge>
+                                {!openQuestionsExcel &&
+                                    <Badge
+                                        variant="outline"
+                                        className={`text-xs border-gray-300 text-gray-600 ${isAlreadyAdded ? "opacity-60" : ""}`}
+                                    >
+                                        {question?.user?.id === userId ? "tôi" : question?.user?.username}
+                                    </Badge>}
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
                                 onClick={(e) => {
                                     e.stopPropagation()
-                                    toggleQuestionExpansion(question.id, added)
+                                    toggleQuestionExpansion(question.id)
                                 }}
                                 variant="ghost"
                                 size="sm"
@@ -447,7 +589,7 @@ export default function CreateExam({id}) {
                             >
                                 {isExpanded ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
                             </Button>
-                            {question.user.id === userId && (
+                            {!openQuestionsExcel && question?.user?.id === userId && (
                                 <Button
                                     onClick={(e) => {
                                         e.stopPropagation()
@@ -461,7 +603,7 @@ export default function CreateExam({id}) {
                                     <Edit className="h-4 w-4"/>
                                 </Button>
                             )}
-                            {showRemove && onRemove && (
+                            {!openQuestionsExcel && showRemove && onRemove && (
                                 <Button
                                     onClick={(e) => {
                                         e.stopPropagation()
@@ -492,10 +634,8 @@ export default function CreateExam({id}) {
                                         }`}
                                     >
                                         <div className="flex items-center gap-2">
-                      <span className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}>
-                        {String.fromCharCode(65 + option.id)}.
-                      </span>
-                                            <span>{option.name}</span>
+                      <span className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}></span>
+                                            <span>{option.content}</span>
                                             {option.correct &&
                                                 <CheckCircle2 className="h-4 w-4 ml-auto text-teal-600"/>}
                                         </div>
@@ -503,6 +643,21 @@ export default function CreateExam({id}) {
                                 ))}
                             </div>
                         </div>
+                        {Array.isArray(question.errors) && question.errors.length > 0 && (
+                            <div className="px-4 pb-4">
+                                <div className="pt-2">
+                                    <div className="bg-red-50 border border-red-300 rounded-lg p-3">
+                                        <h5 className="text-sm font-semibold text-red-700 mb-1">🛑 Lỗi:</h5>
+                                        <ul className="list-disc list-inside text-xs text-red-700 space-y-1">
+                                            {question.errors.map((err, idx) => (
+                                                <li key={idx}>{err}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 )}
             </div>
@@ -689,9 +844,9 @@ export default function CreateExam({id}) {
                                     <div className="space-y-2">
                                         <Label className="text-gray-700 font-medium flex items-center gap-2">
                                             {formik.values.isPublic ? (
-                                                <Globe className="h-4 w-4 text-teal-600" />
+                                                <Globe className="h-4 w-4 text-teal-600"/>
                                             ) : (
-                                                <Lock className="h-4 w-4 text-gray-500" />
+                                                <Lock className="h-4 w-4 text-gray-500"/>
                                             )}
                                             Chế độ hiển thị
                                         </Label>
@@ -804,7 +959,6 @@ export default function CreateExam({id}) {
                                                     index={index}
                                                     showRemove={true}
                                                     onRemove={removeQuestion}
-                                                    displayAdded={true}
                                                 />
                                             ))}
                                         </div>
@@ -833,7 +987,11 @@ export default function CreateExam({id}) {
                                             <Globe className="h-4 w-4 text-teal-600"/>
                                             Nguồn câu hỏi
                                         </Label>
-                                        <Select value={questionSource} onValueChange={setQuestionSource}>
+                                        <Select value={questionSource}
+                                                onValueChange={(value) => {
+                                                    if (value !== "-555") setQuestionSource(value)
+                                                    else setShowImportDialog(true)
+                                                }}>
                                             <SelectTrigger
                                                 className="w-full border-gray-300 bg-gray-50 focus:border-teal-500 cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                                 <SelectValue placeholder="Chọn nguồn câu hỏi"/>
@@ -866,6 +1024,15 @@ export default function CreateExam({id}) {
                                                         Tất cả
                                                     </div>
                                                 </SelectItem>
+                                                <SelectItem
+                                                    value={"-555"}
+                                                    className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="h-4 w-4"/>
+                                                        Nhập câu hỏi từ Excel
+                                                    </div>
+                                                </SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -886,21 +1053,21 @@ export default function CreateExam({id}) {
                                         </div>
                                     </div>
                                     <div className="space-y-2 w-full md:w-auto flex-shrink-0">
-                                        <Label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                                            <Upload className="h-4 w-4 text-purple-600"/>
-                                            Tải lên
-                                        </Label>
+                                        {/*<Label className="text-gray-700 font-medium text-sm flex items-center gap-2">*/}
+                                        {/*    <Upload className="h-4 w-4 text-purple-600"/>*/}
+                                        {/*    Tải lên*/}
+                                        {/*</Label>*/}
                                         <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-                                            <DialogTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    className="w-full cursor-pointer bg-white text-purple-600 border-purple-300 hover:bg-purple-50 transition-all duration-200 disabled:cursor-not-allowed"
-                                                    title="Import câu hỏi từ Excel"
-                                                >
-                                                    <Upload className="h-4 w-4 mr-2"/>
-                                                    File Excel
-                                                </Button>
-                                            </DialogTrigger>
+                                            {/*<DialogTrigger asChild>*/}
+                                            {/*    <Button*/}
+                                            {/*        variant="outline"*/}
+                                            {/*        className="w-full cursor-pointer bg-white text-purple-600 border-purple-300 hover:bg-purple-50 transition-all duration-200 disabled:cursor-not-allowed"*/}
+                                            {/*        title="Import câu hỏi từ Excel"*/}
+                                            {/*    >*/}
+                                            {/*        <Upload className="h-4 w-4 mr-2"/>*/}
+                                            {/*        File Excel*/}
+                                            {/*    </Button>*/}
+                                            {/*</DialogTrigger>*/}
 
                                             <DialogContent className="bg-white max-w-md">
                                                 <DialogHeader>
@@ -963,13 +1130,91 @@ export default function CreateExam({id}) {
                                                     </Button>
                                                     <Button
                                                         className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white"
-                                                        onClick={handleImport}
+                                                        onClick={handleReadFileExcel}
                                                         disabled={isSubmitting}
                                                     >
                                                         <Upload className="h-4 w-4 mr-2"/>
-                                                        Tải lên
+                                                        Đọc File
                                                     </Button>
                                                 </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+
+                                        <Dialog open={openQuestionsExcel} onOpenChange={setOpenQuestionsExcel}>
+                                            <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden bg-white">
+                                                <DialogHeader>
+                                                    <div className="flex items-center justify-between">
+                                                        <DialogTitle className="text-lg font-bold text-teal-700">Danh
+                                                            sách câu hỏi</DialogTitle>
+
+                                                        {/*{errorQuestionIds.length > 0 && (*/}
+                                                        {/*    <div*/}
+                                                        {/*        className="flex items-center gap-2 bg-red-100 border border-red-300 px-3 py-1 rounded-lg">*/}
+                                                        {/*        <span className="text-sm font-semibold text-red-800">Đến câu hỏi lỗi</span>*/}
+                                                        {/*        <Button*/}
+                                                        {/*            size="icon"*/}
+                                                        {/*            variant="ghost"*/}
+                                                        {/*            className="cursor-pointer text-red-600 hover:bg-red-200 p-1"*/}
+                                                        {/*            onClick={handlePrevError}*/}
+                                                        {/*            title="Tới lỗi trước"*/}
+                                                        {/*            disabled={currentErrorIndex < 1}*/}
+                                                        {/*        >*/}
+                                                        {/*            <ChevronUp className="h-4 w-4"/>*/}
+                                                        {/*        </Button>*/}
+                                                        {/*        <Button*/}
+                                                        {/*            size="icon"*/}
+                                                        {/*            variant="ghost"*/}
+                                                        {/*            className="cursor-pointer text-red-600 hover:bg-red-200 p-1"*/}
+                                                        {/*            onClick={handleNextError}*/}
+                                                        {/*            title="Tới lỗi tiếp theo"*/}
+                                                        {/*        >*/}
+                                                        {/*            <ChevronDown className="h-4 w-4"/>*/}
+                                                        {/*        </Button>*/}
+                                                        {/*    </div>*/}
+                                                        {/*)}*/}
+                                                    </div>
+                                                </DialogHeader>
+
+                                                <ScrollArea className="h-[70vh] pr-2">
+                                                    <div className="space-y-4 mt-2">
+                                                        {questionsFromExcel.length === 0 ? (
+                                                            <p className="text-center text-gray-500 text-sm">Chưa có câu
+                                                                hỏi nào.</p>
+                                                        ) : (
+                                                            questionsFromExcel.map((q) => {
+                                                                    const hasError = (q.errors !== undefined) && q.errors.length > 0;
+                                                                    return (
+                                                                        <QuestionCard
+                                                                            key={questionsFromExcel.indexOf(q)}
+                                                                            question={q}
+                                                                            index={-questionsFromExcel.indexOf(q)}
+                                                                            userId={userId}
+                                                                            expandedQuestions={new Set()}
+                                                                            selectedQuestion={[]}
+                                                                            isQuestionAlreadyAdded={() => false}
+                                                                            ref={(el) => {
+                                                                                if (hasError && el) {
+                                                                                    errorRefs.current.push(el)
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    )
+                                                                }
+                                                            ))}
+                                                    </div>
+                                                </ScrollArea>
+
+                                                {questionsFromExcel.length > 0 &&
+                                                    questionsFromExcel.every((q) => !(q.errors?.length > 0)) && (
+                                                        <div className="flex justify-end mt-4">
+                                                            <Button onClick={handleImportQuestions}
+                                                                    className="bg-teal-600 text-white hover:bg-teal-700"
+                                                                    disabled={isSubmitting}
+                                                            >
+                                                                Tải lên {questionsFromExcel.length} câu hỏi
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                             </DialogContent>
                                         </Dialog>
                                     </div>
@@ -1007,7 +1252,6 @@ export default function CreateExam({id}) {
                                                 key={question.id}
                                                 question={question}
                                                 onToggleSelect={toggleQuestionSelection}
-                                                displayAdded={false}
                                             />
                                         ))
                                     )}

@@ -1,14 +1,11 @@
 import axiosInstance from "../config/axiosConfig";
 
 class QuestionService {
-    static async import(file,userId) {
+    static async import(data, userId) {
         try {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("userId", userId);
-            return await axiosInstance.post("/questions/import", formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
+            const params = {questions: data, userId: userId};
+            console.log(params)
+            return await axiosInstance.post("/questions/import", params)
         } catch (error) {
             throw error;
         }
@@ -17,7 +14,7 @@ class QuestionService {
     static async create(questionData) {
         try {
             return await axiosInstance.post("/questions", questionData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: {'Content-Type': 'multipart/form-data'}
             })
         } catch (error) {
             return Promise.reject(error);
@@ -65,7 +62,7 @@ class QuestionService {
     static async update(id, questionData) {
         try {
             return await axiosInstance.put(`/questions/${id}`, questionData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: {'Content-Type': 'multipart/form-data'}
             })
         } catch (error) {
             throw error

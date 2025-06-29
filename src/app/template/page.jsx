@@ -1,406 +1,370 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Copy, Check, Download, Loader2, Info } from "lucide-react"
-import CategoryService from "../../services/CategoryService"
-import DifficultyService from "../../services/DifficultyService"
-import TypeService from "../../services/TypeService"
-import { toast } from "sonner"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
-import { Button } from "../../components/ui/button"
-import { Badge } from "../../components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
-import { Alert, AlertDescription } from "../../components/ui/alert"
-import * as XLSX from "xlsx"
+import {useEffect, useState} from "react"
+import {Download} from "lucide-react"
+import {Card, CardContent, CardHeader, CardTitle} from "../../components/ui/card";
+import {Button} from "../../components/ui/button";
+import {Input} from "../../components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../../components/ui/select";
+import * as ExcelJS from "exceljs";
+import {saveAs} from "file-saver"
+import CategoryService from "../../services/CategoryService";
+import DifficultyService from "../../services/DifficultyService";
+import TypeService from "../../services/TypeService";
+import {toast} from "sonner";
 
-export default function QuizInterface() {
-    const [copiedRow, setCopiedRow] = useState(null)
-    const [categories, setCategories] = useState([])
-    const [difficulties, setDifficulties] = useState([])
-    const [types, setTypes] = useState([])
-    const [loading, setLoading] = useState(false)
+export default function ExcelTemplate() {
+    const [questions, setQuestions] = useState([
+        {
+            id: "1",
+            content: "Ưu điểm của Java là gì ?",
+            category: "Địa lý",
+            difficulty: "Dễ",
+            type: "Nhiều lựa chọn",
+            answer1: "Tính đa nền tảng",
+            answer2: "Hướng đối tượng rõ ràng",
+            answer3: "Bảo mật và quản lý bộ nhớ tốt",
+            answer4: "Hiệu suất chậm hơn so với ngôn ngữ biên dịch như C/C++",
+            correct: "1,2,3",
+        },
+        {
+            id: "2",
+            content: "2 + 2 = ?",
+            category: "Toán học",
+            difficulty: "Dễ",
+            type: "Một lựa chọn",
+            answer1: "3",
+            answer2: "4",
+            answer3: "5",
+            answer4: "6",
+            correct: "4",
+        },
+        {
+            id: "3",
+            content: "Trái đất quay quanh mặt trời",
+            category: "Khoa học",
+            difficulty: "Dễ",
+            type: "Đúng/Sai",
+            answer1: "Đúng",
+            answer2: "Sai",
+            answer3: "",
+            answer4: "",
+            correct: "1",
+        },
+    ])
+    const [categories, setCategories] = useState([]);
+    const [difficulties, setDifficulties] = useState([]);
+    const [types, setTypes] = useState([]);
 
     useEffect(() => {
-        fetchData()
-    }, [])
-
-    const fetchData = async () => {
-        try {
-            setLoading(true)
-            const resCategory = await CategoryService.getAll()
-            setCategories(resCategory.data)
-
-            const resDifficulty = await DifficultyService.getAll()
-            setDifficulties(resDifficulty.data)
-
-            const resType = await TypeService.getAll()
-            setTypes(resType.data)
-        } catch (error) {
-            const message = error?.response?.data || "Đã xảy ra lỗi"
-            toast.error(message)
-        } finally {
-            setLoading(false)
+        const fetchData = async () => {
+            try {
+                const resCategories = await CategoryService.getAll();
+                setCategories(resCategories.data.map(category => category.name));
+                const resDifficulties = await DifficultyService.getAll();
+                setDifficulties(resDifficulties.data.map(difficulty => difficulty.name));
+                const resTypes = await TypeService.getAll();
+                setTypes(resTypes.data.map(type => type.name));
+            } catch (error) {
+                toast.error(error?.response?.data || "Lỗi khi lấy dữ liệu")
+            }
         }
+
+        fetchData();
+    }, []);
+
+    const updateQuestion = (id, field, value) => {
+        setQuestions(questions.map((q) => (q.id === id ? {...q, [field]: value} : q)))
     }
 
-    const sampleQuestions = [
-        {
-            id: 1,
-            content: "Những ngôn ngữ lập trình nào sau đây?",
-            category: "Danh mục",
-            difficulty: "Độ khó",
-            type: "multi-choice",
-            answers: [
-                { answer: "Java", correct: true },
-                { answer: "Python", correct: true },
-                { answer: "Coffee", correct: false },
-                { answer: "JavaScript", correct: true },
-            ],
-        },
-        {
-            id: 2,
-            content: "Thủ đô của Pháp là gì?",
-            category: "Danh mục",
-            difficulty: "Độ khó",
-            type: "single-choice",
-            answers: [
-                { answer: "Paris", correct: true },
-                { answer: "Berlin", correct: false },
-                { answer: "Madrid", correct: false },
-            ],
-        },
-        {
-            id: 3,
-            content: "Trái đất có hình phẳng",
-            category: "Danh mục",
-            difficulty: "Độ khó",
-            type: "true-false",
-            answers: [
-                { answer: "Đúng", correct: false },
-                { answer: "Sai", correct: true },
-            ],
-        },
-    ]
-
-    const handleCopyRow = async (rowType, data) => {
-        const textToCopy = data.map((item) => item.name).join(", ")
+    const downloadExcel = async () => {
         try {
-            await navigator.clipboard.writeText(textToCopy)
-            const rowIndex = rowType === "categories" ? 0 : rowType === "types" ? 1 : 2
-            setCopiedRow(rowIndex)
-            toast.success(
-                `Danh sách ${rowType === "categories" ? "danh mục" : rowType === "types" ? "kiểu câu hỏi" : "độ khó"} đã được sao chép`,
-            )
-            setTimeout(() => setCopiedRow(null), 2000)
-        } catch (err) {
-            toast.error("Không thể sao chép vào clipboard")
-        }
-    }
+            const workbook = new ExcelJS.Workbook()
+            const questionSheet = workbook.addWorksheet("Câu hỏi")
 
-    const handleDownloadTemplate = () => {
-        try {
-            const workbook = XLSX.utils.book_new()
-
-            const headers = ["ID", "Nội dung", "Danh mục", "Độ khó", "Kiểu câu hỏi", "Đáp án", "Đúng/Sai"]
-            const templateData = [
-                headers,
-                ...flattenedData.map((row) => [
-                    row.id,
-                    row.content,
-                    row.category,
-                    row.difficulty,
-                    row.type,
-                    row.answer,
-                    row.correct,
-                ]),
+            questionSheet.columns = [
+                {header: "Nội dung", key: "content", width: 50},
+                {header: "Danh mục", key: "category", width: 20},
+                {header: "Độ khó", key: "difficulty", width: 15},
+                {header: "Loại câu hỏi", key: "type", width: 25},
+                {header: "Đáp án 1", key: "a1", width: 20},
+                {header: "Đáp án 2", key: "a2", width: 20},
+                {header: "Đáp án 3", key: "a3", width: 20},
+                {header: "Đáp án 4", key: "a4", width: 20},
+                {header: "Đáp án đúng", key: "correct", width: 20},
             ]
 
-            const templateSheet = XLSX.utils.aoa_to_sheet(templateData)
-
-            templateSheet["!cols"] = [
-                { wch: 5 },
-                { wch: 50 },
-                { wch: 15 },
-                { wch: 15 },
-                { wch: 15 },
-                { wch: 30 },
-                { wch: 10 },
-            ]
-
-            XLSX.utils.book_append_sheet(workbook, templateSheet, "Mẫu câu hỏi")
-
-            const categoriesData = [["Danh mục có sẵn"], ...categories.map((cat) => [cat.name])]
-            const categoriesSheet = XLSX.utils.aoa_to_sheet(categoriesData)
-            categoriesSheet["!cols"] = [{ wch: 20 }]
-            XLSX.utils.book_append_sheet(workbook, categoriesSheet, "Danh mục")
-
-            const difficultiesData = [["Độ khó có sẵn"], ...difficulties.map((diff) => [diff.name])]
-            const difficultiesSheet = XLSX.utils.aoa_to_sheet(difficultiesData)
-            difficultiesSheet["!cols"] = [{ wch: 20 }]
-            XLSX.utils.book_append_sheet(workbook, difficultiesSheet, "Độ khó")
-
-            const typesData = [["Kiểu câu hỏi có sẵn"], ...types.map((type) => [type.name])]
-            const typesSheet = XLSX.utils.aoa_to_sheet(typesData)
-            typesSheet["!cols"] = [{ wch: 20 }]
-            XLSX.utils.book_append_sheet(workbook, typesSheet, "Kiểu câu hỏi")
-
-            const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
-            const blob = new Blob([excelBuffer], {
-                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            questions.forEach((q) => {
+                questionSheet.addRow({
+                    content: q.content,
+                    category: q.category,
+                    difficulty: q.difficulty,
+                    type: q.type,
+                    a1: q.answer1,
+                    a2: q.answer2,
+                    a3: q.answer3 || "",
+                    a4: q.answer4 || "",
+                    correct: q.correct,
+                })
             })
 
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement("a")
-            a.href = url
-            a.download = "mau-cau-hoi-quiz.xlsx"
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            window.URL.revokeObjectURL(url)
+            for (let i = 2; i <= 100; i++) {
+                questionSheet.getCell(`B${i}`).dataValidation = {
+                    type: "list",
+                    allowBlank: true,
+                    formulae: [`"${categories.join(",")}"`],
+                }
+                questionSheet.getCell(`C${i}`).dataValidation = {
+                    type: "list",
+                    allowBlank: true,
+                    formulae: [`"${difficulties.join(",")}"`],
+                }
+                questionSheet.getCell(`D${i}`).dataValidation = {
+                    type: "list",
+                    allowBlank: true,
+                    formulae: [`"${types.join(",")}"`],
+                }
+            }
 
-            toast.success("Mẫu câu hỏi quiz đã được tải xuống dưới dạng file Excel")
+            const guideSheet = workbook.addWorksheet("Hướng dẫn")
+            guideSheet.columns = [
+                {header: "Cột", key: "col", width: 20},
+                {header: "Mô tả", key: "desc", width: 60},
+                {header: "Bắt buộc", key: "required", width: 15},
+            ]
+
+            const guideData = [
+                {col: "Nội dung", desc: "Nội dung của câu hỏi", required: "Có"},
+                {col: "Danh mục", desc: `Chọn một trong: ${categories.join(", ")}`, required: "Có"},
+                {col: "Độ khó", desc: `Chọn một trong: ${difficulties.join(", ")}`, required: "Có"},
+                {col: "Loại câu hỏi", desc: `Chọn một trong: ${types.join(", ")}`, required: "Có"},
+                {col: "Đáp án 1", desc: "Đáp án thứ nhất", required: "Có"},
+                {col: "Đáp án 2", desc: "Đáp án thứ hai", required: "Có"},
+                {col: "Đáp án 3", desc: "Đáp án thứ ba (tùy chọn với Đúng/Sai)", required: "Tùy chọn"},
+                {col: "Đáp án 4", desc: "Đáp án thứ tư (tùy chọn với Đúng/Sai)", required: "Tùy chọn"},
+                {col: "Đáp án đúng", desc: "Phải trùng với một trong các đáp án", required: "Có"},
+            ]
+            guideData.forEach((g) => guideSheet.addRow(g))
+
+            const dropdownSheet = workbook.addWorksheet("Dữ liệu dropdown")
+            dropdownSheet.columns = [
+                {header: "Loại", key: "type", width: 20},
+                {header: "Giá trị", key: "value", width: 60},
+            ]
+
+            const dropdownData = [
+                {type: "Danh mục", value: categories.join(", ")},
+                {type: "Độ khó", value: difficulties.join(", ")},
+                {type: "Loại câu hỏi", value: types.join(", ")},
+            ]
+            dropdownData.forEach((d) => dropdownSheet.addRow(d))
+
+            const buffer = await workbook.xlsx.writeBuffer()
+            const now = new Date()
+            const timestamp = now.toISOString().slice(0, 19).replace(/:/g, "-")
+            const filename = `cau-hoi-quizizz-${timestamp}.xlsx`
+
+            saveAs(new Blob([buffer]), filename)
+            toast.success(`File ${filename} đã được tạo thành công!`)
         } catch (error) {
-            toast.error("Không thể tạo file Excel")
-            console.error("Lỗi tạo Excel:", error)
+            toast.error("❌ Lỗi khi tạo file Excel:", error)
         }
-    }
-
-    const flattenedData = sampleQuestions.flatMap((question) =>
-        question.answers.map((answer) => ({
-            id: question.id,
-            content: question.content,
-            category: question.category,
-            difficulty: question.difficulty,
-            type: question.type,
-            answer: answer.answer,
-            correct: answer.correct,
-        })),
-    )
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-purple-900">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-            </div>
-        )
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-6">
-            <div className="max-w-7xl mx-auto space-y-8">
-                {/* Header */}
-                <div className="text-center space-y-2">
-                    <h1 className="text-4xl font-bold text-gray-900">Mẫu File Excel Câu Hỏi Quiz</h1>
-                    <p className="text-gray-600">
-                        Mỗi câu hỏi phải sử dụng 1 giá trị trong mỗi phần Danh mục, Độ khó và Kiểu câu hỏi.
-                    </p>
-                </div>
-
-                {/* Ghi chú quan trọng */}
-                <Alert className="bg-blue-50 border-blue-200">
-                    <Info className="h-4 w-4" />
-                    <AlertDescription className="text-sm">
-                        <strong>Ghi chú quan trọng:</strong>
-                        <ul className="mt-2 space-y-1 list-disc list-inside">
-                            <li>Với mỗi giá trị danh mục, độ khó, kiểu câu hỏi - hãy chọn 1 trong các dữ liệu sẵn có bên dưới</li>
-                            <li>Số lượng câu trả lời của 1 câu hỏi nhiều nhất là 4</li>
-                            <li>
-                                Kiểu câu hỏi mặc định: multi-choice (nhiều lựa chọn), single-choice (một lựa chọn), true-false
-                                (đúng/sai)
-                            </li>
-                        </ul>
-                    </AlertDescription>
-                </Alert>
-
-                {/* Configuration Rows */}
-                <div className="grid gap-6">
-                    {/* Categories Row */}
-                    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-                        <CardHeader className="pb-2">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg font-semibold text-purple-700">Danh mục</CardTitle>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleCopyRow("categories", categories)}
-                                    className="bg-white hover:bg-purple-50"
-                                >
-                                    {copiedRow === 0 ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                </Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-wrap gap-2">
-                                {categories.map((category, index) => (
-                                    <Badge
-                                        key={index}
-                                        variant="secondary"
-                                        className="bg-purple-100 text-purple-700 hover:bg-purple-200 cursor-pointer transition-colors"
-                                        onClick={async () => {
-                                            try {
-                                                await navigator.clipboard.writeText(category.name)
-                                                toast.success(`Danh mục "${category.name}" đã được sao chép`)
-                                            } catch (err) {
-                                                toast.error("Không thể sao chép vào clipboard")
-                                            }
-                                        }}
-                                    >
-                                        {category.name}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Types Row */}
-                    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-                        <CardHeader className="pb-2">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg font-semibold text-blue-700">Kiểu câu hỏi</CardTitle>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleCopyRow("types", types)}
-                                    className="bg-white hover:bg-blue-50"
-                                >
-                                    {copiedRow === 1 ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                </Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                <div className="flex flex-wrap gap-2">
-                                    {types.map((type, index) => (
-                                        <Badge
-                                            key={index}
-                                            variant="secondary"
-                                            className="bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer transition-colors"
-                                            onClick={async () => {
-                                                try {
-                                                    await navigator.clipboard.writeText(type.name)
-                                                    toast.success(`Kiểu câu hỏi "${type.name}" đã được sao chép`)
-                                                } catch (err) {
-                                                    toast.error("Không thể sao chép vào clipboard")
-                                                }
-                                            }}
-                                        >
-                                            {type.name}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Difficulties Row */}
-                    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-                        <CardHeader className="pb-2">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg font-semibold text-green-700">Độ khó</CardTitle>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleCopyRow("difficulties", difficulties)}
-                                    className="bg-white hover:bg-green-50"
-                                >
-                                    {copiedRow === 2 ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                </Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-wrap gap-2">
-                                {difficulties.map((difficulty, index) => (
-                                    <Badge
-                                        key={index}
-                                        variant="secondary"
-                                        className="bg-green-100 text-green-700 hover:bg-green-200 cursor-pointer transition-colors"
-                                        onClick={async () => {
-                                            try {
-                                                await navigator.clipboard.writeText(difficulty.name)
-                                                toast.success(`Độ khó "${difficulty.name}" đã được sao chép`)
-                                            } catch (err) {
-                                                toast.error("Không thể sao chép vào clipboard")
-                                            }
-                                        }}
-                                    >
-                                        {difficulty.name}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Excel-like Table */}
-                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur">
-                    <CardHeader>
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-4">
+            <div className="max-w-7xl mx-auto">
+                <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+                    <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
                         <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle className="text-xl font-semibold text-gray-800">Mẫu câu hỏi</CardTitle>
-                                <p className="text-sm text-gray-600">Dữ liệu mẫu hiển thị cấu trúc cho từng kiểu câu hỏi</p>
-                            </div>
+                            <CardTitle className="text-3xl font-bold flex items-center gap-2 py-6 px-4">
+                                📊 Mẫu File Excel (.xlsx)
+                            </CardTitle>
                             <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleDownloadTemplate}
-                                className="cursor-pointer bg-white hover:bg-gray-50"
+                                onClick={downloadExcel}
+                                className="bg-white text-purple-600 hover:bg-purple-100 hover:shadow-md font-semibold cursor-pointer transition duration-150"
                             >
-                                <Download className="h-4 w-4 mr-2" />
-                                Tải xuống dữ liệu mẫu (.xlsx)
+                                <Download className="w-4 h-4 mr-2"/>
+                                Tải xuống Excel
                             </Button>
                         </div>
                     </CardHeader>
-                    <CardContent>
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="bg-gray-50">
-                                        <TableHead className="font-semibold">ID</TableHead>
-                                        <TableHead className="font-semibold">Nội dung</TableHead>
-                                        <TableHead className="font-semibold">Danh mục</TableHead>
-                                        <TableHead className="font-semibold">Độ khó</TableHead>
-                                        <TableHead className="font-semibold">Kiểu câu hỏi</TableHead>
-                                        <TableHead className="font-semibold">Đáp án</TableHead>
-                                        <TableHead className="font-semibold">Đúng/Sai</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {flattenedData.map((row, index) => (
-                                        <TableRow key={index} className="hover:bg-gray-50">
-                                            <TableCell className="font-medium">{row.id}</TableCell>
-                                            <TableCell className="max-w-xs">{row.content}</TableCell>
-                                            <TableCell title="Thay bằng 1 trong các Danh mục ở trên">
-                                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                                                    {row.category}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell title="Thay bằng 1 trong các Độ khó ở trên">
-                                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                                    {row.difficulty}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell title="Thay bằng 1 trong các Kiểu câu hỏi ở trên">
-                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                                                    {row.type}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>{row.answer}</TableCell>
-                                            <TableCell>
-                                                <Badge
-                                                    variant={row.correct ? "default" : "secondary"}
-                                                    className={
-                                                        row.correct
-                                                            ? "bg-green-500 hover:bg-green-600 text-white"
-                                                            : "bg-red-500 hover:bg-red-600 text-white"
-                                                    }
-                                                >
-                                                    {row.correct ? "ĐÚNG" : "SAI"}
-                                                </Badge>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+
+                    <CardContent className="p-6">
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-700">Danh sách câu hỏi mẫu</h3>
+                            <p className="text-sm text-gray-500 mt-1">Bao gồm 3 loại câu hỏi: Trắc nghiệm nhiều lựa
+                                chọn, Trắc nghiệm một lựa chọn, và Đúng/Sai</p>
+                        </div>
+
+                        <div className="overflow-x-auto rounded-lg border border-gray-200">
+                            <table className="w-full">
+                                <thead>
+                                <tr className="bg-gradient-to-r from-purple-100 to-blue-100">
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[200px] border-b border-gray-200">Nội
+                                        dung
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[120px] border-b border-gray-200">Danh
+                                        mục
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[100px] border-b border-gray-200">Độ
+                                        khó
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[150px] border-b border-gray-200">Loại
+                                        câu hỏi
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[120px] border-b border-gray-200">Đáp
+                                        án 1
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[120px] border-b border-gray-200">Đáp
+                                        án 2
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[120px] border-b border-gray-200">Đáp
+                                        án 3
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[120px] border-b border-gray-200">Đáp
+                                        án 4
+                                    </th>
+                                    <th className="font-bold text-purple-800 p-3 text-left min-w-[120px] border-b border-gray-200">Đáp
+                                        án đúng
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {questions.map((question, index) => (
+                                    <tr key={question.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Input
+                                                value={question.content}
+                                                onChange={(e) => updateQuestion(question.id, "content", e.target.value)}
+                                                placeholder="Nhập nội dung câu hỏi..."
+                                                className="border-gray-300 focus:border-purple-500 w-[200px]"
+                                            />
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Select
+                                                value={question.category}
+                                                onValueChange={(value) => updateQuestion(question.id, "category", value)}
+                                            >
+                                                <SelectTrigger className="border-gray-300 focus:border-purple-500">
+                                                    <SelectValue placeholder="Chọn danh mục"/>
+                                                </SelectTrigger>
+                                                <SelectContent className={"bg-white"}>
+                                                    {categories.map((cat) => (
+                                                        <SelectItem key={cat} value={cat} className={"cursor-pointer"}>
+                                                            {cat}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Select
+                                                value={question.difficulty}
+                                                onValueChange={(value) => updateQuestion(question.id, "difficulty", value)}
+                                            >
+                                                <SelectTrigger className="border-gray-300 focus:border-purple-500"
+>
+                                                    <SelectValue placeholder="Độ khó"/>
+                                                </SelectTrigger>
+                                                <SelectContent className={"bg-white"}>
+                                                    {difficulties.map((diff) => (
+                                                        <SelectItem key={diff} value={diff} className={"cursor-pointer"}>
+                                                            {diff}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Select
+                                                value={question.type}
+                                                onValueChange={(value) => updateQuestion(question.id, "type", value)}
+                                            >
+                                                <SelectTrigger className="border-gray-300 focus:border-purple-500"
+>
+                                                    <SelectValue placeholder="Loại câu hỏi"/>
+                                                </SelectTrigger>
+                                                <SelectContent className={"bg-white"}>
+                                                    {types.map((type) => (
+                                                        <SelectItem key={type} value={type} className={"cursor-pointer"}>
+                                                            {type}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Input
+                                                value={question.answer1}
+                                                onChange={(e) => updateQuestion(question.id, "answer1", e.target.value)}
+                                                placeholder="Đáp án A"
+                                                className="border-gray-300 focus:border-purple-500 w-[200px]"
+
+                                            />
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Input
+                                                value={question.answer2}
+                                                onChange={(e) => updateQuestion(question.id, "answer2", e.target.value)}
+                                                placeholder="Đáp án B"
+                                                className="border-gray-300 focus:border-purple-500 w-[200px]"
+
+                                            />
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Input
+                                                value={question.answer3}
+                                                onChange={(e) => updateQuestion(question.id, "answer3", e.target.value)}
+                                                placeholder="Đáp án C"
+                                                className="border-gray-300 focus:border-purple-500 w-[200px]"
+
+                                                disabled={question.type === "Đúng/Sai"}
+                                            />
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Input
+                                                value={question.answer4}
+                                                onChange={(e) => updateQuestion(question.id, "answer4", e.target.value)}
+                                                placeholder="Đáp án D"
+                                                className="border-gray-300 focus:border-purple-500 w-[200px]"
+
+                                                disabled={question.type === "Đúng/Sai"}
+                                            />
+                                        </td>
+                                        <td className="p-3 border-b border-gray-200">
+                                            <Input
+                                                value={question.correct}
+                                                onChange={(e) => updateQuestion(question.id, "correct", e.target.value)}
+                                                placeholder="Đáp án đúng"
+                                                className="border-gray-300 focus:border-purple-500 w-[200px]"
+
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <h4 className="font-semibold text-blue-800 mb-2">📋 Hướng dẫn sử dụng:</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+                                <div>
+                                    <h5 className="font-semibold mb-1">Loại câu hỏi:</h5>
+                                    <ul className="space-y-1">
+                                        <li>• <strong>Trắc nghiệm nhiều lựa chọn:</strong> Sử dụng tất cả 4 đáp án</li>
+                                        <li>• <strong>Trắc nghiệm một lựa chọn:</strong> Có thể sử dụng 2-4 đáp án</li>
+                                        <li>• <strong>Đúng/Sai:</strong> Chỉ sử dụng đáp án 1 và 2</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 className="font-semibold mb-1">Đáp án đúng : </h5>
+                                    <ul className="space-y-1">
+                                        <li>• Ví dụ nếu đáp án đúng là Đáp án 1 và Đáp án 2 thì điền vào cột "Đáp án đúng" là 1,2</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
