@@ -23,7 +23,7 @@ import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 import {questionSchema} from "../../yup/questionSchema";
 import {backendBaseUrl} from "../../config/backendBaseUrl";
 import {validateImage} from "../../util/validateImage";
-import FormSelect from "./FormSelect";
+import DropDown from "../dropdown/DropDown";
 
 export default function EditQuestionForm() {
     const router = useRouter()
@@ -201,19 +201,19 @@ export default function EditQuestionForm() {
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-8">
-                    <FormSelect
+                    <DropDown
                         placeholder="Chọn danh mục"
                         value={formik.values.category}
                         options={categories}
                         onChange={handleSelectChange("category")}
                     />
-                    <FormSelect
+                    <DropDown
                         placeholder="Chọn độ khó"
                         value={formik.values.difficulty}
                         options={difficulties}
                         onChange={handleSelectChange("difficulty")}
                     />
-                    <FormSelect
+                    <DropDown
                         placeholder="Chọn thể loại"
                         value={formik.values.type}
                         options={types}

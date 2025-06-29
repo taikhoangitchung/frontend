@@ -20,7 +20,7 @@ import {initialAnswers} from "../../util/defaultAnswers"
 import {cn} from "../../lib/utils"
 import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 import {validateImage} from "../../util/validateImage";
-import FormSelect from "./FormSelect";
+import DropDown from "../dropdown/DropDown";
 import {questionSchema} from "../../yup/questionSchema";
 import {useRouter} from "next/navigation";
 
@@ -123,7 +123,8 @@ export default function CreateQuestionForm() {
             }
             await QuestionService.create(formData)
             toast.success("Tạo câu hỏi thành công! 🎉")
-            router.push("/users/questions/create")
+            formik.resetForm()
+            setImage(null)
         } catch (err) {
             toast.error(err.response?.data || "Tạo câu hỏi thất bại")
         } finally {
@@ -155,19 +156,19 @@ export default function CreateQuestionForm() {
                 </div>
 
                 <div className="flex flex-wrap gap-4 mb-8">
-                    <FormSelect
+                    <DropDown
                         placeholder="Chọn danh mục"
                         value={formik.values.category}
                         options={categories}
                         onChange={handleSelectChange("category")}
                     />
-                    <FormSelect
+                    <DropDown
                         placeholder="Chọn độ khó"
                         value={formik.values.difficulty}
                         options={difficulties}
                         onChange={handleSelectChange("difficulty")}
                     />
-                    <FormSelect
+                    <DropDown
                         placeholder="Chọn thể loại"
                         value={formik.values.type}
                         options={types}
