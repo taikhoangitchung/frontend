@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {useState, useEffect} from "react";
+import {useRouter} from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
-import { toast } from "sonner";
-import { ArrowLeft, Timer, CheckCircle, Pencil, XCircle } from "lucide-react";
+import {toast} from "sonner";
+import {ArrowLeft, Timer, CheckCircle, Pencil, XCircle} from "lucide-react";
 import formatTime from "../../../util/formatTime";
+import {motion, AnimatePresence} from "framer-motion";
+import ExamResultSummary from "../../../components/exam/ExamResultSummary";
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -13,6 +15,8 @@ const HistoryPage = () => {
     const [historyList, setHistoryList] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [selectedHistoryId, setSelectedHistoryId] = useState(null);
+
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("completed");
     const pageSize = 20;
@@ -30,7 +34,6 @@ const HistoryPage = () => {
             try {
                 const response = await HistoryService.getAll();
                 const histories = response.data;
-                console.log("histories", histories);
                 setAllHistories(histories);
                 setTotalPages(Math.ceil(histories.length / pageSize));
                 setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
@@ -54,6 +57,12 @@ const HistoryPage = () => {
         }
     };
 
+    const handleOpenModal = (id) => {
+        setSelectedHistoryId(id);
+    }
+    const handleCloseModal = () => {
+        setSelectedHistoryId(null)
+    };
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setCurrentPage(0);
@@ -85,7 +94,7 @@ const HistoryPage = () => {
                         onClick={() => router.push("/users/dashboard")}
                         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2 hover:shadow-md"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft className="w-4 h-4"/>
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
@@ -101,7 +110,7 @@ const HistoryPage = () => {
                                     : "text-gray-500"
                             }`}
                         >
-                            <Timer size={16} className="inline-block mr-2" />
+                            <Timer size={16} className="inline-block mr-2"/>
                             Đang chạy
                         </button>
 
@@ -113,7 +122,7 @@ const HistoryPage = () => {
                                     : "text-gray-500"
                             }`}
                         >
-                            <CheckCircle size={16} className="inline-block mr-2" />
+                            <CheckCircle size={16} className="inline-block mr-2"/>
                             Hoàn thành
                         </button>
 
@@ -125,7 +134,7 @@ const HistoryPage = () => {
                                     : "text-gray-500"
                             }`}
                         >
-                            <Pencil size={16} className="inline-block mr-2" />
+                            <Pencil size={16} className="inline-block mr-2"/>
                             Tạo
                         </button>
                     </div>
@@ -144,7 +153,7 @@ const HistoryPage = () => {
                                 <div
                                     key={index}
                                     className="bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden cursor-pointer"
-                                    onClick={() => router.push(`/users/histories/${history.historyId}`)}
+                                    onClick={() => handleOpenModal(history.historyId)}
                                 >
                                     <div className="w-full h-36 rounded-t-xl overflow-hidden relative group">
                                         <img
@@ -201,12 +210,12 @@ const HistoryPage = () => {
                                         >
                                             {history.passed ? (
                                                 <>
-                                                    <CheckCircle className="w-4 h-4" />
+                                                    <CheckCircle className="w-4 h-4"/>
                                                     Đạt
                                                 </>
                                             ) : (
                                                 <>
-                                                    <XCircle className="w-4 h-4" />
+                                                    <XCircle className="w-4 h-4"/>
                                                     Không đạt
                                                 </>
                                             )}
@@ -228,7 +237,7 @@ const HistoryPage = () => {
                                                 Trước
                                             </button>
                                         )}
-                                        {Array.from({ length: totalPages }, (_, i) => i).map((page) => (
+                                        {Array.from({length: totalPages}, (_, i) => i).map((page) => (
                                             <button
                                                 key={page}
                                                 onClick={() => handlePageChange(page)}
@@ -259,7 +268,7 @@ const HistoryPage = () => {
                                             Trước
                                         </button>
                                         {Array.from(
-                                            { length: Math.min(5, totalPages) },
+                                            {length: Math.min(5, totalPages)},
                                             (_, i) => currentPage - 2 + i
                                         )
                                             .filter((page) => page >= 0 && page < totalPages)
@@ -289,6 +298,34 @@ const HistoryPage = () => {
                     </>
                 )}
             </div>
+            {selectedHistoryId && (
+                <AnimatePresence>
+                    <motion.div
+                        key="modal"
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        exit={{opacity: 0}}
+                        className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+                    >
+                        <div
+                            className="relative bg-white max-w-5xl max-h-[90vh] overflow-y-auto rounded-xl shadow-xl p-12">
+                            {/* Nút đóng nằm tách biệt, không ảnh hưởng đến padding của nội dung */}
+                            <button
+                                onClick={handleCloseModal}
+                                className="absolute top-4 right-4 text-gray-600 hover:text-red-600 text-2xl z-10"
+                            >
+                                ✕
+                            </button>
+                            {/* Nội dung có padding đều (được bao bởi p-6 từ thẻ cha) */}
+                            <ExamResultSummary
+                                historyId={selectedHistoryId}
+                                viewMode={true}
+                                onExit={handleCloseModal}
+                            />
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+            )}
         </div>
     );
 };

@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import React, {useEffect, useState} from "react"
+import {useParams, useRouter} from "next/navigation"
 import HistoryService from "../../../../../services/HistoryService"
-import { Button } from "../../../../../components/ui/button"
+import {Button} from "../../../../../components/ui/button"
 import {
     Loader2,
     Clock,
@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 
 export default function ExamHistoryPage() {
-    const { id } = useParams()
+    const {id} = useParams()
     const router = useRouter()
     const [histories, setHistories] = useState([])
     const [loading, setLoading] = useState(true)
@@ -38,7 +38,7 @@ export default function ExamHistoryPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-white">
-                <Loader2 className="h-8 w-8 animate-spin text-purple-700" />
+                <Loader2 className="h-8 w-8 animate-spin text-purple-700"/>
             </div>
         )
     }
@@ -59,8 +59,9 @@ export default function ExamHistoryPage() {
             </div>
 
             {histories.length === 0 ? (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center text-gray-500 text-lg flex flex-col items-center gap-3">
-                    <XCircle className="w-8 h-8 text-gray-400" />
+                <div
+                    className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center text-gray-500 text-lg flex flex-col items-center gap-3">
+                    <XCircle className="w-8 h-8 text-gray-400"/>
                     Chưa có học viên nào tham gia bài thi này.
                 </div>
             ) : (
@@ -71,32 +72,32 @@ export default function ExamHistoryPage() {
                             <th className="p-4 border-b text-center">#</th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <Clock className="w-5 h-5" /> Ngày chơi
+                                    <Clock className="w-5 h-5"/> Ngày chơi
                                 </div>
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <User className="w-5 h-5" /> Người chơi
+                                    <User className="w-5 h-5"/> Người chơi
                                 </div>
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <Award className="w-5 h-5" /> Điểm
+                                    <Award className="w-5 h-5"/> Điểm
                                 </div>
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <CheckCircle2 className="w-5 h-5" /> Câu đúng / Tổng
+                                    <CheckCircle2 className="w-5 h-5"/> Số câu đúng
                                 </div>
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <TimerReset className="w-5 h-5" /> Thời gian
+                                    <TimerReset className="w-5 h-5"/> Thời gian
                                 </div>
                             </th>
                             <th className="p-4 border-b">
                                 <div className="flex items-center gap-1">
-                                    <Repeat2 className="w-5 h-5" /> Lượt chơi
+                                    <Repeat2 className="w-5 h-5"/> Lượt chơi
                                 </div>
                             </th>
                         </tr>
@@ -104,12 +105,21 @@ export default function ExamHistoryPage() {
 
                         <tbody className="text-gray-700 font-medium">
                         {histories.map((h, index) => (
-                            <tr key={index} className="even:bg-gray-50 hover:bg-gray-100 transition">
+                            <tr key={index} className="even:bg-white odd:bg-gray-50 hover:bg-gray-100 transition">
                                 <td className="p-4 border-b text-center">{index + 1}</td>
                                 <td className="p-4 border-b">{new Date(h.finishedAt).toLocaleString("vi-VN")}</td>
                                 <td className="p-4 border-b">{h.username}</td>
-                                <td className="p-4 border-b text-purple-700 font-semibold">{h.score}</td>
-                                <td className="p-4 border-b">{h.correctAnswers}/{h.totalQuestions}</td>
+                                <td className="p-4 border-b text-center">
+                                    <span className={`px-2 py-1 rounded font-semibold 
+                                    ${h.score === 100 ? "bg-green-100 text-green-700"
+                                        : h.score >= 50
+                                            ? "bg-yellow-100 text-yellow-700"
+                                            : "bg-red-100 text-red-700"}`}>
+                                        {h.score.toFixed(1)}
+                                    </span>
+                                </td>
+
+                                <td className="p-4 border-b text-center">{h.correctAnswers}/{h.totalQuestions}</td>
                                 <td className="p-4 border-b">{Math.floor(h.timeTaken / 60)}p {h.timeTaken % 60}s</td>
                                 <td className="p-4 border-b text-center">{h.attemptCount}</td>
                             </tr>

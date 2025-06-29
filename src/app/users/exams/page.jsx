@@ -269,7 +269,7 @@ export default function ExamManager() {
                                     </div>
 
                                     <div className="flex gap-3 flex-wrap">
-                                        {ownerFilter === "mine" && (
+                                        {exam.author.id === currentUserId && (
                                             <Button
                                                 variant="outline"
                                                 size="sm"

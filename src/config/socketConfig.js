@@ -2,11 +2,12 @@ export default function createExamSocket({ code, onStart, onSubmit, onEnd, onJoi
     const socket = new WebSocket("ws://localhost:8080/ws/rooms");
     const email = localStorage.getItem("email");
     const username = localStorage.getItem("username");
+    const avatar = localStorage.getItem("avatar");
 
     socket.onopen = () => {
         console.log("✅ Socket connected");
         if (socket.readyState === WebSocket.OPEN) {
-            socket.send(`JOIN:${code}:${email}:${username}:${isHost}`);
+            socket.send(`JOIN:${code}:${email}:${username}:${isHost}:${avatar}`);
         }
     };
 
