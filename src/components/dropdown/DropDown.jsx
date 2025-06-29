@@ -1,7 +1,13 @@
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../ui/select"
 import {typeVietSub} from "../../util/typeVietsub";
 
-export default function FormSelect({placeholder, value, field, options, onChange}) {
+export default function DropDown({
+                                       placeholder,
+                                       value,
+                                       field,
+                                       options,
+                                       onChange,
+                                   }) {
     return (
         <Select value={value} onValueChange={onChange}>
             <SelectTrigger
@@ -21,5 +27,6 @@ export default function FormSelect({placeholder, value, field, options, onChange
                 ))}
             </SelectContent>
         </Select>
-    )
+    );
 }
+

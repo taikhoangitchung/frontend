@@ -13,7 +13,7 @@ import { Skeleton } from "../ui/skeleton"
 import DeleteButton from "../alerts-confirms/DeleleButton"
 import {cn} from "../../lib/utils";
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 20
 
 const CategoryTable = ({ viewMode = "ADMIN" }) => {
     const [categories, setCategories] = useState([])
@@ -37,14 +37,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
             )
             setCategories(sorted)
         } catch (error) {
-            if (error.response?.status === 403) {
-                router.push("/forbidden")
-            } else if (error.response?.status === 401) {
-                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng về trang đăng nhập...")
-                setTimeout(() => {
-                    router.push("/login")
-                }, 2500)
-            }
+            console.error(error)
         } finally {
             setLoading(false)
         }
@@ -65,28 +58,12 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
         }
     }
 
-    const handleNavigation = async (key, path, id = null) => {
-        setIsLoading(prev => ({
-            ...prev,
-            [key]: id ? { ...prev[key], [id]: true } : true
-        }))
-        try {
-            await router.push(path)
-        } catch (error) {
-            console.error("Lỗi khi chuyển trang:", error)
-            setIsLoading(prev => ({
-                ...prev,
-                [key]: id ? { ...prev[key], [id]: false } : false
-            }))
-        }
-    }
-
     const handleCreate = () => {
-        handleNavigation("create", "/admin/categories/create")
+        router.push("/admin/categories/create")
     }
 
     const handleEdit = (id) => {
-        handleNavigation("edit", `/admin/categories/${id}/edit`, id)
+        router.push(`/admin/categories/${id}/edit`)
     }
 
     const handlePageChange = (page) => {
