@@ -6,8 +6,13 @@ import * as Yup from "yup"
 import UserService from "../../../services/UserService"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faUser, faEnvelope, faArrowLeft, faCamera, faUpload } from "@fortawesome/free-solid-svg-icons"
+import {
+    ArrowLeft,
+    Mail,
+    Camera,
+    Upload,
+    User, Loader2
+} from "lucide-react"
 
 const EditProfile = () => {
     const router = useRouter()
@@ -59,7 +64,7 @@ const EditProfile = () => {
             .test(
                 "fileType",
                 "Chỉ hỗ trợ file ảnh",
-                (value) => !value || (value && ["image/jpeg", "image/png", "image/gif"].includes(value.type)),
+                (value) => !value || (value && ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(value.type)),
             ),
     });
 
@@ -69,7 +74,6 @@ const EditProfile = () => {
             formData.append("email", userEmail);
             if (values.username && values.username !== initialUsername) formData.append("username", values.username);
             if (values.avatar && values.avatar instanceof File) formData.append("avatar", values.avatar);
-
             const response = await UserService.editProfile(formData);
             toast.success(response.data, { autoClose: 1500 });
             if (values.username && values.username !== initialUsername) {
@@ -85,7 +89,7 @@ const EditProfile = () => {
     };
 
     const handleCancel = () => {
-        router.back();
+        router.push("/profile");
     };
 
     const handleAvatarChange = (event, setFieldValue) => {
@@ -99,7 +103,11 @@ const EditProfile = () => {
     };
 
     if (!isReady || loading || !userEmail) {
-        return null;
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-purple-900">
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
+            </div>
+        );
     }
 
     return (
@@ -114,10 +122,10 @@ const EditProfile = () => {
                     <div className="flex-1 p-5">
                         <div className="max-w-md mx-auto py-1">
                             <button
-                                onClick={() => router.back()}
+                                onClick={() => router.push("/profile")}
                                 className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                             >
-                                <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                                <ArrowLeft className="mr-2" />
                                 Quay lại
                             </button>
 
@@ -133,7 +141,7 @@ const EditProfile = () => {
                                         {/* Display Email */}
                                         <div className="mb-5 p-4 bg-gray-50 rounded-lg border">
                                             <div className="flex items-center">
-                                                <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 mr-3 text-gray-600" />
+                                                <Mail className="w-5 h-5 mr-3 text-gray-600" />
                                                 <div>
                                                     <p className="text-sm text-gray-600">Email tài khoản</p>
                                                     <p className="font-medium text-gray-900">{userEmail}</p>
@@ -154,12 +162,12 @@ const EditProfile = () => {
                                                         />
                                                     )}
                                                     <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-2">
-                                                        <FontAwesomeIcon icon={faCamera} className="w-3 h-3 text-white" />
+                                                        <Camera className="w-3 h-3 text-white" />
                                                     </div>
                                                 </div>
                                                 <div className="flex-1">
                                                     <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:shadow-md transition-all duration-200">
-                                                        <FontAwesomeIcon icon={faUpload} className="w-4 h-4 mr-2 text-gray-600" />
+                                                        <Upload className="w-4 h-4 mr-2 text-gray-600" />
                                                         <span className="text-sm text-gray-700">Chọn ảnh mới</span>
                                                         <input
                                                             type="file"
@@ -179,8 +187,7 @@ const EditProfile = () => {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Tên hiển thị</label>
                                             <div className="relative">
-                                                <FontAwesomeIcon
-                                                    icon={faUser}
+                                                <User
                                                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                 />
                                                 <Field

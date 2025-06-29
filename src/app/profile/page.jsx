@@ -4,8 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import UserService from "../../services/UserService"
 import { toast } from "sonner"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {faEdit, faEnvelope, faCalendarAlt, faArrowLeft} from "@fortawesome/free-solid-svg-icons"
+import { Edit, Mail, Calendar, ArrowLeft } from "lucide-react"
+
 
 const Profile = () => {
     const router = useRouter()
@@ -110,11 +110,11 @@ const Profile = () => {
                                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{userInfo.username}</h1>
                                 <div className="space-y-1 mb-4">
                                     <p className="text-gray-600 flex items-center">
-                                        <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 mr-2" />
+                                        <Mail className="w-4 h-4 mr-2" />
                                         {userInfo.email}
                                     </p>
                                     <p className="text-gray-600 flex items-center">
-                                        <FontAwesomeIcon icon={faCalendarAlt} className="w-4 h-4 mr-2" />
+                                        <Calendar className="w-4 h-4 mr-2" />
                                         Tham gia: {formatDate(userInfo.createdAt)}
                                     </p>
                                 </div>
@@ -122,7 +122,7 @@ const Profile = () => {
                                     onClick={() => router.push("/profile/edit")}
                                     className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded-lg cursor-pointer transition-colors text-sm"
                                 >
-                                    <FontAwesomeIcon icon={faEdit} className="w-4 h-4 text-gray-600" />
+                                    <Edit className="w-4 h-4 text-gray-600" />
                                     <span className="text-gray-700">Chỉnh sửa Hồ sơ</span>
                                 </button>
                             </div>
@@ -134,7 +134,7 @@ const Profile = () => {
                                 onClick={() => handleBackToDashboard()}
                                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer transition-colors h-9 px-4 py-2"
                             >
-                                <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-white"/>
+                                <ArrowLeft className="w-4 h-4 text-white"/>
                                 <span className="text-white">Quay lại</span>
                             </button>
                         </div>
@@ -174,9 +174,9 @@ const Profile = () => {
 
                             {/* Description */}
                             <div className="max-w-1xl mx-auto">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Tạo quiz hoặc bài học đầu tiên của bạn</h3>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Tạo bài học đầu tiên của bạn</h3>
                                 <p className="text-gray-600 mb-8">
-                                    Lấy các câu hỏi từ thư viện Quizizz hoặc đặt câu hỏi của riêng bạn. Thật nhanh chóng và dễ dàng!
+                                    Lấy các câu hỏi từ thư viện hoặc đặt câu hỏi của riêng bạn. Thật nhanh chóng và dễ dàng!
                                 </p>
 
                                 {/* Create Button */}

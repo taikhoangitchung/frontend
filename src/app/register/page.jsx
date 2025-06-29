@@ -6,8 +6,15 @@ import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
 import UserService from "../../services/UserService"
 import { toast } from "sonner"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faEye, faEyeSlash, faEnvelope, faArrowLeft, faLock, faUser } from "@fortawesome/free-solid-svg-icons"
+import {
+    Mail,
+    ArrowLeft,
+    User,
+    Lock,
+    Eye,
+    EyeOff,
+} from "lucide-react";
+import { FaGoogle } from "react-icons/fa"
 import EmailService from "../../services/EmailService"
 import { ReactDOMServerEdge } from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints"
 import EmailTemplate from "../../util/emailTemplate"
@@ -137,20 +144,20 @@ const Register = () => {
                                         onClick={handleGoogleRegister}
                                     >
                                         <div className="flex items-center">
-                                            <div className="w-5 h-5 mr-3 text-red-500 font-bold">G</div>
+                                            <FaGoogle className="w-5 h-5 mr-3 text-red-500" />
                                             <span className="text-gray-700 font-medium">Tiếp tục với Google</span>
                                         </div>
-                                        <FontAwesomeIcon icon={faArrowLeft} className="rotate-180 text-gray-400" />
+                                        <ArrowLeft className="rotate-180 text-gray-400" />
                                     </button>
                                     <button
                                         className="w-full flex items-center justify-between p-5 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
                                         onClick={() => setShowEmailForm(true)}
                                     >
                                         <div className="flex items-center">
-                                            <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 mr-3 text-gray-600" />
+                                            <Mail className="w-5 h-5 mr-3 text-gray-600" />
                                             <span className="text-gray-700 font-medium">Tiếp tục với Email</span>
                                         </div>
-                                        <FontAwesomeIcon icon={faArrowLeft} className="rotate-180 text-gray-400" />
+                                        <ArrowLeft className="rotate-180 text-gray-400" />
                                     </button>
                                 </div>
 
@@ -172,7 +179,7 @@ const Register = () => {
                                     onClick={() => setShowEmailForm(false)}
                                     className="flex items-center text-purple-600 hover:text-purple-700 hover:underline mb-6 cursor-pointer transition-all duration-200"
                                 >
-                                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+                                    <ArrowLeft className="mr-2" />
                                     Quay lại
                                 </button>
                                 <h1 className="text-2xl font-bold text-gray-900 mb-2">Đăng ký với email</h1>
@@ -185,10 +192,7 @@ const Register = () => {
                                         <Form className="space-y-4">
                                             <div>
                                                 <div className="relative">
-                                                    <FontAwesomeIcon
-                                                        icon={faUser}
-                                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                                    />
+                                                    <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                                                     <Field
                                                         type="text"
                                                         name="username"
@@ -204,8 +208,7 @@ const Register = () => {
                                             </div>
                                             <div>
                                                 <div className="relative">
-                                                    <FontAwesomeIcon
-                                                        icon={faEnvelope}
+                                                    <Mail
                                                         className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                     />
                                                     <Field
@@ -224,8 +227,7 @@ const Register = () => {
                                             </div>
                                             <div>
                                                 <div className="relative">
-                                                    <FontAwesomeIcon
-                                                        icon={faLock}
+                                                    <Lock
                                                         className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                     />
                                                     <Field
@@ -240,7 +242,7 @@ const Register = () => {
                                                         onClick={() => setShowPassword(!showPassword)}
                                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                     >
-                                                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                                     </button>
                                                 </div>
                                                 <ErrorMessage
@@ -251,8 +253,7 @@ const Register = () => {
                                             </div>
                                             <div>
                                                 <div className="relative">
-                                                    <FontAwesomeIcon
-                                                        icon={faLock}
+                                                    <Lock
                                                         className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                                                     />
                                                     <Field
@@ -267,9 +268,7 @@ const Register = () => {
                                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-all duration-200"
                                                     >
-                                                        <FontAwesomeIcon
-                                                            icon={showConfirmPassword ? faEyeSlash : faEye}
-                                                        />
+                                                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                                     </button>
                                                 </div>
                                                 <ErrorMessage
