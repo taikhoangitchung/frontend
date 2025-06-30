@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "../../../../components/ui/card";
 import { Button } from "../../../../components/ui/button";
 import { X, Check, Loader2, ArrowLeft, ChevronDown } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState} from "react";
 import ExamService from "../../../../services/ExamService";
 import { Badge } from "../../../../components/ui/badge";
 import { toast } from "sonner"; // Giả sử bạn dùng sonner để thông báo
@@ -38,15 +38,15 @@ export default function Page() {
         fetchData();
     }, [id]);
 
-    const totalPage = useMemo(() => Math.ceil(questions.length / questionPerPage), [questions]);
-    const start = (page - 1) * questionPerPage;
-    const pagedQuestions = questions.slice(start, start + questionPerPage);
-
     const toggleExpand = (id) => {
         setExpandedIds((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
         );
     };
+
+    const totalPage = Math.ceil(questions.length / questionPerPage);
+    const start = (page - 1) * questionPerPage;
+    const pagedQuestions = questions.slice(start, start + questionPerPage);
 
     if (loading) {
         return (
@@ -89,8 +89,9 @@ export default function Page() {
                         >
                             <CardHeader className="gap-0 !pb-0 px-6">
                                 <div className="flex justify-between items-start gap-2">
-                                    <h2 className="text-lg font-semibold text-purple-800 flex-1">
-                                        {index + 1 + (page - 1) * questionPerPage}. {q.content}
+                                    <h2 className="text-lg font-semibold text-purple-800 flex-1 whitespace-pre-wrap">
+                                        {index + 1 + (page - 1) * questionPerPage}.{" "}
+                                        {typeof q.content === "string" ? q.content.replace(/\\n/g, "\n") : q.content}
                                     </h2>
                                     <Button
                                         variant="ghost"
@@ -106,7 +107,7 @@ export default function Page() {
                             </CardHeader>
                             {expandedIds.includes(q.id) && (
                                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {q.image && (
+                                {q.image && (
                                         <div className="col-span-full">
                                             <img
                                                 src={`${imageBaseUrl}${q.image}`}
@@ -141,6 +142,27 @@ export default function Page() {
                                     ) : (
                                         <div className="col-span-full text-gray-500">Không có đáp án để hiển thị.</div>
                                     )}
+
+                                    {q.answers.map((a) => (
+                                        <div
+                                            key={a.id}
+                                            className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                                a.correct
+                                                    ? "bg-green-50 border-green-200"
+                                                    : "bg-red-50 bg-opacity-20 border-red-200"
+                                            }`}
+                                        >
+                                            {a.correct ? (
+                                                <Check className="w-4 h-4 text-green-600"/>
+                                            ) : (
+                                                <X className="w-4 h-4 text-red-400 opacity-50"/>
+                                            )}
+                                            <span className="text-sm whitespace-pre-wrap">
+  {typeof a.content === "string" ? a.content.replace(/\\n/g, "\n") : a.content}
+</span>
+                                        </div>
+                                    ))}
+
                                     <div className="col-span-full flex flex-wrap gap-2 mt-1">
                                         <Badge
                                             variant="outline"
