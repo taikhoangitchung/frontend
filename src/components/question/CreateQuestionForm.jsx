@@ -68,7 +68,7 @@ export default function CreateQuestionForm() {
             category: "",
             type: "single",
             difficulty: "",
-            answers: [],
+            answers: initialAnswers("single"),
         },
         validationSchema: questionSchema
     })
