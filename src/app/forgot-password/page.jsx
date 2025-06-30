@@ -31,7 +31,7 @@ const ForgotPassword = () => {
             localStorage.setItem("currentUserEmail", values.email)
             const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
                 <EmailTemplate
-                    data={`http://localhost:3000/recover-password`}
+                    data={`https://quiz-gym-app-frontend-a48q.vercel.app/recover-password`}
                     title={"Yêu cầu đặt lại mật khẩu"}
                     description={
                         "Nhấn nút bên dưới để tiến hành đặt lại mật khẩu:"
