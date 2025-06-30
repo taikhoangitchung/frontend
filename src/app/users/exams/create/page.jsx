@@ -473,11 +473,25 @@ export default function CreateExam({id}) {
 
                 const correctCount = answers.filter((a) => a.correct).length
 
-                if (rawItem.type === types[1] && correctCount !== 1) {
-                    errors.push("Câu hỏi một lựa chọn phải có duy nhất 1 đáp án đúng")
+                if (rawItem.type === "multiple") {
+                    if (correctCount < 2) {
+                        errors.push("Câu hỏi nhiều lựa chọn phải có nhiều hơn 1 đáp án đúng")
+                    }
+                    if (answers.length !== 4) {
+                        errors.push("Câu hỏi nhiều lựa chọn hoặc 1 lựa chọn phải có đủ 4 đáp án")
+                    }
                 }
 
-                if (rawItem.type === types[2]) {
+                if (rawItem.type === "single") {
+                    if (correctCount > 1 || correctCount === 0) {
+                        errors.push("Câu hỏi một lựa chọn phải có duy nhất 1 đáp án đúng")
+                    }
+                    if (answers.length !== 4) {
+                        errors.push("Câu hỏi nhiều lựa chọn hoặc 1 lựa chọn phải có đủ 4 đáp án")
+                    }
+                }
+
+                if (rawItem.type === "boolean") {
                     if (answers.length !== 2) {
                         errors.push("Câu hỏi Đúng/Sai phải có đúng 2 đáp án")
                     }
