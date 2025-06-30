@@ -61,20 +61,21 @@ export default function Page() {
                     <span className="text-lg font-medium">
                             Danh sách câu hỏi (Tổng: {questions.length})
                         </span>
-                    <Button
-                        onClick={() => router.push("/users/exams")}
-                        className="bg-gray-700 hover:bg-gray-600 text-white"
+                    <button
+                        onClick={() => router.push("/users/dashboard")}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <ArrowLeft className="w-4 h-4 mr-2"/>
-                        Quay lại
-                    </Button>
+                        <ArrowLeft className="w-4 h-4"/>
+                        <span className="text-white">Quay lại</span>
+                    </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 pt-4">
                     {pagedQuestions.map((q, index) => (
-                        <Card key={q.id} className="bg-white transition-all duration-200
-                            hover:shadow-lg hover:-translate-y-1 hover:ring-1 hover:scale-[1.01]
-                            hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2">
+                        <Card key={q.id}
+                              className="bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:ring-1 hover:scale-[1.01] hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2"
+                              onClick={() => toggleExpand(q.id)} // Mở rộng khi click vào card
+                        >
                             <CardHeader className="gap-0 !pb-0 px-6">
                                 <div className="flex justify-between items-start gap-2">
                                     <h2 className="text-lg font-semibold text-purple-800 flex-1">
