@@ -12,6 +12,7 @@ import CategoryService from "../../services/CategoryService";
 import DifficultyService from "../../services/DifficultyService";
 import TypeService from "../../services/TypeService";
 import {toast} from "sonner";
+import {typeVietSub} from "../../util/typeVietsub";
 
 export default function ExcelTemplate() {
     const [questions, setQuestions] = useState([
@@ -288,7 +289,7 @@ export default function ExcelTemplate() {
                                                 <SelectContent className={"bg-white"}>
                                                     {types.map((type) => (
                                                         <SelectItem key={type} value={type} className={"cursor-pointer"}>
-                                                            {type}
+                                                            {typeVietSub(type)}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
