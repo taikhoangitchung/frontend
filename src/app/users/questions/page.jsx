@@ -63,7 +63,7 @@ export default function QuestionTable() {
     const [expandedIds, setExpandedIds] = useState([]);
     const questionPerPage = 10;
 
-    const imageBaseUrl = "http://localhost:8080";
+    const imageBaseUrl = "https://quizgymapp.onrender.com";
 
     useEffect(() => {
         const id = parseInt(localStorage.getItem("id") || "0");
@@ -221,7 +221,7 @@ export default function QuestionTable() {
                         <div className="relative z-10">
                             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
                                 <SelectTrigger
-                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                     <SelectValue placeholder="Danh mục"/>
                                 </SelectTrigger>
                                 <SelectContent
@@ -299,7 +299,7 @@ export default function QuestionTable() {
                             >
                                 <CardHeader className="gap-0 !pb-0 px-6">
                                     <div className="flex justify-between items-start gap-2">
-                                        <h2 className="text-lg font-semibold text-purple-800 flex-1">
+                                        <h2 className="text-lg font-semibold text-purple-800 flex-1 whitespace-pre-wrap">
                                             {idx + 1 + (page - 1) * questionPerPage}. {q.content}
                                         </h2>
                                         {q.user.id === userId && (
@@ -371,7 +371,8 @@ export default function QuestionTable() {
                                                 ) : (
                                                     <X className="w-4 h-4 text-red-400 opacity-50"/>
                                                 )}
-                                                <span className="text-sm">{a.content}</span>
+                                                <span className="text-sm whitespace-pre-wrap">{a.content}</span>
+
                                             </div>
                                         ))}
                                         <div className="col-span-full flex flex-wrap gap-2 mt-1">

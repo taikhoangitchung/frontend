@@ -35,8 +35,10 @@ export default function ExamDetailPanel({ data, onClose }) {
                 <div className="space-y-6">
                     {data.map((question, index) => (
                         <div key={question.id} className="bg-purple-50 p-4 rounded-xl shadow-sm border">
-                            <p className="font-semibold mb-4 text-purple-800">
-                                {index + 1}. {question.content}
+                            <p className="font-semibold mb-4 text-purple-800 whitespace-pre-wrap">
+                                {index + 1}. {typeof question.content === "string"
+                                ? question.content.replace(/\\n/g, "\n")
+                                : question.content}
                             </p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -53,11 +55,16 @@ export default function ExamDetailPanel({ data, onClose }) {
                                             className={`relative border rounded-lg px-4 py-3 min-h-[4rem] ${borderColor} ${bgColor}`}
                                         >
                                             {isSelected && (
-                                                <div className="absolute top-0 right-2 -translate-y-1/2 bg-white border border-purple-500 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded shadow-sm z-10">
+                                                <div
+                                                    className="absolute top-0 right-2 -translate-y-1/2 bg-white border border-purple-500 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded shadow-sm z-10">
                                                     Đã chọn
                                                 </div>
                                             )}
-                                            <span className="font-medium">{answer.content}</span>
+                                            <span className="font-medium whitespace-pre-wrap">
+  {typeof answer.content === "string"
+      ? answer.content.replace(/\\n/g, "\n")
+      : answer.content}
+</span>
                                         </div>
                                     )
                                 })}
