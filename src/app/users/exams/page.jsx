@@ -229,12 +229,16 @@ export default function ExamManager() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="p-1 cursor-pointer transition-all duration-200"
+                                                    className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                                     onClick={() => router.push(`/users/exams/${exam.id}/edit`)}
                                                 >
                                                     <Edit className="w-6 h-6"/>
                                                 </Button>
-                                                <DeleteButton id={exam.id} handleDelete={handleDeleteExam}/>
+                                                <DeleteButton
+                                                    id={exam.id}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    handleDelete={handleDeleteExam}/>
                                             </div>
                                         )}
                                     </div>
