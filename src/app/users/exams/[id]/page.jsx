@@ -1,18 +1,19 @@
-"use client"
+"use client";
 
-import {Card, CardContent, CardHeader} from "../../../../components/ui/card";
-import {Button} from "../../../../components/ui/button";
-import {X, Check, Loader2, ArrowLeft, ChevronDown} from "lucide-react";
-import {useParams, useRouter} from "next/navigation";
-import React, {useEffect, useState} from "react";
+import { Card, CardContent, CardHeader } from "../../../../components/ui/card";
+import { Button } from "../../../../components/ui/button";
+import { X, Check, Loader2, ArrowLeft, ChevronDown } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState, useMemo } from "react";
 import ExamService from "../../../../services/ExamService";
-import {Badge} from "../../../../components/ui/badge";
+import { Badge } from "../../../../components/ui/badge";
+import { toast } from "sonner"; // Giả sử bạn dùng sonner để thông báo
 
 const questionPerPage = 10;
 
 export default function Page() {
     const router = useRouter();
-    const {id} = useParams();
+    const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [questions, setQuestions] = useState([]);
     const [page, setPage] = useState(1);
@@ -26,9 +27,10 @@ export default function Page() {
         const fetchData = async () => {
             try {
                 const response = await ExamService.getToPlayById(id);
-                setQuestions(response.data.questions);
+                setQuestions(response.data.questions || []);
             } catch (error) {
-                console.log(error);
+                toast.error("Không thể tải câu hỏi: " + (error.response?.data || error.message));
+                console.error(error);
             } finally {
                 setLoading(false);
             }
@@ -36,20 +38,28 @@ export default function Page() {
         fetchData();
     }, [id]);
 
+    const totalPage = useMemo(() => Math.ceil(questions.length / questionPerPage), [questions]);
+    const start = (page - 1) * questionPerPage;
+    const pagedQuestions = questions.slice(start, start + questionPerPage);
+
     const toggleExpand = (id) => {
         setExpandedIds((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
         );
     };
 
-    const totalPage = Math.ceil(questions.length / questionPerPage);
-    const start = (page - 1) * questionPerPage;
-    const pagedQuestions = questions.slice(start, start + questionPerPage);
-
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-purple-900">
-                <Loader2 className="h-8 w-8 animate-spin text-white"/>
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
+            </div>
+        );
+    }
+
+    if (!questions.length) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <p className="text-gray-500">Không có câu hỏi nào để hiển thị.</p>
             </div>
         );
     }
@@ -59,22 +69,23 @@ export default function Page() {
             <div className="max-w-5xl mx-auto space-y-4">
                 <div className="flex justify-between mb-2">
                     <span className="text-lg font-medium">
-                            Danh sách câu hỏi (Tổng: {questions.length})
-                        </span>
+                        Danh sách câu hỏi (Tổng: {questions.length})
+                    </span>
                     <button
                         onClick={() => router.push("/users/dashboard")}
                         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <ArrowLeft className="w-4 h-4"/>
+                        <ArrowLeft className="w-4 h-4" />
                         <span className="text-white">Quay lại</span>
                     </button>
                 </div>
 
                 <div className="space-y-4 pt-4">
                     {pagedQuestions.map((q, index) => (
-                        <Card key={q.id}
-                              className="bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:ring-1 hover:scale-[1.01] hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2"
-                              onClick={() => toggleExpand(q.id)} // Mở rộng khi click vào card
+                        <Card
+                            key={q.id}
+                            className="bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:ring-1 hover:scale-[1.01] hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2"
+                            onClick={() => toggleExpand(q.id)} // Mở/đóng khi click vào card
                         >
                             <CardHeader className="gap-0 !pb-0 px-6">
                                 <div className="flex justify-between items-start gap-2">
@@ -84,8 +95,7 @@ export default function Page() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => toggleExpand(q.id)}
-                                        className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-teal-50 px-2 py-1 transition-all duration-200"
+                                        className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                         title="Xem đáp án"
                                     >
                                         <ChevronDown
@@ -101,7 +111,8 @@ export default function Page() {
                                             <img
                                                 src={`${imageBaseUrl}${q.image}`}
                                                 className="max-w-[50%] mt-2 cursor-pointer hover:scale-105 transition-transform"
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Ngăn sự kiện lan ra khi click vào hình
                                                     setSelectedImage(`${imageBaseUrl}${q.image}`);
                                                     setModalOpen(true);
                                                 }}
@@ -109,43 +120,45 @@ export default function Page() {
                                             />
                                         </div>
                                     )}
-
-                                    {q.answers.map((a) => (
-                                        <div
-                                            key={a.id}
-                                            className={`flex items-center gap-2 p-3 rounded-lg border ${
-                                                a.correct
-                                                    ? "bg-green-50 border-green-200"
-                                                    : "bg-red-50 bg-opacity-20 border-red-200"
-                                            }`}
-                                        >
-                                            {a.correct ? (
-                                                <Check className="w-4 h-4 text-green-600"/>
-                                            ) : (
-                                                <X className="w-4 h-4 text-red-400 opacity-50"/>
-                                            )}
-                                            <span className="text-sm">{a.content}</span>
-                                        </div>
-                                    ))}
-
+                                    {q.answers && q.answers.length > 0 ? (
+                                        q.answers.map((a) => (
+                                            <div
+                                                key={a.id}
+                                                className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                                    a.correct
+                                                        ? "bg-green-50 border-green-200"
+                                                        : "bg-red-50 bg-opacity-20 border-red-200"
+                                                }`}
+                                            >
+                                                {a.correct ? (
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                ) : (
+                                                    <X className="w-4 h-4 text-red-400 opacity-50" />
+                                                )}
+                                                <span className="text-sm">{a.content || "Không có nội dung đáp án"}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full text-gray-500">Không có đáp án để hiển thị.</div>
+                                    )}
                                     <div className="col-span-full flex flex-wrap gap-2 mt-1">
                                         <Badge
                                             variant="outline"
                                             className="text-xs border-teal-300 text-teal-700 bg-teal-50"
                                         >
-                                            {q.category?.name}
+                                            {q.category?.name || "Chưa có danh mục"}
                                         </Badge>
                                         <Badge
                                             variant="outline"
                                             className="text-xs border-purple-300 text-purple-700 bg-purple-50"
                                         >
-                                            {q.difficulty?.name}
+                                            {q.difficulty?.name || "Chưa có độ khó"}
                                         </Badge>
                                         <Badge
                                             variant="outline"
                                             className="text-xs border-gray-300 text-gray-600"
                                         >
-                                            {q.user?.username}
+                                            {q.user?.username || "Chưa có người tạo"}
                                         </Badge>
                                     </div>
                                 </CardContent>
