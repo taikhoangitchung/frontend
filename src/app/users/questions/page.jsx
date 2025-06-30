@@ -221,7 +221,7 @@ export default function QuestionTable() {
                         <div className="relative z-10">
                             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
                                 <SelectTrigger
-                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                     <SelectValue placeholder="Danh mục"/>
                                 </SelectTrigger>
                                 <SelectContent
