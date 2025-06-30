@@ -312,7 +312,7 @@ const HistoryPage = () => {
                             {/* Nút đóng nằm tách biệt, không ảnh hưởng đến padding của nội dung */}
                             <button
                                 onClick={handleCloseModal}
-                                className="absolute top-4 right-4 text-gray-600 hover:text-red-600 text-2xl z-10"
+                                className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white text-1xl font-semibold z-10 transition-all duration-200 cursor-pointer rounded-full w-9 h-9 flex items-center justify-center"
                             >
                                 ✕
                             </button>
