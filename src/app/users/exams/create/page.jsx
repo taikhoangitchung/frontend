@@ -55,6 +55,7 @@ import {
 import * as ExcelJS from "exceljs"
 import {ScrollArea} from "../../../../components/ui/scroll-area";
 import TypeService from "../../../../services/TypeService";
+import {ScrollArea} from "../../../../components/ui/scroll-area";
 import {BiBorderAll} from "react-icons/bi";
 import {continueDynamicHTMLResume} from "next/dist/server/stream-utils/node-web-streams-helper";
 
@@ -164,7 +165,6 @@ export default function CreateExam({id}) {
                     searchTerm,
                 )
                 setQuestionBank(resFilter.data)
-                console.log(resFilter.data);
             } catch (error) {
                 toast.error(error?.response?.data || "Lỗi khi fetch data")
             }
@@ -267,16 +267,11 @@ export default function CreateExam({id}) {
             toast.dismiss();
             toast.warning("Hãy chọn danh mục trước")
         } else {
-            if (isQuestionAlreadyAdded(questionId)) {
-                console.log(`id: ${questionId} , isSelected: ${isQuestionAlreadyAdded(questionId)}`)
-                return
-            }
+            if (isQuestionAlreadyAdded(questionId)) return
 
             if (selectedQuestion.find((q) => q.id === questionId) === undefined) {
-                console.log("not selected")
                 setSelectedQuestion([...selectedQuestion, questionBank.find((q) => q.id === questionId)])
             } else {
-                console.log("selected")
                 setSelectedQuestion([...selectedQuestion.filter((q) => q.id !== questionId)])
             }
         }
