@@ -155,7 +155,7 @@ export default function ExamManager() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
+                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
                                 <SelectValue placeholder="Lọc theo danh mục"/>
                             </SelectTrigger>
                             <SelectContent
@@ -187,7 +187,7 @@ export default function ExamManager() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
+                        className="pl-10 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 

@@ -198,7 +198,7 @@ export default function QuestionTable() {
                                     setPage(1);
                                 }}
                             >
-                                <SelectTrigger className="min-w-36 h-9 border hover:shadow-sm hover:border-gray-400 transition-all cursor-pointer">
+                                <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
                                     <SelectValue placeholder="Tác giả" />
                                 </SelectTrigger>
                                 <SelectContent
@@ -213,7 +213,7 @@ export default function QuestionTable() {
                         </div>
                         <div className="relative z-10">
                             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-                                <SelectTrigger className="min-w-48 h-9 border hover:shadow-sm hover:border-gray-400 transition-all cursor-pointer">
+                                <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
                                     <SelectValue placeholder="Danh mục"/>
                                 </SelectTrigger>
                                 <SelectContent
@@ -231,13 +231,13 @@ export default function QuestionTable() {
                         </div>
                     </div>
 
-                    <Button
+                    <button
                         onClick={() => router.push("/users/dashboard")}
-                        className="bg-gray-700 hover:bg-gray-600 cursor-pointer text-white"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs bg-gray-700 text-white hover:bg-gray-600 border border-gray-500 cursor-pointer h-9 px-4 py-2"
                     >
-                        <ArrowLeft className="mr-2 w-4 h-4"/>
-                        Quay lại
-                    </Button>
+                        <ArrowLeft className="w-4 h-4"/>
+                        <span className="text-white">Quay lại</span>
+                    </button>
                 </div>
 
                 {/* Search box */}
@@ -250,7 +250,7 @@ export default function QuestionTable() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 border"
+                        className="pl-10 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 
@@ -258,7 +258,7 @@ export default function QuestionTable() {
 
                 {/* List */}
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                         <span className="text-lg font-medium">
                             Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
                         </span>
@@ -281,11 +281,11 @@ export default function QuestionTable() {
                         <div className="text-center py-8 text-gray-500">Không có dữ liệu</div>
                     ) : (
                         questions.map((q, idx) => (
-                            <Card key={q.id} className="bg-white transition-all duration-200
-                            hover:shadow-lg
-                            hover:-translate-y-1 cursor-pointer
-                            hover:ring-1 hover:scale-[1.01]
-                            hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2">
+                            <Card
+                                key={q.id}
+                                className="bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:ring-1 hover:scale-[1.01] hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2"
+                                onClick={() => toggleExpand(q.id)} // Mở rộng khi click vào card
+                            >
                                 <CardHeader className="gap-0 !pb-0 px-6">
                                     <div className="flex justify-between items-start gap-2">
                                         <h2 className="text-lg font-semibold text-purple-800 flex-1">
@@ -296,24 +296,25 @@ export default function QuestionTable() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => handleEdit(q.id)}
-                                                    className="hover:cursor-pointer"
+                                                    onClick={(e) => { e.stopPropagation(); handleEdit(q.id); }} // Ngăn sự kiện lan ra
+                                                    className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                                 >
-                                                    <Edit className="w-5 h-5 "/>
+                                                    <Edit className="w-5 h-5"/>
                                                 </Button>
                                                 <DeleteButton
                                                     id={q.id}
                                                     handleDelete={handleDelete}
                                                     variant="ghost"
                                                     size="sm"
+                                                    className="cursor-pointer text-gray-500 hover:bg-red-200 hover:text-red-700 px-2 py-1 transition-all duration-200" // Hiệu ứng hover đỏ
                                                 />
                                             </div>
                                         )}
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => toggleExpand(q.id)}
-                                            className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-teal-50 px-2 py-1 transition-all duration-200"
+                                            onClick={(e) => { e.stopPropagation(); toggleExpand(q.id); }} // Ngăn sự kiện lan ra
+                                            className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                             title="Xem đáp án"
                                         >
                                             <ChevronDown
@@ -339,7 +340,6 @@ export default function QuestionTable() {
                                                 />
                                             </div>
                                         )}
-
                                         {q.answers.map((a) => (
                                             <div
                                                 key={a.id}
@@ -357,7 +357,6 @@ export default function QuestionTable() {
                                                 <span className="text-sm">{a.content}</span>
                                             </div>
                                         ))}
-
                                         <div className="col-span-full flex flex-wrap gap-2 mt-1">
                                             <Badge
                                                 variant="outline"
