@@ -905,7 +905,7 @@ export default function CreateExam({id}) {
                                                 role="switch"
                                                 aria-checked={formik.values.isPublic}
                                                 onClick={() => formik.setFieldValue("isPublic", !formik.values.isPublic)}
-                                                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${
+                                                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors cursor-pointer transition-all duration-200 ${
                                                     formik.values.isPublic ? "bg-teal-600" : "bg-gray-300"
                                                 }`}
                                             >
@@ -960,14 +960,14 @@ export default function CreateExam({id}) {
                                                         <Button
                                                             variant="outline"
                                                             onClick={() => setShowDeleteDialog(false)}
-                                                            className="bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                                            className="bg-white text-gray-700 border-gray-300 hover:bg-gray-100 cursor-pointer transition-all duration-200"
                                                         >
                                                             Hủy
                                                         </Button>
                                                         <Button
                                                             variant="destructive"
                                                             onClick={clearAllQuestions}
-                                                            className="bg-red-600 hover:bg-red-700 text-white"
+                                                            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all duration-200"
                                                         >
                                                             <Trash2 className="h-4 w-4 mr-2"/>
                                                             Xóa tất cả
