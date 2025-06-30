@@ -30,7 +30,7 @@ import {
     User,
     Zap,
     Save,
-    Lock
+    Lock, ListPlus, PlusCircle, PlusSquare, LucideSaveAll, SaveAll, SaveAllIcon, ListChecks
 } from "lucide-react"
 import {Button} from "../../../../components/ui/button"
 import {FaFireAlt} from "react-icons/fa"
@@ -53,9 +53,8 @@ import {
     DialogTrigger,
 } from "../../../../components/ui/dialog"
 import * as ExcelJS from "exceljs"
-
-import TypeService from "../../../../services/TypeService";
 import {ScrollArea} from "../../../../components/ui/scroll-area";
+import TypeService from "../../../../services/TypeService";
 
 const questionLimits = [
     {value: 30, label: "30 câu"},
@@ -180,7 +179,7 @@ export default function CreateExam({id}) {
     }, [formik.values.questionLimit])
 
     useEffect(() => {
-        if (file !== null) toast.info("File Added")
+        if (file !== null) toast.info("Đã thêm file thành công")
     }, [file])
 
     useEffect(() => {
@@ -262,12 +261,10 @@ export default function CreateExam({id}) {
 
     const toggleQuestionSelection = (questionId) => {
         if (formik.values.categoryId === -1) {
+            toast.dismiss();
             toast.warning("Hãy chọn danh mục trước")
         } else {
-            if (isQuestionAlreadyAdded(questionId)) {
-                toast.warning("Câu hỏi này đã được thêm vào bài kiểm tra!")
-                return
-            }
+            if (isQuestionAlreadyAdded(questionId)) return
 
             if (selectedQuestion.find((q) => q.id === questionId) === undefined) {
                 setSelectedQuestion([...selectedQuestion, questionBank.find((q) => q.id === questionId)])
@@ -376,6 +373,29 @@ export default function CreateExam({id}) {
         setFile(e.target.files[0])
     }
 
+    const handleSelectAll = () => {
+        if (formik.values.categoryId === -1) {
+            toast.dismiss();
+            toast.warning("Hãy chọn danh mục trước");
+            return;
+        }
+
+        const selectableQuestions = [];
+
+        for (const question of questionBank) {
+            const alreadyAdded = isQuestionAlreadyAdded(question.id);
+            const alreadySelected = selectedQuestion.some((q) => q.id === question.id);
+            if (selectableQuestions.length >= 50) break;
+            else if (!alreadyAdded && !alreadySelected) selectableQuestions.push(question);
+        }
+
+        setSelectedQuestion([...selectedQuestion, ...selectableQuestions]);
+    };
+
+    const handleUnselectedAll = () => {
+        setSelectedQuestion([]);
+    }
+
     const handleReadFileExcel = async () => {
         try {
             if (!file) {
@@ -445,11 +465,25 @@ export default function CreateExam({id}) {
 
                 const correctCount = answers.filter((a) => a.correct).length
 
-                if (rawItem.type === types[1] && correctCount !== 1) {
-                    errors.push("Câu hỏi một lựa chọn phải có duy nhất 1 đáp án đúng")
+                if (rawItem.type === "multiple") {
+                    if (correctCount < 2) {
+                        errors.push("Câu hỏi nhiều lựa chọn phải có nhiều hơn 1 đáp án đúng")
+                    }
+                    if (answers.length !== 4) {
+                        errors.push("Câu hỏi nhiều lựa chọn hoặc 1 lựa chọn phải có đủ 4 đáp án")
+                    }
                 }
 
-                if (rawItem.type === types[2]) {
+                if (rawItem.type === "single") {
+                    if (correctCount > 1 || correctCount === 0) {
+                        errors.push("Câu hỏi một lựa chọn phải có duy nhất 1 đáp án đúng")
+                    }
+                    if (answers.length !== 4) {
+                        errors.push("Câu hỏi nhiều lựa chọn hoặc 1 lựa chọn phải có đủ 4 đáp án")
+                    }
+                }
+
+                if (rawItem.type === "boolean") {
                     if (answers.length !== 2) {
                         errors.push("Câu hỏi Đúng/Sai phải có đúng 2 đáp án")
                     }
@@ -480,7 +514,7 @@ export default function CreateExam({id}) {
             setFile(null);
             await setQuestionsFromExcel(result)
         } catch (error) {
-            console.error("❌ Lỗi khi đọc file Excel:", error)
+            toast.error("❌ Lỗi khi đọc file Excel:", error)
         }
     }
 
@@ -491,6 +525,7 @@ export default function CreateExam({id}) {
             toast.success(response?.data || `Thêm thành công ${questionsFromExcel.length} câu hỏi`)
             setQuestionsFromExcel([]);
             setOpenQuestionsExcel(false);
+            setReload(!reload)
         } catch (error) {
             toast.error(error?.response?.data || "Lỗi khi tải lên danh sách câu hỏi")
         } finally {
@@ -635,7 +670,8 @@ export default function CreateExam({id}) {
                                         }`}
                                     >
                                         <div className="flex items-center gap-2">
-                      <span className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}></span>
+                                            <span
+                                                className={`font-semibold ${option.correct ? "text-teal-700" : "text-gray-600"}`}></span>
                                             <span>{option.content}</span>
                                             {option.correct &&
                                                 <CheckCircle2 className="h-4 w-4 ml-auto text-teal-600"/>}
@@ -1054,22 +1090,7 @@ export default function CreateExam({id}) {
                                         </div>
                                     </div>
                                     <div className="space-y-2 w-full md:w-auto flex-shrink-0">
-                                        {/*<Label className="text-gray-700 font-medium text-sm flex items-center gap-2">*/}
-                                        {/*    <Upload className="h-4 w-4 text-purple-600"/>*/}
-                                        {/*    Tải lên*/}
-                                        {/*</Label>*/}
                                         <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-                                            {/*<DialogTrigger asChild>*/}
-                                            {/*    <Button*/}
-                                            {/*        variant="outline"*/}
-                                            {/*        className="w-full cursor-pointer bg-white text-purple-600 border-purple-300 hover:bg-purple-50 transition-all duration-200 disabled:cursor-not-allowed"*/}
-                                            {/*        title="Import câu hỏi từ Excel"*/}
-                                            {/*    >*/}
-                                            {/*        <Upload className="h-4 w-4 mr-2"/>*/}
-                                            {/*        File Excel*/}
-                                            {/*    </Button>*/}
-                                            {/*</DialogTrigger>*/}
-
                                             <DialogContent className="bg-white max-w-md">
                                                 <DialogHeader>
                                                     <DialogTitle className="flex items-center gap-2 text-purple-600">
@@ -1233,10 +1254,31 @@ export default function CreateExam({id}) {
                         </Card>
                         <Card className="p-0 shadow-lg border-gray-200 bg-white flex-1">
                             <CardHeader className="bg-purple-600 text-white rounded-t-lg">
-                                <CardTitle className="flex items-center justify-between text-lg py-3">
-                                    <div className="flex items-center gap-3">
-                                        <ListIcon className="h-5 w-5"/>
-                                        Danh Sách Câu Hỏi ({questionBank.length})
+                                {/*<CardTitle className="flex items-center justify-between text-lg py-3">*/}
+                                {/*    <div className="flex items-center gap-3">*/}
+                                {/*        <ListIcon className="h-5 w-5"/>*/}
+                                {/*        Danh Sách Câu Hỏi ({questionBank.length})*/}
+                                {/*    </div>*/}
+                                {/*</CardTitle>*/}
+                                <CardTitle className="flex items-center gap-3 text-lg py-3">
+                                    <Search className="h-5 w-5"/>
+                                    Ngân Hàng Câu Hỏi
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        {selectedQuestion.length > 0 &&
+                                            <Badge
+                                                className="bg-white/20 text-white border-white/30 hover:bg-purple-300 cursor-pointer"
+                                                onClick={handleUnselectedAll}>
+                                                Bỏ chọn tất cả
+                                            </Badge>
+                                        }
+                                        {selectedQuestion.length < 50
+                                            && questionBank.find(q => !formik.values.questions.some(sq => sq.id === q.id)) !== undefined &&
+                                            <Badge
+                                                className="bg-white/20 text-white border-white/30 hover:bg-purple-300 cursor-pointer"
+                                                onClick={handleSelectAll}>
+                                                Chọn tất cả
+                                            </Badge>
+                                        }
                                     </div>
                                 </CardTitle>
                             </CardHeader>
