@@ -84,7 +84,7 @@ const Register = () => {
             localStorage.setItem("token_confirm_email", token)
             const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
                 <EmailTemplate
-                    data={`http://localhost:3000/confirm`}
+                    data={`https://quiz-gym-app-frontend-a48q.vercel.app/confirm`}
                     title={"Mở Khóa Tài Khoản"}
                     description={"Nhấn nút bên dưới để xác nhận"}
                     openButton={true}
@@ -116,7 +116,7 @@ const Register = () => {
     }
 
     const handleGoogleRegister = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google"
+        window.location.href = "https://quizgymapp.onrender.com/oauth2/authorization/google"
     }
 
     if (!isReady) return null

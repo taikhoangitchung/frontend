@@ -21,7 +21,7 @@ export default function Page() {
     const [selectedImage, setSelectedImage] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
 
-    const imageBaseUrl = "http://localhost:8080";
+    const imageBaseUrl = "https://quizgymapp.onrender.com";
 
     useEffect(() => {
         const fetchData = async () => {

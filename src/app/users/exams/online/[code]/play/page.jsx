@@ -44,7 +44,7 @@ export default function PlayExamFormOnline() {
     const timerRef = useRef(null);
 
     const storedEmail = localStorage.getItem("email");
-    const imageBaseUrl = "http://localhost:8080";
+    const imageBaseUrl = "https://quizgymapp.onrender.com";
 
     const fetchLatestResult = async () => {
         try {
