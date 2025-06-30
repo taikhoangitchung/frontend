@@ -198,31 +198,42 @@ export default function QuestionTable() {
                                     setPage(1);
                                 }}
                             >
-                                <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
-                                    <SelectValue placeholder="Tác giả" />
+                                <SelectTrigger
+                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
+                                    <SelectValue placeholder="Tác giả"/>
                                 </SelectTrigger>
                                 <SelectContent
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all" className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả tác giả</SelectItem>
-                                    <SelectItem value="mine" className="cursor-pointer hover:bg-gray-100 transition-colors">Của tôi</SelectItem>
-                                    <SelectItem value="others" className="cursor-pointer hover:bg-gray-100 transition-colors">Của người khác</SelectItem>
+                                    <SelectItem value="all"
+                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả
+                                        tác giả</SelectItem>
+                                    <SelectItem value="mine"
+                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Của
+                                        tôi</SelectItem>
+                                    <SelectItem value="others"
+                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Của người
+                                        khác</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="relative z-10">
                             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-                                <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                                <SelectTrigger
+                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
                                     <SelectValue placeholder="Danh mục"/>
                                 </SelectTrigger>
                                 <SelectContent
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all" className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả danh mục</SelectItem>
+                                    <SelectItem value="all"
+                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả
+                                        danh mục</SelectItem>
                                     {categories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id.toString()} className="cursor-pointer hover:bg-gray-100 transition-colors">
+                                        <SelectItem key={cat.id} value={cat.id.toString()}
+                                                    className="cursor-pointer hover:bg-gray-100 transition-colors">
                                             {cat.name}
                                         </SelectItem>
                                     ))}
@@ -258,7 +269,7 @@ export default function QuestionTable() {
 
                 {/* List */}
                 <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                         <span className="text-lg font-medium">
                             Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
                         </span>
@@ -296,7 +307,10 @@ export default function QuestionTable() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={(e) => { e.stopPropagation(); handleEdit(q.id); }} // Ngăn sự kiện lan ra
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEdit(q.id);
+                                                    }} // Ngăn sự kiện lan ra
                                                     className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                                 >
                                                     <Edit className="w-5 h-5"/>
@@ -313,7 +327,10 @@ export default function QuestionTable() {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={(e) => { e.stopPropagation(); toggleExpand(q.id); }} // Ngăn sự kiện lan ra
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleExpand(q.id);
+                                            }} // Ngăn sự kiện lan ra
                                             className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                             title="Xem đáp án"
                                         >

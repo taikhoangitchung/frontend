@@ -131,14 +131,23 @@ export default function ExamManager() {
                             }}
                         >
                             <SelectTrigger
-                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                 <SelectValue placeholder="Lọc theo tác giả"/>
                             </SelectTrigger>
                             <SelectContent
                                 className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem value="all">Tất cả tác giả</SelectItem>
-                                <SelectItem value="mine">Của tôi</SelectItem>
-                                <SelectItem value="others">Của người khác</SelectItem>
+                                <SelectItem
+                                    value="all"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Tất cả tác giả</SelectItem>
+                                <SelectItem
+                                    value="mine"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Của tôi</SelectItem>
+                                <SelectItem
+                                    value="others"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select
@@ -155,14 +164,22 @@ export default function ExamManager() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                            <SelectTrigger
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                 <SelectValue placeholder="Lọc theo danh mục"/>
                             </SelectTrigger>
                             <SelectContent
                                 className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                                <SelectItem
+                                    value="all"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Tất cả danh mục</SelectItem>
                                 {categories.map(cat => (
-                                    <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+                                    <SelectItem
+                                        key={cat.id}
+                                        value={String(cat.id)}
+                                        className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                    >{cat.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
