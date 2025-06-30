@@ -92,7 +92,7 @@ class UserService {
 
     static async confirmEmail(email) {
         try {
-            return await axiosInstance.get("/users/confirm", {params: {email}});
+            await axiosInstance.patch("/users/confirm", {email: email});
         } catch (error) {
             throw error;
         }
@@ -128,7 +128,7 @@ class UserService {
 
     static async refreshToken(refreshToken) {
         try {
-            return await axiosInstance.post("/users/refresh-token", { refreshToken });
+            return await axiosInstance.post("/users/refresh-token", {refreshToken});
         } catch (error) {
             throw error;
         }
