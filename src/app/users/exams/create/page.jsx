@@ -55,9 +55,6 @@ import {
 import * as ExcelJS from "exceljs"
 import {ScrollArea} from "../../../../components/ui/scroll-area";
 import TypeService from "../../../../services/TypeService";
-import {ScrollArea} from "../../../../components/ui/scroll-area";
-import {BiBorderAll} from "react-icons/bi";
-import {continueDynamicHTMLResume} from "next/dist/server/stream-utils/node-web-streams-helper";
 
 const questionLimits = [
     {value: 30, label: "30 câu"},
