@@ -7,7 +7,7 @@ import {Card, CardContent, CardHeader} from "../../../components/ui/card";
 import {Separator} from "../../../components/ui/separator";
 import {
     Search, Plus, Edit, BookOpen, Target, Clock, CheckCircle, HelpCircle, Flame,
-    FileText, BarChart2, FlaskConical, ArrowLeft
+    FileText, BarChart2, FlaskConical, ArrowLeft, Play
 } from "lucide-react";
 import {useRouter, useSearchParams} from "next/navigation";
 import ExamService from "../../../services/ExamService";
@@ -318,6 +318,15 @@ export default function ExamManager() {
                                         >
                                             <FlaskConical className="w-4 h-4 mr-1"/>
                                             Tạo phòng thi online
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-emerald-600 border-emerald-300 hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer transition-all duration-200"
+                                            onClick={() => router.push(`/users/exams/${exam.id}/play`)}
+                                        >
+                                            <Play className="w-4 h-4 mr-1" />
+                                            Thực hành
                                         </Button>
                                     </div>
                                 </CardContent>

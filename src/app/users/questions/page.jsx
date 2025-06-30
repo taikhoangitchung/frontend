@@ -299,7 +299,7 @@ export default function QuestionTable() {
                             >
                                 <CardHeader className="gap-0 !pb-0 px-6">
                                     <div className="flex justify-between items-start gap-2">
-                                        <h2 className="text-lg font-semibold text-purple-800 flex-1">
+                                        <h2 className="text-lg font-semibold text-purple-800 flex-1 whitespace-pre-wrap">
                                             {idx + 1 + (page - 1) * questionPerPage}. {q.content}
                                         </h2>
                                         {q.user.id === userId && (
@@ -371,7 +371,8 @@ export default function QuestionTable() {
                                                 ) : (
                                                     <X className="w-4 h-4 text-red-400 opacity-50"/>
                                                 )}
-                                                <span className="text-sm">{a.content}</span>
+                                                <span className="text-sm whitespace-pre-wrap">{a.content}</span>
+
                                             </div>
                                         ))}
                                         <div className="col-span-full flex flex-wrap gap-2 mt-1">
