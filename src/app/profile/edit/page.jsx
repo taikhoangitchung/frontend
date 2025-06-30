@@ -31,7 +31,7 @@ const EditProfile = () => {
             }
             setUserEmail(storedUserEmail);
             const storedUsername = localStorage.getItem("username") || "";
-            const defaultAvatar = "http://localhost:8080/media/default-avatar.png";
+            const defaultAvatar = "https://quizgymapp.onrender.com/media/default-avatar.png";
             setInitialUsername(storedUsername);
             setAvatarPreview(defaultAvatar);
 
@@ -41,7 +41,7 @@ const EditProfile = () => {
                     const username = user.username || storedUsername;
                     const avatar = user.avatar || defaultAvatar;
                     setInitialUsername(username);
-                    setAvatarPreview(`http://localhost:8080${avatar}`);
+                    setAvatarPreview(`https://quizgymapp.onrender.com${avatar}`);
                     localStorage.setItem("username", username);
                     localStorage.setItem("avatar", avatar);
                 })

@@ -121,7 +121,7 @@ const Login = () => {
     const handleGoogleLogin = () => {
         setIsRedirecting(true)
         setTimeout(() => {
-            window.location.href = "http://localhost:8080/oauth2/authorization/google"
+            window.location.href = "https://quizgymapp.onrender.com/oauth2/authorization/google"
         }, 300)
     }
 
