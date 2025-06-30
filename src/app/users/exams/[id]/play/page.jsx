@@ -238,7 +238,11 @@ export default function OfflineExamForm() {
                     {/* Right Section - Question Content (7/10) */}
                     <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-7">
                         <div className="text-xl bg-white/10 border-white/30 text-white p-4 rounded-lg">
-                            {currentQuestion.content}
+                            <div className="whitespace-pre-wrap">
+                                {typeof currentQuestion.content === "string"
+                                    ? currentQuestion.content.replace(/\\n/g, "\n")
+                                    : currentQuestion.content}
+                            </div>
                             <div className="text-lg text-purple-200 font-normal">
                                 ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
                             </div>
@@ -246,9 +250,11 @@ export default function OfflineExamForm() {
                     </Card>
                 </div>
             ) : (
-                <div className="text-center text-xl bg-black/20 rounded-2xl p-6">
-                    {currentQuestion?.content}
-                    <div className="text-lg text-purple-200 font-normal">
+                <div className="text-center text-xl bg-black/20 rounded-2xl p-6 whitespace-pre-wrap">
+                    {typeof currentQuestion?.content === "string"
+                        ? currentQuestion.content.replace(/\\n/g, "\n")
+                        : currentQuestion.content}
+                    <div className="text-lg text-purple-200 font-normal mt-2">
                         ({isMultipleChoice ? "Chọn nhiều đáp án" : "Chọn một đáp án"})
                     </div>
                 </div>
@@ -264,7 +270,11 @@ export default function OfflineExamForm() {
                             className={getAnswerButtonStyle(answer, index)}
                             disabled={submitting || submitted}
                         >
-                            <span className="text-center px-4">{answer.content}</span>
+                            <span className="text-center px-4 whitespace-pre-wrap">
+  {typeof answer.content === "string"
+      ? answer.content.replace(/\\n/g, "\n")
+      : answer.content}
+</span>
                             <div className="absolute top-3 left-3">
                                 <div className={`w-8 h-8 flex items-center justify-center shadow transition-all duration-200
                                 ${isSelected ? "opacity-100 scale-100" : "opacity-10 scale-90"}

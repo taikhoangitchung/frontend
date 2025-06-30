@@ -77,8 +77,9 @@ export default function Page() {
                             hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2">
                             <CardHeader className="gap-0 !pb-0 px-6">
                                 <div className="flex justify-between items-start gap-2">
-                                    <h2 className="text-lg font-semibold text-purple-800 flex-1">
-                                        {index + 1 + (page - 1) * questionPerPage}. {q.content}
+                                    <h2 className="text-lg font-semibold text-purple-800 flex-1 whitespace-pre-wrap">
+                                        {index + 1 + (page - 1) * questionPerPage}.{" "}
+                                        {typeof q.content === "string" ? q.content.replace(/\\n/g, "\n") : q.content}
                                     </h2>
                                     <Button
                                         variant="ghost"
@@ -95,7 +96,7 @@ export default function Page() {
                             </CardHeader>
                             {expandedIds.includes(q.id) && (
                                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {q.image && (
+                                {q.image && (
                                         <div className="col-span-full">
                                             <img
                                                 src={`${imageBaseUrl}${q.image}`}
@@ -123,7 +124,9 @@ export default function Page() {
                                             ) : (
                                                 <X className="w-4 h-4 text-red-400 opacity-50"/>
                                             )}
-                                            <span className="text-sm">{a.content}</span>
+                                            <span className="text-sm whitespace-pre-wrap">
+  {typeof a.content === "string" ? a.content.replace(/\\n/g, "\n") : a.content}
+</span>
                                         </div>
                                     ))}
 
