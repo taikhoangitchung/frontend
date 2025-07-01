@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { Loader2, Search } from "lucide-react"
 import UserService from "../../services/UserService"
@@ -10,7 +10,6 @@ import { Input } from "../ui/input"
 import { TableBody, TableCell, TableHead, TableHeader, TableRow, Table } from "../ui/table"
 import { Button } from "../ui/button"
 import UserStatusSwitch from "../alerts-confirms/UserStatusSwitch"
-import {formatDate} from "../../util/formatDate";
 
 const UserTable = () => {
     const [users, setUsers] = useState([])
@@ -123,10 +122,11 @@ const UserTable = () => {
                             <CardContent className="p-0">
                                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
                                     <h2 className="text-lg font-semibold">Danh sách người dùng</h2>
-                                    <div className="flex items-center">
+                                    <div className="flex items-center relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700 w-4 h-4"/>
                                         <Input
                                             placeholder="Tìm kiếm theo tên hoặc email"
-                                            className="w-64 h-9 mr-2 cursor-pointer transition-all duration-200"
+                                            className="w-64 h-9 mr-2 pl-10 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                                             onChange={(e) => {
                                                 setIsLoading(true)
                                                 setSearchTerm(e.target.value)

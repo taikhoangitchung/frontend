@@ -127,7 +127,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                     {viewMode === "ADMIN" && (
                         <Button
                             onClick={handleCreate}
-                            className="bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300 cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
+                            className="bg-purple-600 hover:bg-purple-700 cursor-pointer text-white"
                             variant="outline"
                             disabled={isLoading.create}
                         >
@@ -162,7 +162,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                                             variant="ghost"
                                             size="sm"
                                             title="Chỉnh sửa"
-                                            className="p-1 text-primary hover:bg-gray-100"
+                                            className="cursor-pointer text-gray-600 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                             onClick={() => handleEdit(category.id)}
                                             disabled={isLoading.edit[category.id]}
                                         >
@@ -175,7 +175,9 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                                         <DeleteButton
                                             id={category.id}
                                             handleDelete={handleDelete}
-                                            className="p-1 text-red-600 hover:bg-red-50"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="cursor-pointer text-gray-500 hover:bg-red-200 hover:text-red-700 px-2 py-1 transition-all duration-200"
                                         />
                                     </div>
                                 )}
