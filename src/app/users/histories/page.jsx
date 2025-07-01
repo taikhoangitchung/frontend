@@ -1,12 +1,12 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter} from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
-import {toast} from "sonner";
-import {ArrowLeft, Timer, CheckCircle, Pencil, XCircle} from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, Timer, CheckCircle, Pencil, XCircle } from "lucide-react";
 import formatTime from "../../../util/formatTime";
-import {motion, AnimatePresence} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import ExamResultSummary from "../../../components/exam/ExamResultSummary";
 
 const HistoryPage = () => {
@@ -21,6 +21,17 @@ const HistoryPage = () => {
     const [activeTab, setActiveTab] = useState("completed");
     const pageSize = 20;
 
+    const formatDate = (dateArray) => {
+        if (!dateArray || !Array.isArray(dateArray) || dateArray.length < 3) return "Không xác định";
+        try {
+            const [yyyy, mm, dd] = dateArray; // Lấy năm, tháng, ngày từ mảng
+            return `${String(dd).padStart(2, '0')}/${String(mm).padStart(2, '0')}/${yyyy}`;
+        } catch (error) {
+            console.error("Lỗi định dạng ngày:", dateArray, error);
+            return "Không xác định";
+        }
+    };
+
     useEffect(() => {
         if (activeTab !== "completed") {
             setHistoryList([]);
@@ -33,7 +44,37 @@ const HistoryPage = () => {
             setLoading(true);
             try {
                 const response = await HistoryService.getAll();
-                const histories = response.data;
+                let histories = response.data;
+
+                // Sắp xếp theo finishedAt giảm dần (mới nhất lên trên)
+                histories = histories.sort((a, b) => {
+                    const dateA = new Date(a.finishedAt[0], a.finishedAt[1] - 1, a.finishedAt[2], a.finishedAt[3], a.finishedAt[4], a.finishedAt[5]);
+                    const dateB = new Date(b.finishedAt[0], b.finishedAt[1] - 1, b.finishedAt[2], b.finishedAt[3], b.finishedAt[4], b.finishedAt[5]);
+                    return dateB - dateA; // Sắp xếp giảm dần
+                });
+
+                // Nhóm các lần thi theo examTitle và gán attemptTime (mới nhất là số lớn nhất)
+                const examAttempts = {};
+                histories.forEach((history) => {
+                    const examTitle = history.examTitle;
+                    if (!examAttempts[examTitle]) {
+                        examAttempts[examTitle] = [];
+                    }
+                    examAttempts[examTitle].push(history); // Lưu toàn bộ history
+                });
+
+                // Gán attemptTime theo thứ tự giảm dần (mới nhất là max, cũ nhất là 1)
+                histories = histories.map((history) => {
+                    const examTitle = history.examTitle;
+                    const attempts = examAttempts[examTitle];
+                    const index = attempts.findIndex((h) => h.historyId === history.historyId);
+                    const attemptTime = attempts.length - index; // Mới nhất là số lớn nhất, cũ nhất là 1
+                    return {
+                        ...history,
+                        attemptTime: attemptTime
+                    };
+                });
+
                 setAllHistories(histories);
                 setTotalPages(Math.ceil(histories.length / pageSize));
                 setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
@@ -59,9 +100,9 @@ const HistoryPage = () => {
 
     const handleOpenModal = (id) => {
         setSelectedHistoryId(id);
-    }
+    };
     const handleCloseModal = () => {
-        setSelectedHistoryId(null)
+        setSelectedHistoryId(null);
     };
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -195,7 +236,7 @@ const HistoryPage = () => {
 
                                         <div className="flex justify-between text-sm text-gray-500">
                                             <span>Ngày thi:</span>
-                                            <span>{new Date(history.finishedAt).toLocaleString("vi-VN")}</span>
+                                            <span>{formatDate(history.finishedAt)}</span>
                                         </div>
 
                                         <div className="flex justify-between text-sm text-gray-500">

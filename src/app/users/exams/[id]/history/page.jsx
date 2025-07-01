@@ -1,9 +1,9 @@
 "use client"
 
-import React, {useEffect, useState} from "react"
-import {useParams, useRouter} from "next/navigation"
+import React, { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
 import HistoryService from "../../../../../services/HistoryService"
-import {Button} from "../../../../../components/ui/button"
+import { Button } from "../../../../../components/ui/button"
 import {
     Loader2,
     Clock,
@@ -12,14 +12,26 @@ import {
     CheckCircle2,
     TimerReset,
     Repeat2,
-    XCircle, ArrowLeft,
+    XCircle,
+    ArrowLeft,
 } from "lucide-react"
 
 export default function ExamHistoryPage() {
-    const {id} = useParams()
+    const { id } = useParams()
     const router = useRouter()
     const [histories, setHistories] = useState([])
     const [loading, setLoading] = useState(true)
+
+    const formatDate = (dateArray) => {
+        if (!dateArray || !Array.isArray(dateArray) || dateArray.length < 3) return "Không xác định"
+        try {
+            const [yyyy, mm, dd] = dateArray // Lấy năm, tháng, ngày từ mảng
+            return `${String(dd).padStart(2, '0')}-${String(mm).padStart(2, '0')}-${yyyy}`
+        } catch (error) {
+            console.error("Lỗi định dạng ngày:", dateArray, error)
+            return "Không xác định"
+        }
+    }
 
     useEffect(() => {
         const fetchHistories = async () => {
@@ -107,7 +119,7 @@ export default function ExamHistoryPage() {
                         {histories.map((h, index) => (
                             <tr key={index} className="even:bg-white odd:bg-gray-50 hover:bg-gray-100 transition">
                                 <td className="p-4 border-b text-center">{index + 1}</td>
-                                <td className="p-4 border-b">{new Date(h.finishedAt).toLocaleString("vi-VN")}</td>
+                                <td className="p-4 border-b">{formatDate(h.finishedAt)}</td>
                                 <td className="p-4 border-b">{h.username}</td>
                                 <td className="p-4 border-b text-center">
                                     <span className={`px-2 py-1 rounded font-semibold 
