@@ -26,6 +26,16 @@ const UserTable = () => {
         nextPage: false
     })
 
+    function formatDateFromArray(arr) {
+        if (arr === null) {
+            return "---";
+        }
+        const [year, month, day] = arr;
+        const dd = String(day).padStart(2, '0');
+        const mm = String(month).padStart(2, '0');
+        return `${dd}-${mm}-${year}`;
+    }
+
 // ✅ API call
     useEffect(() => {
         setIsLoading(true)
@@ -159,8 +169,8 @@ const UserTable = () => {
                                                             <TableCell className="py-3 px-4 font-medium">{user.id}</TableCell>
                                                             <TableCell className="py-3 px-4 font-medium">{user.email}</TableCell>
                                                             <TableCell className="py-3 px-4">{user.username}</TableCell>
-                                                            <TableCell className="py-3 px-4 text-gray-600">{formatDate(user.createAt)}</TableCell>
-                                                            <TableCell className="py-3 px-4 text-gray-600">{formatDate(user.lastLogin)}</TableCell>
+                                                            <TableCell className="py-3 px-4 text-gray-600">{formatDateFromArray(user.createAt)}</TableCell>
+                                                            <TableCell className="py-3 px-4 text-gray-600">{formatDateFromArray(user.lastLogin)}</TableCell>
                                                             <TableCell className="py-3 px-4 text-gray-600">
                                                                 <UserStatusSwitch user={user} onToggle={handleToggleUserStatus} />
                                                             </TableCell>
