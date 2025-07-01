@@ -17,8 +17,8 @@ export default function Component() {
 
     const callApi = async () => {
         try {
-            setLoading(true);
-            const token = localStorage.getItem("token_confirm_email");
+            setLoading(true)
+            const token = localStorage.getItem("token_confirm_email")
             const response = await UserService.checkToken(token)
 
             const email = localStorage.getItem("email")
