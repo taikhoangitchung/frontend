@@ -137,7 +137,7 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                         <Button
                             variant="ghost"
                             className="text-purple-600 border-b-2 border-purple-600 cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
-                            onClick={() => handleNavigation("home", "/users")}
+                            onClick={() => handleNavigation("home", "/")}
                             disabled={isLoading.home}
                         >
                             {isLoading.home ? (
