@@ -92,7 +92,7 @@ class UserService {
 
     static async confirmEmail(email) {
         try {
-            return await axiosInstance.get("/users/confirm", {params: {email}});
+            return await axiosInstance.patch("/users/confirm", {email: email});
         } catch (error) {
             throw error;
         }

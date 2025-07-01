@@ -79,7 +79,7 @@ const Register = () => {
         localStorage.removeItem("token")
         try {
             const response = await UserService.register(values)
-
+            localStorage.setItem("email", response.data)
             const token = crypto.randomUUID()
             localStorage.setItem("token_confirm_email", token)
             const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
