@@ -7,7 +7,7 @@ import {Card, CardContent, CardHeader} from "../../../components/ui/card";
 import {Separator} from "../../../components/ui/separator";
 import {
     Search, Plus, Edit, BookOpen, Target, Clock, CheckCircle, HelpCircle, Flame,
-    FileText, BarChart2, FlaskConical, ArrowLeft
+    FileText, BarChart2, FlaskConical, ArrowLeft, Play
 } from "lucide-react";
 import {useRouter, useSearchParams} from "next/navigation";
 import ExamService from "../../../services/ExamService";
@@ -131,14 +131,23 @@ export default function ExamManager() {
                             }}
                         >
                             <SelectTrigger
-                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200">
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                 <SelectValue placeholder="Lọc theo tác giả"/>
                             </SelectTrigger>
                             <SelectContent
                                 className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem value="all">Tất cả tác giả</SelectItem>
-                                <SelectItem value="mine">Của tôi</SelectItem>
-                                <SelectItem value="others">Của người khác</SelectItem>
+                                <SelectItem
+                                    value="all"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Tất cả tác giả</SelectItem>
+                                <SelectItem
+                                    value="mine"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Của tôi</SelectItem>
+                                <SelectItem
+                                    value="others"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select
@@ -155,14 +164,22 @@ export default function ExamManager() {
                                 setPage(1);
                             }}
                         >
-                            <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm">
+                            <SelectTrigger
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                 <SelectValue placeholder="Lọc theo danh mục"/>
                             </SelectTrigger>
                             <SelectContent
                                 className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                                <SelectItem
+                                    value="all"
+                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >Tất cả danh mục</SelectItem>
                                 {categories.map(cat => (
-                                    <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+                                    <SelectItem
+                                        key={cat.id}
+                                        value={String(cat.id)}
+                                        className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                    >{cat.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -187,7 +204,7 @@ export default function ExamManager() {
                             setSearchTerm(e.target.value);
                             setPage(1);
                         }}
-                        className="pl-10 bg-white cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
+                        className="pl-10 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
 
@@ -229,12 +246,16 @@ export default function ExamManager() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="p-1 cursor-pointer transition-all duration-200"
+                                                    className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                                     onClick={() => router.push(`/users/exams/${exam.id}/edit`)}
                                                 >
                                                     <Edit className="w-6 h-6"/>
                                                 </Button>
-                                                <DeleteButton id={exam.id} handleDelete={handleDeleteExam}/>
+                                                <DeleteButton
+                                                    id={exam.id}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    handleDelete={handleDeleteExam}/>
                                             </div>
                                         )}
                                     </div>
@@ -297,6 +318,15 @@ export default function ExamManager() {
                                         >
                                             <FlaskConical className="w-4 h-4 mr-1"/>
                                             Tạo phòng thi online
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-emerald-600 border-emerald-300 hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer transition-all duration-200"
+                                            onClick={() => router.push(`/users/exams/${exam.id}/play`)}
+                                        >
+                                            <Play className="w-4 h-4 mr-1" />
+                                            Thực hành
                                         </Button>
                                     </div>
                                 </CardContent>

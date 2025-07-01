@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
 import { motion } from "framer-motion";
-import {useEffect, useState, useRef} from "react"
-import {Button} from "../ui/button"
-import {useRouter} from "next/navigation"
-import {Eye, RefreshCw, LogOut, X} from "lucide-react"
-import HistoryService from "../../services/HistoryService"
-import ExamDetailPanel from "./ExamDetailPanel"
-import RankStars from "../icon/rank"
+import { useEffect, useState, useRef } from "react";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { Eye, RefreshCw, LogOut, X } from "lucide-react";
+import HistoryService from "../../services/HistoryService";
+import ExamDetailPanel from "./ExamDetailPanel";
+import RankStars from "../icon/rank";
 
-export default function ExamResultSummary({onReplay, historyId, viewMode = false, onExit}) {
-    const [showPanel, setShowPanel] = useState(false)
-    const router = useRouter()
-    const [data, setData] = useState(null)
-    const username = localStorage.getItem("username")
-    const [loading, setLoading] = useState(true)
-    const panelRef = useRef(null)
+export default function ExamResultSummary({ onReplay, historyId, viewMode = false, onExit }) {
+    const [showPanel, setShowPanel] = useState(false);
+    const router = useRouter();
+    const [data, setData] = useState(null);
+    const username = localStorage.getItem("username");
+    const [loading, setLoading] = useState(true);
+    const panelRef = useRef(null);
 
     const handleExit = () => {
         if (onExit) {
@@ -28,26 +28,26 @@ export default function ExamResultSummary({onReplay, historyId, viewMode = false
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await HistoryService.getHistoryDetail(historyId)
-                console.log(response.data)
-                setData(response.data)
+                const response = await HistoryService.getHistoryDetail(historyId);
+                console.log(response.data);
+                setData(response.data);
             } catch (error) {
-                console.error(error)
+                console.error(error);
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
-        }
-        fetchData()
-    }, [historyId])
+        };
+        fetchData();
+    }, [historyId]);
 
     const avgTimePerQ =
         data && data.correct + data.wrong > 0
             ? Math.round(data.timeTaken / (data.correct + data.wrong))
-            : 0
+            : 0;
 
     const showDetail = () => {
-        setShowPanel(true)
-    }
+        setShowPanel(true);
+    };
 
     if (loading || !data) {
         return (
@@ -59,10 +59,10 @@ export default function ExamResultSummary({onReplay, historyId, viewMode = false
 
     return (
         <motion.div
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            exit={{opacity: 0, y: 20}}
-            transition={{duration: 0.25}}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.25 }}
             className="bg-purple-900 w-full max-w-xl rounded-xl p-6 shadow-lg text-center space-y-6"
         >
             <div className="bg-purple-900 w-full max-w-xl rounded-xl p-6 shadow-lg text-center space-y-6">
@@ -117,7 +117,7 @@ export default function ExamResultSummary({onReplay, historyId, viewMode = false
                                     <p className="text-purple-200 text-xs mb-2 text-center">Bảng xếp hạng</p>
                                     <div className="space-y-1 text-sm">
                                         {data.rankResponse.rankings.map((r, i) => {
-                                            const isCurrentUser = r.username === username
+                                            const isCurrentUser = r.username === username;
                                             return (
                                                 <div
                                                     key={i}
@@ -131,9 +131,9 @@ export default function ExamResultSummary({onReplay, historyId, viewMode = false
                                                         <span>{r.rank}.</span>
                                                         <span>{r.username}</span>
                                                     </div>
-                                                    <RankStars rank={r.rank}/>
+                                                    <RankStars rank={r.rank} />
                                                 </div>
-                                            )
+                                            );
                                         })}
                                     </div>
                                 </div>
@@ -143,9 +143,9 @@ export default function ExamResultSummary({onReplay, historyId, viewMode = false
                         <div className="flex flex-col gap-2 mt-6">
                             <Button
                                 onClick={showDetail}
-                                className="bg-white text-purple-900 rounded-full px-6 py-2 font-semibold mt-2 flex items-center justify-center gap-2 cursor-pointer"
+                                className="bg-white text-purple-900 rounded-full px-6 py-2 font-semibold mt-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all duration-200"
                             >
-                                <Eye size={18}/>
+                                <Eye size={18} />
                                 Xem chi tiết
                             </Button>
 
@@ -154,16 +154,16 @@ export default function ExamResultSummary({onReplay, historyId, viewMode = false
                                     onClick={onReplay}
                                     className="bg-purple-500 hover:bg-purple-600 text-white rounded-full font-semibold py-2 flex items-center gap-2 justify-center cursor-pointer"
                                 >
-                                    <RefreshCw size={18}/>
+                                    <RefreshCw size={18} />
                                     Chơi lại
                                 </Button>
                             )}
 
                             <Button
-                                className="bg-white text-purple-900 rounded-full font-semibold py-2 flex items-center justify-center gap-2 cursor-pointer"
+                                className="bg-white text-purple-900 rounded-full font-semibold py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all duration-200"
                                 onClick={handleExit}
                             >
-                                <LogOut size={18}/>
+                                <LogOut size={18} />
                                 Thoát
                             </Button>
                         </div>
@@ -182,5 +182,5 @@ export default function ExamResultSummary({onReplay, historyId, viewMode = false
                 </div>
             </div>
         </motion.div>
-    )
+    );
 }
