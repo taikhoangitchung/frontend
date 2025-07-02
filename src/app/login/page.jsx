@@ -102,7 +102,7 @@ const Login = () => {
             let nextPage = ""
 
             if (role === "ADMIN") {
-                nextPage = "/admin/dashboard"
+                nextPage = "/admin/dashboard?tab=users"
             } else {
                 nextPage = "/users/dashboard"
             }

@@ -111,9 +111,7 @@ export default function CategoryForm({ mode = "create", categoryId = null }) {
                                 </div>
                             </div>
 
-                            <Separator />
-
-                            <div className="flex justify-end gap-3">
+                            <div className="flex justify-end gap-3 pt-3">
                                 <Button
                                     type="button"
                                     onClick={() => router.back()}
