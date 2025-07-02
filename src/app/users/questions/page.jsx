@@ -63,7 +63,7 @@ export default function QuestionTable() {
     const [expandedIds, setExpandedIds] = useState([]);
     const questionPerPage = 10;
 
-    const imageBaseUrl = "http://localhost:8080";
+    const imageBaseUrl = "https://quizgymapp.onrender.com";
 
     useEffect(() => {
         const id = parseInt(localStorage.getItem("id") || "0");

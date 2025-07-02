@@ -33,7 +33,7 @@ export default function OfflineExamForm() {
     const currentQuestion = questions[questionIndex] || {}
     const isMultipleChoice = currentQuestion?.type?.name === "multiple"
 
-    const imageBaseUrl = "http://localhost:8080";
+    const imageBaseUrl = "https://quizgymapp.onrender.com";
 
     useEffect(() => {
         const fetchQuizData = async () => {

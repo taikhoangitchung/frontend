@@ -31,7 +31,7 @@ const Profile = () => {
             const storedUsername = localStorage.getItem("username") || ""
             const storedAvatar = localStorage.getItem("avatar") || ""
             const storedRole = localStorage.getItem("role") || ""
-            const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
+            const defaultAvatar = "https://quizgymapp.onrender.com/media/default-avatar.png"
 
             setUserInfo((prev) => ({
                 ...prev,
@@ -47,7 +47,7 @@ const Profile = () => {
                     setUserInfo({
                         email: storedUserEmail,
                         username: user.username || storedUsername || "Người dùng",
-                        avatar: user.avatar ? `http://localhost:8080${user.avatar}` : defaultAvatar,
+                        avatar: user.avatar ? `https://quizgymapp.onrender.com${user.avatar}` : defaultAvatar,
                         quizCount: user.quizCount || 0,
                         createdAt: user.createdAt || null,
                         role: user.role || storedRole // Ưu tiên role từ response, nếu không có thì dùng từ localStorage
