@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { FaGoogle } from "react-icons/fa"
 import { jwtDecode } from "jwt-decode"
+import { config } from "../../config/url.config"
 
 const Login = () => {
     const router = useRouter()
@@ -121,7 +122,7 @@ const Login = () => {
     const handleGoogleLogin = () => {
         setIsRedirecting(true)
         setTimeout(() => {
-            window.location.href = "http://localhost:8080/oauth2/authorization/google"
+            window.location.href = `${config.apiBaseUrl}/oauth2/authorization/google`
         }, 300)
     }
 
