@@ -1,14 +1,15 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter} from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
-import {toast} from "sonner";
-import {ArrowLeft, Timer, CheckCircle, Pencil, X} from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, CheckCircle, Pencil, X } from "lucide-react";
 import ListHistory from "../../../components/histories/ListHistory";
 import DetailHistory from "../../../components/histories/DetailHistory";
 import RoomRankingPanel from "../../../components/exam/RankingList";
 import ExamResultSummary from "../../../components/exam/ExamResultSummary";
+import {Button} from "../../../components/ui/button";
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -21,7 +22,7 @@ const HistoryPage = () => {
 
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("completed");
-    const pageSize = 20;
+    const pageSize = 12;
 
     useEffect(() => {
         switch (activeTab) {
@@ -42,74 +43,81 @@ const HistoryPage = () => {
         const fetchRoomCode = async () => {
             if (selectedHistoryId !== null && activeTab === "created") {
                 try {
-                    const response = await HistoryService.getRoomByHistoryId(selectedHistoryId)
-                    setCode(response.data.code)
+                    const response = await HistoryService.getRoomByHistoryId(selectedHistoryId);
+                    setCode(response.data.code);
                 } catch (error) {
-                    toast.error(error?.response?.data || "Lỗi khi lấy lịch sử theo id")
+                    toast.error(error?.response?.data || "Lỗi khi lấy lịch sử theo id");
                 }
             }
-        }
+        };
 
-        fetchRoomCode()
+        fetchRoomCode();
     }, [selectedHistoryId]);
-
-    const historyCreateByMe = async () => {
-        try {
-            const response = await HistoryService.getALlCreateByMe();
-            const histories = response.data
-
-            setAllHistories(histories);
-            setTotalPages(Math.ceil(histories.length / pageSize));
-            setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
-        } catch (error) {
-            toast.error(error?.response?.data || "Lỗi khi lấy kết quả phòng thi bạn tạo")
-        }
-    }
 
     const fetchHistory = async () => {
         setLoading(true);
         try {
-            const response = await HistoryService.getAll();
-            let histories = response.data;
+            const response = await HistoryService.getAll(currentPage, pageSize);
+            console.log("API response:", response.data); // Debug response
+            if (!response.data || !response.data.content) {
+                throw new Error("Dữ liệu không hợp lệ từ API");
+            }
+            let histories = [...response.data.content]; // Sao chép mảng để tránh lỗi tham chiếu
 
-            // Sắp xếp theo finishedAt giảm dần (mới nhất lên trên)
-            histories = histories.sort((a, b) => {
+            // Sắp xếp theo finishedAt giảm dần
+            histories.sort((a, b) => {
                 const dateA = new Date(a.finishedAt[0], a.finishedAt[1] - 1, a.finishedAt[2], a.finishedAt[3], a.finishedAt[4], a.finishedAt[5]);
                 const dateB = new Date(b.finishedAt[0], b.finishedAt[1] - 1, b.finishedAt[2], b.finishedAt[3], b.finishedAt[4], b.finishedAt[5]);
-                return dateB - dateA; // Sắp xếp giảm dần
+                return dateB - dateA;
             });
 
-            // Nhóm các lần thi theo examTitle và gán attemptTime (mới nhất là số lớn nhất)
+            // Nhóm theo examTitle và gán attemptTime
             const examAttempts = {};
             histories.forEach((history) => {
                 const examTitle = history.examTitle;
                 if (!examAttempts[examTitle]) {
                     examAttempts[examTitle] = [];
                 }
-                examAttempts[examTitle].push(history); // Lưu toàn bộ history
+                examAttempts[examTitle].push(history);
             });
 
-            // Gán attemptTime theo thứ tự giảm dần (mới nhất là max, cũ nhất là 1)
             histories = histories.map((history) => {
                 const examTitle = history.examTitle;
                 const attempts = examAttempts[examTitle];
                 const index = attempts.findIndex((h) => h.historyId === history.historyId);
-                const attemptTime = attempts.length - index; // Mới nhất là số lớn nhất, cũ nhất là 1
+                const attemptTime = attempts.length - index;
                 return {
                     ...history,
                     attemptTime: attemptTime
                 };
             });
 
-            setAllHistories(histories);
-            setTotalPages(Math.ceil(histories.length / pageSize));
-            setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
+            setHistoryList(histories);
+            setTotalPages(response.data.totalPages || 1); // Đảm bảo totalPages là số
         } catch (error) {
+            console.error("Error:", error);
             toast.error(
                 error.response?.status === 404
                     ? "Không tìm thấy lịch sử bài thi"
-                    : "Lỗi khi lấy lịch sử bài thi"
+                    : error.message || "Lỗi khi lấy lịch sử bài thi"
             );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const historyCreateByMe = async () => {
+        try {
+            const response = await HistoryService.getALlCreateByMe(currentPage, pageSize);
+            console.log("API response:", response.data); // Debug response
+            if (!response.data || !response.data.content) {
+                throw new Error("Dữ liệu không hợp lệ từ API");
+            }
+            setHistoryList([...response.data.content]); // Sao chép mảng
+            setTotalPages(response.data.totalPages || 1);
+        } catch (error) {
+            console.error("Error:", error);
+            toast.error(error?.response?.data || "Lỗi khi lấy kết quả phòng thi bạn tạo");
         } finally {
             setLoading(false);
         }
@@ -118,7 +126,6 @@ const HistoryPage = () => {
     const handlePageChange = (page) => {
         if (page >= 0 && page < totalPages) {
             setCurrentPage(page);
-            setHistoryList(allHistories.slice(page * pageSize, (page + 1) * pageSize));
         }
     };
 
@@ -138,7 +145,7 @@ const HistoryPage = () => {
     const handleCloseRanking = () => {
         setCode("");
         setSelectedHistoryId(null);
-    }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
@@ -157,18 +164,6 @@ const HistoryPage = () => {
                 {/* Tab Navigation */}
                 <div className="mb-8">
                     <div className="flex space-x-8 border-b border-gray-200">
-                        <button
-                            onClick={() => handleTabChange("running")}
-                            className={`pb-4 px-2 text-sm font-medium transition-all duration-200 relative cursor-pointer hover:text-orange-600 ${
-                                activeTab === "running"
-                                    ? "text-orange-600 border-b-2 border-orange-600"
-                                    : "text-gray-500"
-                            }`}
-                        >
-                            <Timer size={16} className="inline-block mr-2"/>
-                            Đang chạy
-                        </button>
-
                         <button
                             onClick={() => handleTabChange("completed")}
                             className={`pb-4 px-2 text-sm font-medium transition-all duration-200 relative cursor-pointer hover:text-orange-600 ${
@@ -195,28 +190,32 @@ const HistoryPage = () => {
                     </div>
                 </div>
 
-                {activeTab === "completed" &&
-                    <ListHistory currentPage={currentPage}
-                                 handlePageChange={handlePageChange}
-                                 historyList={historyList}
-                                 totalPages={totalPages}
-                                 handleOpenModalDetailHistory={handleOpenModal}
-                                 page={activeTab}
-                    />}
-                {activeTab === "created" &&
-                    <ListHistory currentPage={currentPage}
-                                 handlePageChange={handlePageChange}
-                                 historyList={historyList}
-                                 totalPages={totalPages}
-                                 handleOpenModalDetailHistory={handleOpenModal}
-                                 page={activeTab}
-                    />}
-
+                {activeTab === "completed" && (
+                    <ListHistory
+                        currentPage={currentPage}
+                        handlePageChange={handlePageChange}
+                        historyList={historyList}
+                        totalPages={totalPages}
+                        handleOpenModalDetailHistory={handleOpenModal}
+                        page={activeTab}
+                    />
+                )}
+                {activeTab === "created" && (
+                    <ListHistory
+                        currentPage={currentPage}
+                        handlePageChange={handlePageChange}
+                        historyList={historyList}
+                        totalPages={totalPages}
+                        handleOpenModalDetailHistory={handleOpenModal}
+                        page={activeTab}
+                    />
+                )}
             </div>
-            {activeTab === "completed" && selectedHistoryId &&
-                <DetailHistory selectedHistoryId={selectedHistoryId} handleCloseModal={handleCloseModal}/>}
-            {activeTab === "created" && code
-                && <>
+            {activeTab === "completed" && selectedHistoryId && (
+                <DetailHistory selectedHistoryId={selectedHistoryId} handleCloseModal={handleCloseModal} />
+            )}
+            {activeTab === "created" && code && (
+                <>
                     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
                         <button
                             onClick={handleCloseRanking}
@@ -234,7 +233,32 @@ const HistoryPage = () => {
                         </div>
                     </div>
                 </>
-            }
+            )}
+
+            {/* Pagination */}
+            <div className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
+                {currentPage > 0 && (
+                    <Button
+                        variant="outline"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
+                    >
+                        Trang trước
+                    </Button>
+                )}
+                <Button disabled>
+                    {currentPage + 1}/{totalPages}
+                </Button>
+                {currentPage < totalPages - 1 && (
+                    <Button
+                        variant="outline"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
+                    >
+                        Trang sau
+                    </Button>
+                )}
+            </div>
         </div>
     );
 };
