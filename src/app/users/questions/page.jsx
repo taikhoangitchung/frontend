@@ -19,6 +19,8 @@ import QuestionService from "../../../services/QuestionService";
 import CategoryService from "../../../services/CategoryService";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import { Badge } from "../../../components/ui/badge";
+import {getSupabaseImageUrl} from "../../../util/getImageSupabaseUrl";
+import {supabaseConfig} from "../../../config/supabaseConfig";
 
 const Modal = ({ onClose, children }) => {
     return (
@@ -330,10 +332,10 @@ export default function QuestionTable() {
                                         {q.image && (
                                             <div className="col-span-full">
                                                 <img
-                                                    src={`${imageBaseUrl}${q.image}`}
+                                                    src={getSupabaseImageUrl(supabaseConfig.bucketImageQuestion, q.image)}
                                                     className="max-w-[50%] mt-2 cursor-pointer hover:scale-105 transition-transform"
                                                     onClick={() => {
-                                                        setSelectedImage(`${imageBaseUrl}${q.image}`);
+                                                        setSelectedImage(getSupabaseImageUrl(supabaseConfig.bucketImageQuestion, q.image));
                                                         setModalOpen(true);
                                                     }}
                                                     alt="image"
