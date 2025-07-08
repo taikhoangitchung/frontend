@@ -32,7 +32,7 @@ export function AdminSidebar({currentTab}) {
                             <button
                                 key={item.tab}
                                 onClick={() => router.push(`/admin/dashboard?tab=${item.tab}`)}
-                                className={`w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg transition-all duration-200 transform hover:translate-x-1 ${
+                                className={`w-full flex items-center gap-3 px-3 py-3 text-gray-700 rounded-lg cursor-pointer transition-all duration-200 transform hover:translate-x-1 ${
                                     isActive
                                         ? "bg-purple-100 text-purple-700 border-l-4 border-purple-500"
                                         : "hover:bg-purple-50 hover:text-purple-700 hover:border-l-4 hover:border-purple-500"

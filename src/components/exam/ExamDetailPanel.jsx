@@ -5,7 +5,7 @@ import {X} from "lucide-react"
 
 export default function ExamDetailPanel({ data, onClose }) {
     const panelRef = useRef(null)
-    console.log(data)
+
     const handleOverlayClick = (e) => {
         if (panelRef.current && !panelRef.current.contains(e.target)) {
             onClose()

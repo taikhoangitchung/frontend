@@ -26,7 +26,7 @@ export default function LandingPage() {
         const decoded = jwtDecode(storedToken);
         const currentTime = Date.now() / 1000;
         if (decoded.exp && decoded.exp >= currentTime) {
-            const nextPage = storedRole === "ADMIN" ? "/admin/dashboard" : "/users/dashboard";
+            const nextPage = storedRole === "ADMIN" ? "/admin/dashboard?tab=users" : "/users/dashboard";
             setTimeout(() => {
                 router.push(nextPage);
             }, 100);

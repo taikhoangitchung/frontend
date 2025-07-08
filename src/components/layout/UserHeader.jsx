@@ -49,7 +49,7 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
         questions: false,
         categories: false
     })
-    const defaultAvatar = "http://localhost:8080/media/default-avatar.png"
+    const defaultAvatar = "http://localhost:8080/media/default-avatar.png";
 
     useEffect(() => {
         const savedEmail = localStorage.getItem("email")
@@ -103,7 +103,7 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
     }
 
     return (
-        <header className="bg-white border-b border-gray-200 px-4 py-3 w-full">
+        <header className="fixed z-50 bg-white border-b border-gray-200 px-4 py-3 w-full">
             <div className="flex items-center w-full max-w-full">
                 {/* Logo */}
                 <div className="flex items-center w-auto">
@@ -119,7 +119,7 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                 {/* Giữa: Tìm kiếm + Điều hướng */}
                 <div className="flex-1 flex items-center justify-center gap-6 px-6">
                     {/* Tìm kiếm */}
-                    <div className="flex-1 max-w-xl">
+                    <div className="hidden md:block flex-1 max-w-xl">
                         <div className="relative">
                             <Search
                                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"/>
@@ -137,7 +137,7 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                         <Button
                             variant="ghost"
                             className="text-purple-600 border-b-2 border-purple-600 cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
-                            onClick={() => handleNavigation("home", "/users")}
+                            onClick={() => handleNavigation("home", "/")}
                             disabled={isLoading.home}
                         >
                             {isLoading.home ? (
@@ -310,5 +310,6 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                 </div>
             </div>
         </header>
+
     )
 }

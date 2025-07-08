@@ -9,7 +9,7 @@ import {RiErrorWarningFill} from "react-icons/ri";
 
 export default function Component() {
     const [isSuccess, setIsSuccess] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         callApi();
@@ -17,7 +17,8 @@ export default function Component() {
 
     const callApi = async () => {
         try {
-            const token = localStorage.getItem("token_confirm_email");
+            setLoading(true)
+            const token = localStorage.getItem("token_confirm_email")
             const response = await UserService.checkToken(token)
 
             const email = localStorage.getItem("email")
@@ -29,7 +30,6 @@ export default function Component() {
                 await UserService.confirmEmail(email);
             }
         } catch (error) {
-            console.log(error)
             toast.error(error.toString());
         } finally {
             setLoading(false);

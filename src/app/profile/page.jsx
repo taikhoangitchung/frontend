@@ -74,15 +74,10 @@ const Profile = () => {
 
     const formatDate = (dateString) => {
         if (!dateString) return "Không xác định"
-        try {
-            const date = new Date(dateString)
-            const day = String(date.getDate()).padStart(2, '0')
-            const month = String(date.getMonth() + 1).padStart(2, '0')
-            const year = date.getFullYear()
-            return `${day}-${month}-${year}`
-        } catch (error) {
-            return "Không xác định"
-        }
+        const [year, month, day] = dateString;
+        const dd = String(day).padStart(2, '0');
+        const mm = String(month).padStart(2, '0');
+        return `${dd}-${mm}-${year}`;
     }
 
     if (!isReady || loading) {

@@ -1,17 +1,17 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
-import {Button} from "../../../components/ui/button";
-import {Input} from "../../../components/ui/input";
-import {Card, CardContent, CardHeader} from "../../../components/ui/card";
-import {Separator} from "../../../components/ui/separator";
+import React, { useEffect, useState } from "react";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Card, CardContent, CardHeader } from "../../../components/ui/card";
+import { Separator } from "../../../components/ui/separator";
 import {
     Search, Plus, Edit, BookOpen, Target, Clock, CheckCircle, HelpCircle, Flame,
     FileText, BarChart2, FlaskConical, ArrowLeft, Play
 } from "lucide-react";
-import {useRouter, useSearchParams} from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ExamService from "../../../services/ExamService";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import RoomService from "../../../services/RoomService";
 import {
@@ -34,7 +34,7 @@ export default function ExamManager() {
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
-    const [totalPage, setTotalPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1); // Thay totalPage bằng totalPages
     const [totalExams, setTotalExams] = useState(0);
     const examPerPage = 10;
 
@@ -45,10 +45,6 @@ export default function ExamManager() {
     }, [categoryIdParam]);
 
     useEffect(() => {
-        fetchExams();
-    }, [searchTerm, categoryId, ownerFilter, page]);
-
-    useEffect(() => {
         async function fetchCategories() {
             try {
                 const res = await CategoryService.getAll();
@@ -57,35 +53,43 @@ export default function ExamManager() {
                 console.error("Lỗi tải danh mục:", err);
             }
         }
-
         fetchCategories();
     }, []);
 
     const fetchExams = async () => {
         setLoading(true);
         try {
-            const res = await ExamService.getAll();
-            let filtered = res.data;
-            filtered = filtered.filter((e) => e.public || e.author.id === currentUserId);
-            if (categoryId) {
-                filtered = filtered.filter((e) => String(e.category.id) === categoryId);
+            let res;
+            if (!categoryId && !searchTerm && ownerFilter === "all") {
+                res = await ExamService.getAll(page - 1, examPerPage); // page bắt đầu từ 0
+            } else {
+                // Logic lọc phức tạp hơn, cần API hỗ trợ lọc với Pageable (tùy chỉnh thêm nếu cần)
+                res = await ExamService.getAll(page - 1, examPerPage); // Hiện tại dùng getAll, cần mở rộng API sau
+                let filtered = res.data.content;
+                if (categoryId) {
+                    filtered = filtered.filter((e) => String(e.category.id) === categoryId);
+                }
+                if (searchTerm.trim()) {
+                    const term = searchTerm.toLowerCase();
+                    filtered = filtered.filter((e) =>
+                        e.title.toLowerCase().includes(term) ||
+                        e.category.name.toLowerCase().includes(term)
+                    );
+                }
+                if (ownerFilter === "mine") {
+                    filtered = filtered.filter((e) => e.author.id === currentUserId);
+                } else if (ownerFilter === "others") {
+                    filtered = filtered.filter((e) => e.author.id !== currentUserId);
+                }
+                setTotalExams(filtered.length);
+                setTotalPages(Math.ceil(filtered.length / examPerPage));
+                setExams(filtered.slice(0, examPerPage)); // Chỉ lấy phần trang hiện tại
             }
-            if (searchTerm.trim()) {
-                const term = searchTerm.toLowerCase();
-                filtered = filtered.filter((e) =>
-                    e.title.toLowerCase().includes(term) ||
-                    e.category.name.toLowerCase().includes(term)
-                );
+            if (!categoryId && !searchTerm && ownerFilter === "all") {
+                setExams(res.data.content);
+                setTotalPages(res.data.totalPages);
+                setTotalExams(res.data.totalElements);
             }
-            if (ownerFilter === "mine") {
-                filtered = filtered.filter((e) => e.author.id === currentUserId);
-            } else if (ownerFilter === "others") {
-                filtered = filtered.filter((e) => e.author.id !== currentUserId);
-            }
-            setTotalExams(filtered.length);
-            setTotalPage(Math.ceil(filtered.length / examPerPage));
-            const start = (page - 1) * examPerPage;
-            setExams(filtered.slice(start, start + examPerPage));
         } catch (err) {
             console.error(err);
             toast.error("Đã xảy ra lỗi khi tải danh sách bài thi!");
@@ -93,6 +97,10 @@ export default function ExamManager() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchExams();
+    }, [searchTerm, categoryId, ownerFilter, page]);
 
     async function handleCreateRoom(id) {
         try {
@@ -131,23 +139,16 @@ export default function ExamManager() {
                             }}
                         >
                             <SelectTrigger
-                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                            >
                                 <SelectValue placeholder="Lọc theo tác giả"/>
                             </SelectTrigger>
                             <SelectContent
-                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem
-                                    value="all"
-                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
-                                >Tất cả tác giả</SelectItem>
-                                <SelectItem
-                                    value="mine"
-                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
-                                >Của tôi</SelectItem>
-                                <SelectItem
-                                    value="others"
-                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
-                                >Của người khác</SelectItem>
+                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md"
+                            >
+                                <SelectItem value="all">Tất cả tác giả</SelectItem>
+                                <SelectItem value="mine">Của tôi</SelectItem>
+                                <SelectItem value="others">Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select
@@ -165,25 +166,21 @@ export default function ExamManager() {
                             }}
                         >
                             <SelectTrigger
-                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
+                                className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                            >
                                 <SelectValue placeholder="Lọc theo danh mục"/>
                             </SelectTrigger>
                             <SelectContent
-                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md">
-                                <SelectItem
-                                    value="all"
-                                    className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
-                                >Tất cả danh mục</SelectItem>
+                                className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md"
+                            >
+                                <SelectItem value="all">Tất cả danh mục</SelectItem>
                                 {categories.map(cat => (
-                                    <SelectItem
-                                        key={cat.id}
-                                        value={String(cat.id)}
-                                        className="cursor-pointer transition-all duration-200 hover:bg-gray-100"
-                                    >{cat.name}</SelectItem>
+                                    <SelectItem key={cat.id} value={String(cat.id)}>
+                                        {cat.name}
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-
                     </div>
 
                     <button
@@ -226,7 +223,8 @@ export default function ExamManager() {
                     {loading ? (
                         <div className="flex justify-center items-center py-12">
                             <div
-                                className="w-8 h-8 border-4 border-t-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"></div>
+                                className="w-8 h-8 border-4 border-t-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"
+                            ></div>
                             <span className="ml-3 text-gray-500">Đang tải bài thi...</span>
                         </div>
                     ) : exams.length === 0 ? (
@@ -237,7 +235,8 @@ export default function ExamManager() {
                     ) : (
                         exams.map((exam) => (
                             <Card key={exam.id}
-                                  className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white">
+                                  className="border border-gray-200 hover:shadow-md transition-all duration-200 bg-white"
+                            >
                                 <CardHeader className="pb-0">
                                     <div className="flex justify-between items-start">
                                         <h2 className="text-xl sm:text-2xl font-bold text-purple-800">{exam.title}</h2>
@@ -255,7 +254,8 @@ export default function ExamManager() {
                                                     id={exam.id}
                                                     variant="ghost"
                                                     size="sm"
-                                                    handleDelete={handleDeleteExam}/>
+                                                    handleDelete={handleDeleteExam}
+                                                />
                                             </div>
                                         )}
                                     </div>
@@ -281,7 +281,7 @@ export default function ExamManager() {
                                         </p>
                                         <p className="flex items-center gap-1">
                                             <HelpCircle className="w-4 h-4"/>
-                                            Số câu hỏi: <strong>{exam.questions.length}</strong>
+                                            Số câu hỏi: <strong>{exam.questionCount}</strong>
                                         </p>
                                         <p className="flex items-center gap-1">
                                             <Flame className="w-4 h-4"/>
@@ -325,7 +325,7 @@ export default function ExamManager() {
                                             className="text-emerald-600 border-emerald-300 hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer transition-all duration-200"
                                             onClick={() => router.push(`/users/exams/${exam.id}/play`)}
                                         >
-                                            <Play className="w-4 h-4 mr-1" />
+                                            <Play className="w-4 h-4 mr-1"/>
                                             Thực hành
                                         </Button>
                                     </div>
@@ -340,22 +340,19 @@ export default function ExamManager() {
                         <Button
                             variant="outline"
                             onClick={() => setPage(page - 1)}
-                            className="text-sm cursor-pointer transition-all duration-200"
+                            className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
                         >
                             Trang trước
                         </Button>
                     )}
-                    <Button
-                        className="text-blue-700 cursor-pointer transition-all duration-200"
-                        disabled
-                    >
-                        {page}/{totalPage}
+                    <Button disabled>
+                        {page}/{totalPages}
                     </Button>
-                    {page < totalPage && (
+                    {page < totalPages && (
                         <Button
                             variant="outline"
                             onClick={() => setPage(page + 1)}
-                            className="text-sm cursor-pointer transition-all duration-200"
+                            className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
                         >
                             Trang sau
                         </Button>

@@ -162,6 +162,7 @@ export default function CreateExam({id}) {
                     searchTerm,
                 )
                 setQuestionBank(resFilter.data)
+                setSelectedQuestion([]);
             } catch (error) {
                 toast.error(error?.response?.data || "Lỗi khi fetch data")
             }
@@ -527,10 +528,18 @@ export default function CreateExam({id}) {
             setOpenQuestionsExcel(false);
             setReload(!reload)
         } catch (error) {
+            console.log(error)
             toast.error(error?.response?.data || "Lỗi khi tải lên danh sách câu hỏi")
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+    const isSelectedOrAdded = () => {
+        const countSelected = selectedQuestion.length
+        const questionBankIds = questionBank.map(qb => qb.id)
+        const countAdded = formik.values.questions.filter(q => questionBankIds.includes(q.id)).length
+        return countSelected + countAdded === questionBank.length;
     }
 
     const scrollToError = (index) => {
@@ -573,9 +582,19 @@ export default function CreateExam({id}) {
                                 {isAlreadyAdded ? (
                                     <CheckCircle2 className="h-5 w-5 text-gray-400"/>
                                 ) : isToggleSelected ? (
-                                    <CheckCircle2 className="h-5 w-5 text-teal-600"/>
+                                    <input
+                                        type="checkbox"
+                                        checked={true}
+                                        onChange={() => toggleQuestionSelection(question.id)}
+                                        className="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer transition-all duration-200"
+                                    />
                                 ) : (
-                                    <Circle className="h-5 w-5 text-gray-400"/>
+                                    <input
+                                        type="checkbox"
+                                        checked={false}
+                                        onChange={() => toggleQuestionSelection(question.id)}
+                                        className="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer transition-all duration-200"
+                                    />
                                 )}
                             </div>
                         }
@@ -1254,15 +1273,9 @@ export default function CreateExam({id}) {
                         </Card>
                         <Card className="p-0 shadow-lg border-gray-200 bg-white flex-1">
                             <CardHeader className="bg-purple-600 text-white rounded-t-lg">
-                                {/*<CardTitle className="flex items-center justify-between text-lg py-3">*/}
-                                {/*    <div className="flex items-center gap-3">*/}
-                                {/*        <ListIcon className="h-5 w-5"/>*/}
-                                {/*        Danh Sách Câu Hỏi ({questionBank.length})*/}
-                                {/*    </div>*/}
-                                {/*</CardTitle>*/}
                                 <CardTitle className="flex items-center gap-3 text-lg py-3">
-                                    <Search className="h-5 w-5"/>
-                                    Ngân Hàng Câu Hỏi
+                                    <ListIcon className="h-5 w-5"/>
+                                    Danh Sách Câu Hỏi ({questionBank.length})
                                     <div className="flex items-center gap-2 ml-auto">
                                         {selectedQuestion.length > 0 &&
                                             <Badge
@@ -1272,7 +1285,7 @@ export default function CreateExam({id}) {
                                             </Badge>
                                         }
                                         {selectedQuestion.length < 50
-                                            && questionBank.find(q => !formik.values.questions.some(sq => sq.id === q.id)) !== undefined &&
+                                            && !isSelectedOrAdded() &&
                                             <Badge
                                                 className="bg-white/20 text-white border-white/30 hover:bg-purple-300 cursor-pointer"
                                                 onClick={handleSelectAll}>
