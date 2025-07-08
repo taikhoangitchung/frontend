@@ -1,8 +1,10 @@
 "use client";
 
-import {CheckCircle, Clock, Users} from "lucide-react";
+import {CheckCircle, Clock, Users, X} from "lucide-react";
+import {config} from "../../config/url.config";
+import {defaultAvatar} from "../../config/backendBaseUrl";
 
-export default function ProgressBoard({candidates = [], submittedUsers = []}) {
+export default function ProgressBoard({candidates = [], submittedUsers = [], onKick}) {
     const total = candidates.length;
     const submitted = submittedUsers.length;
 
@@ -33,7 +35,7 @@ export default function ProgressBoard({candidates = [], submittedUsers = []}) {
                         >
                             <div className="flex items-center gap-2">
                                 <img
-                                    src={`http://localhost:8080${item.avatar}`}
+                                    src={item.avatar ? `${config.apiBaseUrl}${item.avatar}` : `${config.apiBaseUrl}${defaultAvatar}`}
                                     alt={item.username}
                                     className="w-6 h-6 rounded-full object-cover border border-white/20"
                                 />
@@ -51,6 +53,13 @@ export default function ProgressBoard({candidates = [], submittedUsers = []}) {
                                         <span className="text-yellow-100">Đang làm</span>
                                     </>
                                 )}
+                                <button
+                                    className="text-red-400 hover:text-red-600"
+                                    title="Kick khỏi phòng"
+                                    onClick={() => onKick(item.email)}
+                                >
+                                                <X className="w-4 h-4"/>
+                                </button>
                             </span>
                         </div>
                     );
