@@ -1,13 +1,12 @@
 "use client";
 
-import {useState, useEffect} from "react";
-import {useRouter} from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
-import {toast} from "sonner";
-import {ArrowLeft, Timer, CheckCircle, Pencil, XCircle} from "lucide-react";
-import formatTime from "../../../util/formatTime";
-import {motion, AnimatePresence} from "framer-motion";
-import ExamResultSummary from "../../../components/exam/ExamResultSummary";
+import { toast } from "sonner";
+import { ArrowLeft, Timer, CheckCircle, Pencil } from "lucide-react";
+import ListHistory from "../../../components/histories/ListHistory";
+import DetailHistory from "../../../components/histories/DetailHistory";
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -28,27 +27,57 @@ const HistoryPage = () => {
             setLoading(false);
             return;
         }
-
-        const fetchHistory = async () => {
-            setLoading(true);
-            try {
-                const response = await HistoryService.getAll();
-                const histories = response.data;
-                setAllHistories(histories);
-                setTotalPages(Math.ceil(histories.length / pageSize));
-                setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
-            } catch (error) {
-                toast.error(
-                    error.response?.status === 404
-                        ? "Không tìm thấy lịch sử bài thi"
-                        : "Lỗi khi lấy lịch sử bài thi"
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchHistory();
     }, [currentPage, activeTab]);
+
+    const fetchHistory = async () => {
+        setLoading(true);
+        try {
+            const response = await HistoryService.getAll();
+            let histories = response.data;
+
+            // Sắp xếp theo finishedAt giảm dần (mới nhất lên trên)
+            histories = histories.sort((a, b) => {
+                const dateA = new Date(a.finishedAt[0], a.finishedAt[1] - 1, a.finishedAt[2], a.finishedAt[3], a.finishedAt[4], a.finishedAt[5]);
+                const dateB = new Date(b.finishedAt[0], b.finishedAt[1] - 1, b.finishedAt[2], b.finishedAt[3], b.finishedAt[4], b.finishedAt[5]);
+                return dateB - dateA; // Sắp xếp giảm dần
+            });
+
+            // Nhóm các lần thi theo examTitle và gán attemptTime (mới nhất là số lớn nhất)
+            const examAttempts = {};
+            histories.forEach((history) => {
+                const examTitle = history.examTitle;
+                if (!examAttempts[examTitle]) {
+                    examAttempts[examTitle] = [];
+                }
+                examAttempts[examTitle].push(history); // Lưu toàn bộ history
+            });
+
+            // Gán attemptTime theo thứ tự giảm dần (mới nhất là max, cũ nhất là 1)
+            histories = histories.map((history) => {
+                const examTitle = history.examTitle;
+                const attempts = examAttempts[examTitle];
+                const index = attempts.findIndex((h) => h.historyId === history.historyId);
+                const attemptTime = attempts.length - index; // Mới nhất là số lớn nhất, cũ nhất là 1
+                return {
+                    ...history,
+                    attemptTime: attemptTime
+                };
+            });
+
+            setAllHistories(histories);
+            setTotalPages(Math.ceil(histories.length / pageSize));
+            setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
+        } catch (error) {
+            toast.error(
+                error.response?.status === 404
+                    ? "Không tìm thấy lịch sử bài thi"
+                    : "Lỗi khi lấy lịch sử bài thi"
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handlePageChange = (page) => {
         if (page >= 0 && page < totalPages) {
@@ -59,31 +88,15 @@ const HistoryPage = () => {
 
     const handleOpenModal = (id) => {
         setSelectedHistoryId(id);
-    }
+    };
+
     const handleCloseModal = () => {
-        setSelectedHistoryId(null)
+        setSelectedHistoryId(null);
     };
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setCurrentPage(0);
     };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                <div className="space-y-4 w-full max-w-7xl px-6">
-                    {[...Array(4)].map((_, index) => (
-                        <div
-                            key={index}
-                            className="bg-white animate-pulse rounded-xl shadow-lg p-4 h-48 flex items-center justify-center"
-                        >
-                            <div className="w-full h-32 bg-gray-200 rounded-t-xl"></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
@@ -140,192 +153,10 @@ const HistoryPage = () => {
                     </div>
                 </div>
 
-                {activeTab !== "completed" ? (
-                    <div className="text-gray-600 text-center py-10">
-                        Chức năng đang phát triển...
-                    </div>
-                ) : historyList.length === 0 ? (
-                    <p className="text-gray-600">Bạn chưa thực hiện bài thi nào.</p>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                            {historyList.map((history, index) => (
-                                <div
-                                    key={index}
-                                    className="bg-white shadow-lg rounded-xl p-0 transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] relative overflow-hidden cursor-pointer"
-                                    onClick={() => handleOpenModal(history.historyId)}
-                                >
-                                    <div className="w-full h-36 rounded-t-xl overflow-hidden relative group">
-                                        <img
-                                            src="/cardquiz.png"
-                                            alt={history.examTitle}
-                                            className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-90"
-                                        />
+                { activeTab === "completed" && <ListHistory currentPage={currentPage} handlePageChange={handlePageChange} historyList={historyList} totalPages={totalPages} handleOpenModalDetailHistory={handleOpenModal}/>}
 
-                                        <div
-                                            className="absolute top-2 right-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold text-purple-700 outline-none transition-colors group-hover:bg-white/90"
-                                        >
-                                            Lượt thi {history.attemptTime}
-                                        </div>
-                                        <div
-                                            className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"
-                                        ></div>
-                                    </div>
-
-                                    <div className="p-4">
-                                        <div
-                                            className="text-center text-base font-semibold text-gray-800 hover:text-gray-900 transition-colors duration-300 mb-4 h-10 flex items-center justify-center"
-                                        >
-                                            <span
-                                                className="line-clamp-2 overflow-hidden text-ellipsis text-wrap"
-                                            >
-                                                {history.examTitle}
-                                            </span>
-                                        </div>
-
-                                        <div className="mb-4">
-                                            <div
-                                                className={`w-full h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                                                    history.score === 100 ? "bg-[#5de2a5]" : "bg-[#e2be5d]"
-                                                }`}
-                                            >
-                                                Độ chính xác: {history.score.toFixed(1)}%
-                                            </div>
-                                        </div>
-
-                                        <div className="flex justify-between text-sm text-gray-500">
-                                            <span>Ngày thi:</span>
-                                            <span>{new Date(history.finishedAt).toLocaleString("vi-VN")}</span>
-                                        </div>
-
-                                        <div className="flex justify-between text-sm text-gray-500">
-                                            <span>Thời gian làm bài:</span>
-                                            <span>{formatTime(history.timeTaken)}</span>
-                                        </div>
-
-                                        <div
-                                            className={`text-sm font-semibold mt-2 flex items-center gap-1 ${
-                                                history.passed ? "text-green-600" : "text-red-600"
-                                            }`}
-                                        >
-                                            {history.passed ? (
-                                                <>
-                                                    <CheckCircle className="w-4 h-4"/>
-                                                    Đạt
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <XCircle className="w-4 h-4"/>
-                                                    Không đạt
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="mt-4 flex justify-center">
-                            <nav className="inline-flex rounded-md shadow">
-                                {totalPages <= 3 || currentPage < 2 || currentPage >= totalPages - 2 ? (
-                                    <>
-                                        {currentPage > 0 && (
-                                            <button
-                                                onClick={() => handlePageChange(currentPage - 1)}
-                                                className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-l-md cursor-pointer hover:shadow-md"
-                                            >
-                                                Trước
-                                            </button>
-                                        )}
-                                        {Array.from({length: totalPages}, (_, i) => i).map((page) => (
-                                            <button
-                                                key={page}
-                                                onClick={() => handlePageChange(page)}
-                                                className={`px-4 py-2 border border-gray-300 text-sm font-medium ${
-                                                    currentPage === page
-                                                        ? "bg-purple-600 text-white"
-                                                        : "bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200"
-                                                } cursor-pointer rounded-md hover:shadow-md`}
-                                            >
-                                                {page + 1}
-                                            </button>
-                                        ))}
-                                        {currentPage < totalPages - 1 && (
-                                            <button
-                                                onClick={() => handlePageChange(currentPage + 1)}
-                                                className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-r-md cursor-pointer hover:shadow-md"
-                                            >
-                                                Sau
-                                            </button>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        <button
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-l-md cursor-pointer hover:shadow-md"
-                                        >
-                                            Trước
-                                        </button>
-                                        {Array.from(
-                                            {length: Math.min(5, totalPages)},
-                                            (_, i) => currentPage - 2 + i
-                                        )
-                                            .filter((page) => page >= 0 && page < totalPages)
-                                            .map((page) => (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => handlePageChange(page)}
-                                                    className={`px-4 py-2 border border-gray-300 text-sm font-medium ${
-                                                        currentPage === page
-                                                            ? "bg-purple-600 text-white"
-                                                            : "bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200"
-                                                    } cursor-pointer rounded-md hover:shadow-md`}
-                                                >
-                                                    {page + 1}
-                                                </button>
-                                            ))}
-                                        <button
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            className="px-4 py-2 border border-gray-300 text-sm font-medium bg-white text-gray-700 hover:bg-purple-600 hover:text-white transition-all duration-200 rounded-r-md cursor-pointer hover:shadow-md"
-                                        >
-                                            Sau
-                                        </button>
-                                    </>
-                                )}
-                            </nav>
-                        </div>
-                    </>
-                )}
             </div>
-            {selectedHistoryId && (
-                <AnimatePresence>
-                    <motion.div
-                        key="modal"
-                        initial={{opacity: 0}}
-                        animate={{opacity: 1}}
-                        exit={{opacity: 0}}
-                        className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-                    >
-                        <div
-                            className="relative bg-white max-w-5xl max-h-[90vh] overflow-y-auto rounded-xl shadow-xl p-12">
-                            {/* Nút đóng nằm tách biệt, không ảnh hưởng đến padding của nội dung */}
-                            <button
-                                onClick={handleCloseModal}
-                                className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white text-1xl font-semibold z-10 transition-all duration-200 cursor-pointer rounded-full w-9 h-9 flex items-center justify-center"
-                            >
-                                ✕
-                            </button>
-                            {/* Nội dung có padding đều (được bao bởi p-6 từ thẻ cha) */}
-                            <ExamResultSummary
-                                historyId={selectedHistoryId}
-                                viewMode={true}
-                                onExit={handleCloseModal}
-                            />
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
-            )}
+            {selectedHistoryId && <DetailHistory selectedHistoryId={selectedHistoryId} handleCloseModal={handleCloseModal} />}
         </div>
     );
 };

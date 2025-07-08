@@ -1,5 +1,7 @@
+import { config } from "./url.config";
+
 export default function createExamSocket({ code, onStart, onSubmit, onEnd, onJoin, onLeave, isHost }) {
-    const socket = new WebSocket("ws://localhost:8080/ws/rooms");
+    const socket = new WebSocket(`${config.socket.baseUrl}/rooms`);
     const email = localStorage.getItem("email");
     const username = localStorage.getItem("username");
     const avatar = localStorage.getItem("avatar");
@@ -59,7 +61,7 @@ export default function createExamSocket({ code, onStart, onSubmit, onEnd, onJoi
 
 
 export const kickSocket = ({email, onKick}) => {
-    const socket = new WebSocket(`ws://localhost:8080/ws/kick?email=${email}`);
+    const socket = new WebSocket(`${config.socket.kickUrl}?email=${email}`);
 
     socket.onmessage = (event) => {
         console.log("message", event.data);

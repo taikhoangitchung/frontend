@@ -35,7 +35,7 @@ export default function UserStatusSwitch({ user, onToggle }) {
                 role="switch"
                 aria-checked={checked}
                 onClick={handleSwitchClick}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer ${
                     checked ? "bg-green-500" : "bg-red-500"
                 }`}
             >
@@ -68,8 +68,8 @@ export default function UserStatusSwitch({ user, onToggle }) {
                 actionLabel={pendingAction ? "Kích hoạt" : "Vô hiệu hóa"}
                 actionClass={
                     pendingAction
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-red-600 hover:bg-red-700"
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : "bg-red-600 text-white hover:bg-red-700"
                 }
                 cancelClass="bg-gray-100 hover:bg-gray-200 text-gray-800 border-0"
                 onConfirm={handleConfirm}

@@ -9,6 +9,16 @@ import { toast } from "sonner"
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { FaGoogle } from "react-icons/fa"
 import { jwtDecode } from "jwt-decode"
+import { config } from "../../config/url.config";
+
+const validationSchema = Yup.object({
+    email: Yup.string()
+        .email("Email không hợp lệ")
+        .required("Email không được để trống"),
+    password: Yup.string()
+        .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
+        .required("Mật khẩu không được để trống"),
+});
 
 const Login = () => {
     const router = useRouter()
@@ -21,9 +31,13 @@ const Login = () => {
     useEffect(() => {
         const autoLogin = localStorage.getItem("autoLogin")
         if (autoLogin) {
-            const { email, password } = JSON.parse(autoLogin)
-            setInitialValues({ email, password })
-            localStorage.removeItem("autoLogin")
+            try {
+                const { email, password } = JSON.parse(autoLogin);
+                setInitialValues({ email, password });
+                localStorage.removeItem("autoLogin");
+            } catch (e) {
+                console.error("Auto login parse error:", e);
+            }
         }
 
         const params = new URLSearchParams(window.location.search)
@@ -32,26 +46,30 @@ const Login = () => {
         const refreshToken = params.get("refreshToken")
 
         if (error) {
-            setErrorMessage(decodeURIComponent(error)) // 👈 gán vào state
+            setErrorMessage(decodeURIComponent(error))
             return
         }
 
         if (token && refreshToken) {
-            const decoded = jwtDecode(token)
-            localStorage.setItem("token", token)
-            localStorage.setItem("refreshToken", refreshToken)
-            localStorage.setItem("email", decoded.sub)
-            localStorage.setItem("id", decoded.id)
-            localStorage.setItem("role", decoded.role)
-            localStorage.setItem("username", decoded.username)
+            try {
+                const decoded = jwtDecode(token)
+                localStorage.setItem("token", token)
+                localStorage.setItem("refreshToken", refreshToken)
+                localStorage.setItem("email", decoded.sub)
+                localStorage.setItem("id", decoded.id)
+                localStorage.setItem("role", decoded.role)
+                localStorage.setItem("username", decoded.username)
 
-            toast.success("Đăng nhập thành công! Chào mừng bạn trở lại.", {
-                duration: 2000,
-                className: "bg-green-100 text-green-800 border border-green-300 rounded-lg shadow-md",
-            })
+                toast.success("Đăng nhập thành công! Chào mừng bạn trở lại.", {
+                    duration: 2000,
+                    className: "bg-green-100 text-green-800 border border-green-300 rounded-lg shadow-md",
+                })
 
-            const nextPage = decoded.role === "ADMIN" ? "/admin/dashboard" : "/users/dashboard"
-            setTimeout(() => router.push(nextPage), 2000)
+                const nextPage = decoded.role === "ADMIN" ? "/admin/dashboard" : "/users/dashboard"
+                setTimeout(() => router.push(nextPage), 2000);
+            }catch (e){
+                console.error("JWT decode error:", e);
+            }
         }
     }, [])
 
@@ -67,17 +85,7 @@ const Login = () => {
         }
     }, [errorMessage])
 
-    const validationSchema = Yup.object({
-        email: Yup.string()
-            .matches(
-                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                "Email không hợp lệ"
-            )
-            .required("Email không được để trống"),
-        password: Yup.string()
-            .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
-            .required("Mật khẩu không được để trống"),
-    });
+
 
     const handleSubmit = async (values, { setSubmitting }) => {
         try {
@@ -102,7 +110,7 @@ const Login = () => {
             let nextPage = ""
 
             if (role === "ADMIN") {
-                nextPage = "/admin/dashboard"
+                nextPage = "/admin/dashboard?tab=users"
             } else {
                 nextPage = "/users/dashboard"
             }
@@ -120,14 +128,12 @@ const Login = () => {
 
     const handleGoogleLogin = () => {
         setIsRedirecting(true)
-        setTimeout(() => {
-            window.location.href = "https://quizgymapp.onrender.com/oauth2/authorization/google"
-        }, 300)
+        window.location.href = `${config.apiBaseUrl}/oauth2/authorization/google`
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
-            <div className="flex items-start justify-center px-6 py-10">
+        <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 ">
+            <div className="min-h-screen items-center flex justify-center px-6 py-10">
                 <div
                     className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full flex"
                     style={{ minHeight: "500px" }}
@@ -270,7 +276,7 @@ const Login = () => {
                     </div>
 
                     {/* Right Panel - Hero Image */}
-                    <div className="flex-1 bg-gradient-to-br from-orange-100 to-blue-100 relative overflow-hidden">
+                    <div className="hidden sm:block flex-1 relative overflow-hidden bg-gradient-to-br from-orange-100 to-blue-100">
                         <img
                             src="/photo-login.jpg"
                             alt="Quizizz Hero"

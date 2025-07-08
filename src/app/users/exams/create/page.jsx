@@ -581,9 +581,19 @@ export default function CreateExam({id}) {
                                 {isAlreadyAdded ? (
                                     <CheckCircle2 className="h-5 w-5 text-gray-400"/>
                                 ) : isToggleSelected ? (
-                                    <CheckCircle2 className="h-5 w-5 text-teal-600"/>
+                                    <input
+                                        type="checkbox"
+                                        checked={true}
+                                        onChange={() => toggleQuestionSelection(question.id)}
+                                        className="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer transition-all duration-200"
+                                    />
                                 ) : (
-                                    <Circle className="h-5 w-5 text-gray-400"/>
+                                    <input
+                                        type="checkbox"
+                                        checked={false}
+                                        onChange={() => toggleQuestionSelection(question.id)}
+                                        className="h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer transition-all duration-200"
+                                    />
                                 )}
                             </div>
                         }

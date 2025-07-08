@@ -20,24 +20,23 @@ export default function Page() {
     const router = useRouter()
     const username = localStorage.getItem("username")
 
-
-
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const response = await HistoryService.getAll()
-                const histories = response.data || []
-                const played = histories.length
-                const totalScore = histories.reduce((sum, h) => sum + h.score, 0)
-                const avgScore = played > 0 ? (totalScore / played).toFixed(1) : 0
-                setPlayedCount(played)
-                setAccuracy(avgScore)
-            } catch (e) {
-                console.error("Lỗi khi tính thống kê người dùng")
-            }
-        }
         fetchStats()
     }, [])
+
+    const fetchStats = async () => {
+        try {
+            const response = await HistoryService.getAll()
+            const histories = response.data || []
+            const played = histories.length
+            const totalScore = histories.reduce((sum, h) => sum + h.score, 0)
+            const avgScore = played > 0 ? (totalScore / played).toFixed(1) : 0
+            setPlayedCount(played)
+            setAccuracy(avgScore)
+        } catch (e) {
+            console.error("Lỗi khi tính thống kê người dùng")
+        }
+    }
 
     const handleInput = (event) => {
         setInputQuiz(event.target.value.toUpperCase())
@@ -61,14 +60,14 @@ export default function Page() {
             <UserHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
             {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 py-10">
+            <main className="max-w-7xl mx-auto pt-20 px-4 py-10">
                 <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                     {/* Left - Join Quiz */}
                     <div className="flex-1 flex flex-col">
                         <Card
                             className="bg-gradient-to-br from-white to-purple-50/30 shadow-xl rounded-2xl border border-purple-100/50 overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:scale-105"
                         >
-                            <CardContent className="p-0 flex flex-col justify-center">
+                            <CardContent className="p-4 flex flex-col justify-center">
                                 <div className="space-y-5 max-w-md w-full mx-auto">
                                     <div className="text-center mb-3">
                                         <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl mb-3 shadow-lg">

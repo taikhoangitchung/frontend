@@ -84,8 +84,7 @@ class UserService {
 
     static async findId(email) {
         try {
-            const params = {email: email}
-            return await axiosInstance.get("/users/find-id", params);
+            return await axiosInstance.get("/users/find-id", {params: {email}});
         } catch (error) {
             throw error;
         }
@@ -93,7 +92,7 @@ class UserService {
 
     static async confirmEmail(email) {
         try {
-            return await axiosInstance.get("/users/confirm", {params: email});
+            return await axiosInstance.patch("/users/confirm", {email: email});
         } catch (error) {
             throw error;
         }
@@ -129,7 +128,7 @@ class UserService {
 
     static async refreshToken(refreshToken) {
         try {
-            return await axiosInstance.post("/users/refresh-token", {refreshToken});
+            return await axiosInstance.post("/users/refresh-token", { refreshToken });
         } catch (error) {
             throw error;
         }

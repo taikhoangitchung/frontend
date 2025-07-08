@@ -19,6 +19,7 @@ import EmailService from "../../services/EmailService"
 import { ReactDOMServerEdge } from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints"
 import EmailTemplate from "../../util/emailTemplate"
 import { jwtDecode } from "jwt-decode"
+import { config } from "../../config/url.config"
 
 const Register = () => {
     const router = useRouter()
@@ -80,12 +81,11 @@ const Register = () => {
         try {
             const response = await UserService.register(values)
             localStorage.setItem("email", response.data)
-
             const token = crypto.randomUUID()
             localStorage.setItem("token_confirm_email", token)
             const htmlString = ReactDOMServerEdge.renderToStaticMarkup(
                 <EmailTemplate
-                    data={`https://quiz-gym-app-frontend-a48q.vercel.app/confirm`}
+                    data={`${config.clientUrl}/confirm`}
                     title={"Mở Khóa Tài Khoản"}
                     description={"Nhấn nút bên dưới để xác nhận"}
                     openButton={true}
@@ -117,7 +117,7 @@ const Register = () => {
     }
 
     const handleGoogleRegister = () => {
-        window.location.href = "https://quizgymapp.onrender.com/oauth2/authorization/google"
+        window.location.href = `${backendBaseUrl}/oauth2/authorization/google`
     }
 
     if (!isReady) return null
