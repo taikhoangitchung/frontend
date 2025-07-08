@@ -12,11 +12,9 @@ class QuestionService {
 
     static async create(questionData) {
         try {
-            return await axiosInstance.post("/questions", questionData, {
-                headers: {'Content-Type': 'multipart/form-data'}
-            })
+            return await axiosInstance.post("/questions", questionData)
         } catch (error) {
-            return Promise.reject(error);
+            throw error;
         }
     }
 
