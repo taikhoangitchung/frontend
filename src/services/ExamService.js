@@ -44,9 +44,15 @@ class ExamService {
             return Promise.reject(error);
         }
     }
-    static async getAll() {
+
+    static async getAll(page = 0, size = 10) { // Thêm page và size mặc định
         try {
-            return await axiosInstance.get(`/exams`);
+            return await axiosInstance.get("/exams", {
+                params: {
+                    page: page,
+                    size: size
+                }
+            });
         } catch (error) {
             return Promise.reject(error);
         }
