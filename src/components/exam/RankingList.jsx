@@ -4,6 +4,8 @@ import {useEffect, useState} from "react"
 import {Loader2} from "lucide-react"
 import HistoryService from "../../services/HistoryService"
 import ExamDetailPanel from "../exam/ExamDetailPanel"
+import {config} from "../../config/url.config";
+import {defaultAvatar} from "../../config/backendBaseUrl";
 
 export default function RoomRankingPanel({code}) {
     const [email, setEmail] = useState(null)
@@ -98,7 +100,7 @@ export default function RoomRankingPanel({code}) {
                                             <span className="text-sm align-super ml-0.5">{getSuffix(rank.rank)}</span>
                                         </div>
                                         <img
-                                            src={`http://localhost:8080${rank.avatarUrl}`}
+                                            src={rank.avatarUrl ? `${config.apiBaseUrl}${rank.avatarUrl}` : `${config.apiBaseUrl}${defaultAvatar}`}
                                             alt=""
                                             className="w-10 h-10 rounded-full object-cover border border-white/20"
                                         />
