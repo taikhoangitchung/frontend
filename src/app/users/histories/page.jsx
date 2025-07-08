@@ -4,11 +4,10 @@ import {useState, useEffect} from "react";
 import {useRouter} from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
 import {toast} from "sonner";
-import {ArrowLeft, Timer, CheckCircle, Pencil, X} from "lucide-react";
+import {ArrowLeft, Timer, CheckCircle, Pencil, X, Loader2} from "lucide-react";
 import ListHistory from "../../../components/histories/ListHistory";
 import DetailHistory from "../../../components/histories/DetailHistory";
 import RoomRankingPanel from "../../../components/exam/RankingList";
-import ExamResultSummary from "../../../components/exam/ExamResultSummary";
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -24,6 +23,7 @@ const HistoryPage = () => {
     const pageSize = 20;
 
     useEffect(() => {
+        setLoading(true)
         switch (activeTab) {
             case "completed":
                 fetchHistory();
@@ -36,6 +36,7 @@ const HistoryPage = () => {
                 setTotalPages(0);
                 setLoading(false);
         }
+        setLoading(false)
     }, [currentPage, activeTab]);
 
     useEffect(() => {
@@ -140,6 +141,14 @@ const HistoryPage = () => {
         setSelectedHistoryId(null);
     }
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-purple-900">
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
+            </div>
+        )
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
             <div className="max-w-6xl mx-auto px-6">
@@ -195,7 +204,7 @@ const HistoryPage = () => {
                     </div>
                 </div>
 
-                {activeTab === "completed" &&
+                {(activeTab === "completed" || activeTab === "created") &&
                     <ListHistory currentPage={currentPage}
                                  handlePageChange={handlePageChange}
                                  historyList={historyList}
@@ -203,15 +212,6 @@ const HistoryPage = () => {
                                  handleOpenModalDetailHistory={handleOpenModal}
                                  page={activeTab}
                     />}
-                {activeTab === "created" &&
-                    <ListHistory currentPage={currentPage}
-                                 handlePageChange={handlePageChange}
-                                 historyList={historyList}
-                                 totalPages={totalPages}
-                                 handleOpenModalDetailHistory={handleOpenModal}
-                                 page={activeTab}
-                    />}
-
             </div>
             {activeTab === "completed" && selectedHistoryId &&
                 <DetailHistory selectedHistoryId={selectedHistoryId} handleCloseModal={handleCloseModal}/>}

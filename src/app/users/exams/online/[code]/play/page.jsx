@@ -231,6 +231,11 @@ export default function PlayExamFormOnline() {
         if (percent <= 50) return "text-yellow-500";
         return "text-white";
     };
+    const handleKick = (emailToKick) => {
+        if (!emailToKick || !socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
+        socketRef.current.send(`KICK:${code}:${emailToKick}`);
+    };
+
 
     if (loading) {
         return <div className="min-h-screen flex items-center justify-center text-white">Đang tải...</div>;
@@ -472,7 +477,7 @@ export default function PlayExamFormOnline() {
 
             {storedEmail === hostEmail && waitingForOthers && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-                    <ProgressBoard candidates={candidates} submittedUsers={submittedUsers} />
+                    <ProgressBoard candidates={candidates} submittedUsers={submittedUsers} onKick={handleKick} />
                 </div>
             )}
         </div>

@@ -9,7 +9,8 @@ import {toast} from "sonner";
 import {Button} from "../../../../../components/ui/button";
 import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDialog";
 import createExamSocket from "../../../../../config/socketConfig";
-import {backendBaseUrl} from "../../../../../config/backendBaseUrl";
+import {defaultAvatar} from "../../../../../config/backendBaseUrl";
+import {config} from "../../../../../config/url.config";
 
 export default function WaitingRoom() {
     const {code} = useParams();
@@ -221,15 +222,27 @@ export default function WaitingRoom() {
                             <div className="space-y-1">
                                 {candidates?.map((item, index) => (
                                     <div key={index}
-                                         className="flex items-center gap-2 bg-gray-800 px-3 py-2 rounded text-sm text-white">
-                                        <img
-                                            src={`${backendBaseUrl}${item.avatar}`}
-                                            alt={item.username}
-                                            className="w-6 h-6 rounded-full object-cover border border-white"
-                                        />
-                                        <span>{item.username}</span>
+                                         className="flex items-center justify-between bg-gray-800 px-3 py-2 rounded text-sm text-white">
+                                        <div className="flex items-center gap-2">
+                                            <img
+                                                src={item.avatar ? `${config.apiBaseUrl}${item.avatar}` : `${config.apiBaseUrl}${defaultAvatar}`}
+                                                alt={item.username}
+                                                className="w-6 h-6 rounded-full object-cover border border-white"
+                                            />
+                                            <span>{item.username}</span>
+                                        </div>
+                                        {hostEmail === storedEmail && (
+                                            <button
+                                                className="text-red-400 hover:text-red-600"
+                                                title="Kick khỏi phòng"
+                                                onClick={() => socketRef.current?.send(`KICK:${code}:${item.email}`)}
+                                            >
+                                                <X className="w-4 h-4"/>
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
+
                                 {!candidates && (
                                     <div className="text-sm text-gray-400 italic">Chưa có thí sinh nào...</div>
                                 )}
