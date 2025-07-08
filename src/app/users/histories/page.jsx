@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {useState, useEffect} from "react";
+import {useRouter} from "next/navigation";
 import HistoryService from "../../../services/HistoryService";
-import { toast } from "sonner";
-import { ArrowLeft, Timer, CheckCircle, Pencil } from "lucide-react";
+import {toast} from "sonner";
+import {ArrowLeft, Timer, CheckCircle, Pencil, X} from "lucide-react";
 import ListHistory from "../../../components/histories/ListHistory";
 import DetailHistory from "../../../components/histories/DetailHistory";
+import RoomRankingPanel from "../../../components/exam/RankingList";
+import ExamResultSummary from "../../../components/exam/ExamResultSummary";
 
 const HistoryPage = () => {
     const router = useRouter();
@@ -15,20 +17,54 @@ const HistoryPage = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [selectedHistoryId, setSelectedHistoryId] = useState(null);
+    const [code, setCode] = useState("");
 
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("completed");
     const pageSize = 20;
 
     useEffect(() => {
-        if (activeTab !== "completed") {
-            setHistoryList([]);
-            setTotalPages(0);
-            setLoading(false);
-            return;
+        switch (activeTab) {
+            case "completed":
+                fetchHistory();
+                break;
+            case "created":
+                historyCreateByMe();
+                break;
+            default:
+                setHistoryList([]);
+                setTotalPages(0);
+                setLoading(false);
         }
-        fetchHistory();
     }, [currentPage, activeTab]);
+
+    useEffect(() => {
+        const fetchRoomCode = async () => {
+            if (selectedHistoryId !== null && activeTab === "created") {
+                try {
+                    const response = await HistoryService.getRoomByHistoryId(selectedHistoryId)
+                    setCode(response.data.code)
+                } catch (error) {
+                    toast.error(error?.response?.data || "Lỗi khi lấy lịch sử theo id")
+                }
+            }
+        }
+
+        fetchRoomCode()
+    }, [selectedHistoryId]);
+
+    const historyCreateByMe = async () => {
+        try {
+            const response = await HistoryService.getALlCreateByMe();
+            const histories = response.data
+
+            setAllHistories(histories);
+            setTotalPages(Math.ceil(histories.length / pageSize));
+            setHistoryList(histories.slice(currentPage * pageSize, (currentPage + 1) * pageSize));
+        } catch (error) {
+            toast.error(error?.response?.data || "Lỗi khi lấy kết quả phòng thi bạn tạo")
+        }
+    }
 
     const fetchHistory = async () => {
         setLoading(true);
@@ -93,10 +129,16 @@ const HistoryPage = () => {
     const handleCloseModal = () => {
         setSelectedHistoryId(null);
     };
+
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setCurrentPage(0);
     };
+
+    const handleCloseRanking = () => {
+        setCode("");
+        setSelectedHistoryId(null);
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
@@ -153,10 +195,46 @@ const HistoryPage = () => {
                     </div>
                 </div>
 
-                { activeTab === "completed" && <ListHistory currentPage={currentPage} handlePageChange={handlePageChange} historyList={historyList} totalPages={totalPages} handleOpenModalDetailHistory={handleOpenModal}/>}
+                {activeTab === "completed" &&
+                    <ListHistory currentPage={currentPage}
+                                 handlePageChange={handlePageChange}
+                                 historyList={historyList}
+                                 totalPages={totalPages}
+                                 handleOpenModalDetailHistory={handleOpenModal}
+                                 page={activeTab}
+                    />}
+                {activeTab === "created" &&
+                    <ListHistory currentPage={currentPage}
+                                 handlePageChange={handlePageChange}
+                                 historyList={historyList}
+                                 totalPages={totalPages}
+                                 handleOpenModalDetailHistory={handleOpenModal}
+                                 page={activeTab}
+                    />}
 
             </div>
-            {selectedHistoryId && <DetailHistory selectedHistoryId={selectedHistoryId} handleCloseModal={handleCloseModal} />}
+            {activeTab === "completed" && selectedHistoryId &&
+                <DetailHistory selectedHistoryId={selectedHistoryId} handleCloseModal={handleCloseModal}/>}
+            {activeTab === "created" && code
+                && <>
+                    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
+                        <button
+                            onClick={handleCloseRanking}
+                            className="absolute top-4 left-4 text-white hover:text-red-500 p-2 rounded-full z-50 bg-black/30"
+                        >
+                            <X className="w-10 h-10" />
+                        </button>
+
+                        <div
+                            className={`rounded-xl p-6 max-w-6xl w-full grid gap-6 overflow-y-auto max-h-[90vh]`}
+                        >
+                            <div className="min-w-0">
+                                <RoomRankingPanel code={code} />
+                            </div>
+                        </div>
+                    </div>
+                </>
+            }
         </div>
     );
 };

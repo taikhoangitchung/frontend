@@ -17,6 +17,14 @@ class HistoryService {
         }
     }
 
+    static async getALlCreateByMe() {
+        try {
+            return await axiosInstance.get("/histories/my");
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async getSummaryByExamId(examId) {
         try {
             return await axiosInstance.get(`/histories/exams/${examId}`);
@@ -28,6 +36,14 @@ class HistoryService {
     static async getHistoryDetail(id) {
         try {
             return await axiosInstance.get(`/histories/${id}`);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async getRoomByHistoryId(id) {
+        try {
+            return await axiosInstance.get(`/histories/room/${id}`);
         } catch (error) {
             throw error;
         }

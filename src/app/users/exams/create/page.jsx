@@ -528,6 +528,7 @@ export default function CreateExam({id}) {
             setOpenQuestionsExcel(false);
             setReload(!reload)
         } catch (error) {
+            console.log(error)
             toast.error(error?.response?.data || "Lỗi khi tải lên danh sách câu hỏi")
         } finally {
             setIsSubmitting(false);

@@ -4,7 +4,6 @@ class QuestionService {
     static async import(data, userId) {
         try {
             const params = {questions: data, userId: userId};
-            console.log(params)
             return await axiosInstance.post("/questions/import", params)
         } catch (error) {
             throw error;

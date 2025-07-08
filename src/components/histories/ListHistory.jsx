@@ -14,7 +14,7 @@ const formatDate = (dateArray) => {
 
 function ListHistory({historyList, totalPages, currentPage,
                          handlePageChange,
-                         handleOpenModalDetailHistory}) {
+                         handleOpenModalDetailHistory, page}) {
     return (
         <>
             { historyList.length === 0 ? (
@@ -56,43 +56,56 @@ function ListHistory({historyList, totalPages, currentPage,
                                             </span>
                                     </div>
 
-                                    <div className="mb-4">
-                                        <div
-                                            className={`w-full h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                                                history.score === 100 ? "bg-[#5de2a5]" : "bg-[#e2be5d]"
-                                            }`}
-                                        >
-                                            Độ chính xác: {history.score.toFixed(1)}%
+                                    {page === "completed" &&
+                                        <div className="mb-4">
+                                            <div
+                                                className={`w-full h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+                                                    history.score === 100 ? "bg-[#5de2a5]" : "bg-[#e2be5d]"
+                                                }`}
+                                            >
+                                                Độ chính xác: {history.score.toFixed(1)}%
+                                            </div>
                                         </div>
-                                    </div>
+                                    }
 
                                     <div className="flex justify-between text-sm text-gray-500">
                                         <span>Ngày thi:</span>
                                         <span>{formatDate(history.finishedAt)}</span>
                                     </div>
 
-                                    <div className="flex justify-between text-sm text-gray-500">
-                                        <span>Thời gian làm bài:</span>
-                                        <span>{formatTime(history.timeTaken)}</span>
-                                    </div>
+                                    {page = "created" &&
+                                        <div className="flex justify-between text-sm text-gray-500">
+                                            <span>Số người tham gia:</span>
+                                            <span>{history.countMembers}</span>
+                                        </div>
+                                    }
 
-                                    <div
-                                        className={`text-sm font-semibold mt-2 flex items-center gap-1 ${
-                                            history.passed ? "text-green-600" : "text-red-600"
-                                        }`}
-                                    >
-                                        {history.passed ? (
-                                            <>
-                                                <CheckCircle className="w-4 h-4"/>
-                                                Đạt
-                                            </>
-                                        ) : (
-                                            <>
-                                                <XCircle className="w-4 h-4"/>
-                                                Không đạt
-                                            </>
-                                        )}
-                                    </div>
+                                    {page === "completed" &&
+                                        <>
+                                            <div className="flex justify-between text-sm text-gray-500">
+                                                <span>Thời gian làm bài:</span>
+                                                <span>{formatTime(history.timeTaken)}</span>
+                                            </div>
+
+                                            <div
+                                                className={`text-sm font-semibold mt-2 flex items-center gap-1 ${
+                                                    history.passed ? "text-green-600" : "text-red-600"
+                                                }`}
+                                            >
+                                                {history.passed ? (
+                                                    <>
+                                                        <CheckCircle className="w-4 h-4"/>
+                                                        Đạt
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <XCircle className="w-4 h-4"/>
+                                                        Không đạt
+                                                    </>
+                                                )}
+                                            </div>
+                                        </>
+                                    }
                                 </div>
                             </div>
                         ))}
