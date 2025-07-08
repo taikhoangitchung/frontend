@@ -20,25 +20,32 @@ class QuestionService {
         }
     }
 
-    static async filterByCategoryAndSource(categoryId, sourceId, currentUserId, username) {
+    static async getAll(page = 0, size = 20) { // Thêm page và size mặc định
         try {
-            const params = {
-                categoryId: categoryId,
-                sourceId: sourceId,
-                currentUserId: currentUserId,
-                username: username
-            };
-            return await axiosInstance.post("/questions/filter", params);
+            return await axiosInstance.get("/questions", {
+                params: {
+                    page: page,
+                    size: size
+                }
+            });
         } catch (error) {
             throw error;
         }
     }
 
-    static async getAll() {
+    static async filterByCategoryAndSource(categoryId, sourceId, currentUserId, username, page = 0, size = 20) {
         try {
-            return await axiosInstance.get("/questions")
+            const params = {
+                categoryId: categoryId,
+                sourceId: sourceId,
+                currentUserId: currentUserId,
+                username: username,
+                page: page,
+                size: size
+            };
+            return await axiosInstance.post("/questions/filter", params);
         } catch (error) {
-            throw error
+            throw error;
         }
     }
 

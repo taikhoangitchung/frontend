@@ -1,13 +1,13 @@
 "use client";
 
-import React, {useState, useEffect, useCallback} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
-import {Button} from "../../../components/ui/button";
-import {Input} from "../../../components/ui/input";
-import {Card, CardContent, CardHeader} from "../../../components/ui/card";
-import {Separator} from "../../../components/ui/separator";
-import {Search, Plus, Edit, X, Check, ArrowLeft, ChevronDown} from "lucide-react";
-import {toast} from "sonner";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Card, CardContent, CardHeader } from "../../../components/ui/card";
+import { Separator } from "../../../components/ui/separator";
+import { Search, Plus, Edit, X, Check, ArrowLeft, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import {
     Select,
     SelectContent,
@@ -18,9 +18,9 @@ import {
 import QuestionService from "../../../services/QuestionService";
 import CategoryService from "../../../services/CategoryService";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
-import {Badge} from "../../../components/ui/badge";
+import { Badge } from "../../../components/ui/badge";
 
-const Modal = ({onClose, children}) => {
+const Modal = ({ onClose, children }) => {
     return (
         <div
             className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
@@ -52,16 +52,15 @@ export default function QuestionTable() {
     const [searchTerm, setSearchTerm] = useState("");
     const [ownerFilter, setOwnerFilter] = useState("all");
     const [questions, setQuestions] = useState([]);
-    const [allFilteredQuestions, setAllFilteredQuestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
-    const [totalPage, setTotalPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1); // Thay totalPage bằng totalPages
     const [userId, setUserId] = useState(undefined);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [expandedIds, setExpandedIds] = useState([]);
-    const questionPerPage = 10;
+    const questionPerPage = 20; // Cập nhật theo yêu cầu 20 câu hỏi/trang
 
     const imageBaseUrl = "https://quizgymapp.onrender.com";
 
@@ -98,31 +97,22 @@ export default function QuestionTable() {
         if (!userId) return;
         setLoading(true);
         try {
-            const res = await QuestionService.getAll();
-            const filtered = res.data.filter((q) => {
-                const matchesSearch =
-                    q.content.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                    q.answers.some((a) =>
-                        a.content.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-                    ) ||
-                    q.user.username?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-                const matchesOwner =
-                    ownerFilter === "all"
-                        ? true
-                        : ownerFilter === "mine"
-                            ? q.user.id === userId
-                            : q.user.id !== userId;
-                const matchesCategory =
-                    categoryFilter === "all"
-                        ? true
-                        : q.category?.id?.toString() === categoryFilter;
-                return matchesSearch && matchesOwner && matchesCategory;
-            });
-            setAllFilteredQuestions(filtered);
-            const total = Math.ceil(filtered.length / questionPerPage);
-            setTotalPage(total);
-            const start = (page - 1) * questionPerPage;
-            setQuestions(filtered.slice(start, start + questionPerPage));
+            let res;
+            if (categoryFilter === "all" && ownerFilter === "all" && !debouncedSearchTerm) {
+                res = await QuestionService.getAll(page - 1, questionPerPage); // page bắt đầu từ 0
+            } else {
+                const sourceId = ownerFilter === "mine" ? userId : ownerFilter === "others" ? -1 : -999;
+                res = await QuestionService.filterByCategoryAndSource(
+                    categoryFilter === "all" ? -1 : parseInt(categoryFilter),
+                    sourceId,
+                    userId,
+                    debouncedSearchTerm,
+                    page - 1,
+                    questionPerPage
+                );
+            }
+            setQuestions(res.data.content); // Lấy content từ Page
+            setTotalPages(res.data.totalPages); // Cập nhật tổng số trang
         } catch (error) {
             if (error.response?.status === 403) {
                 router.push("/forbidden");
@@ -157,18 +147,18 @@ export default function QuestionTable() {
     const toggleExpand = (id) => {
         setExpandedIds((prev) =>
             prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-        )
-    }
+        );
+    };
 
     const handleEdit = async (id) => {
         try {
-            await QuestionService.checkEditable(id)
-            router.push(`/users/questions/${id}/edit`)
+            await QuestionService.checkEditable(id);
+            router.push(`/users/questions/${id}/edit`);
         } catch (error) {
-            toast.error(error.response.data);
+            toast.error(error.response?.data || "Không thể chỉnh sửa");
             console.log(error);
         }
-    }
+    };
 
     const handleDelete = async (id) => {
         try {
@@ -177,7 +167,7 @@ export default function QuestionTable() {
             setPage(1);
             await fetchQuestions();
         } catch (err) {
-            toast.error(err.response.data);
+            toast.error(err.response?.data || "Xóa thất bại");
         }
     };
 
@@ -199,41 +189,34 @@ export default function QuestionTable() {
                                 }}
                             >
                                 <SelectTrigger
-                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
+                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >
                                     <SelectValue placeholder="Tác giả"/>
                                 </SelectTrigger>
                                 <SelectContent
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all"
-                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả
-                                        tác giả</SelectItem>
-                                    <SelectItem value="mine"
-                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Của
-                                        tôi</SelectItem>
-                                    <SelectItem value="others"
-                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Của người
-                                        khác</SelectItem>
+                                    <SelectItem value="all">Tất cả tác giả</SelectItem>
+                                    <SelectItem value="mine">Của tôi</SelectItem>
+                                    <SelectItem value="others">Của người khác</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="relative z-10">
                             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
                                 <SelectTrigger
-                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
+                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100"
+                                >
                                     <SelectValue placeholder="Danh mục"/>
                                 </SelectTrigger>
                                 <SelectContent
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all"
-                                                className="cursor-pointer hover:bg-gray-100 transition-colors">Tất cả
-                                        danh mục</SelectItem>
+                                    <SelectItem value="all">Tất cả danh mục</SelectItem>
                                     {categories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id.toString()}
-                                                    className="cursor-pointer hover:bg-gray-100 transition-colors">
+                                        <SelectItem key={cat.id} value={cat.id.toString()}>
                                             {cat.name}
                                         </SelectItem>
                                     ))}
@@ -271,7 +254,7 @@ export default function QuestionTable() {
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-medium">
-                            Danh sách câu hỏi (Tổng: {allFilteredQuestions.length})
+                            Danh sách câu hỏi (Tổng: {questions.length})
                         </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
@@ -284,7 +267,7 @@ export default function QuestionTable() {
 
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {Array.from({length: questionPerPage}).map((_, i) => (
+                            {Array.from({ length: questionPerPage }).map((_, i) => (
                                 <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg"></div>
                             ))}
                         </div>
@@ -295,7 +278,7 @@ export default function QuestionTable() {
                             <Card
                                 key={q.id}
                                 className="bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:ring-1 hover:scale-[1.01] hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2"
-                                onClick={() => toggleExpand(q.id)} // Mở rộng khi click vào card
+                                onClick={() => toggleExpand(q.id)}
                             >
                                 <CardHeader className="gap-0 !pb-0 px-6">
                                     <div className="flex justify-between items-start gap-2">
@@ -310,7 +293,7 @@ export default function QuestionTable() {
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleEdit(q.id);
-                                                    }} // Ngăn sự kiện lan ra
+                                                    }}
                                                     className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                                 >
                                                     <Edit className="w-5 h-5"/>
@@ -320,7 +303,7 @@ export default function QuestionTable() {
                                                     handleDelete={handleDelete}
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="cursor-pointer text-gray-500 hover:bg-red-200 hover:text-red-700 px-2 py-1 transition-all duration-200" // Hiệu ứng hover đỏ
+                                                    className="cursor-pointer text-gray-500 hover:bg-red-200 hover:text-red-700 px-2 py-1 transition-all duration-200"
                                                 />
                                             </div>
                                         )}
@@ -330,7 +313,7 @@ export default function QuestionTable() {
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 toggleExpand(q.id);
-                                            }} // Ngăn sự kiện lan ra
+                                            }}
                                             className="cursor-pointer text-gray-500 hover:text-teal-700 hover:bg-black/10 px-2 py-1 transition-all duration-200"
                                             title="Xem đáp án"
                                         >
@@ -372,7 +355,6 @@ export default function QuestionTable() {
                                                     <X className="w-4 h-4 text-red-400 opacity-50"/>
                                                 )}
                                                 <span className="text-sm whitespace-pre-wrap">{a.content}</span>
-
                                             </div>
                                         ))}
                                         <div className="col-span-full flex flex-wrap gap-2 mt-1">
@@ -405,15 +387,15 @@ export default function QuestionTable() {
                 {/* Pagination */}
                 <div className="flex justify-center gap-3 mt-6">
                     {page > 1 && (
-                        <Button variant="outline" onClick={() => setPage(page - 1)} className="hover:cursor-pointer">
+                        <Button variant="outline" onClick={() => setPage(page - 1)} className="transition-all duration-200 cursor-pointer hover:bg-purple-100">
                             Trang trước
                         </Button>
                     )}
                     <Button disabled>
-                        {page}/{totalPage}
+                        {page}/{totalPages}
                     </Button>
-                    {page < totalPage && (
-                        <Button variant="outline" onClick={() => setPage(page + 1)} className="hover:cursor-pointer">
+                    {page < totalPages && (
+                        <Button variant="outline" onClick={() => setPage(page + 1)} className="transition-all duration-200 cursor-pointer hover:bg-purple-100">
                             Trang sau
                         </Button>
                     )}
