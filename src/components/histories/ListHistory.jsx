@@ -1,5 +1,6 @@
 import formatTime from "../../util/formatTime";
 import {CheckCircle, XCircle} from "lucide-react";
+import {useEffect, useState} from "react";
 
 const formatDate = (dateArray) => {
     if (!dateArray || !Array.isArray(dateArray) || dateArray.length < 3) return "Không xác định";
@@ -12,12 +13,15 @@ const formatDate = (dateArray) => {
     }
 };
 
-function ListHistory({historyList, totalPages, currentPage,
+function ListHistory({
+                         historyList, totalPages, currentPage,
                          handlePageChange,
-                         handleOpenModalDetailHistory, page}) {
+                         handleOpenModalDetailHistory, page
+                     }) {
+
     return (
         <>
-            { historyList.length === 0 ? (
+            {historyList.length === 0 ? (
                 <p className="text-gray-600">Bạn chưa thực hiện bài thi nào.</p>
             ) : (
                 <>
@@ -56,7 +60,7 @@ function ListHistory({historyList, totalPages, currentPage,
                                             </span>
                                     </div>
 
-                                    {page === "completed" &&
+                                    {page === "completed" && !isNaN(history.score) &&
                                         <div className="mb-4">
                                             <div
                                                 className={`w-full h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
@@ -73,7 +77,7 @@ function ListHistory({historyList, totalPages, currentPage,
                                         <span>{formatDate(history.finishedAt)}</span>
                                     </div>
 
-                                    {page = "created" &&
+                                    {page === "created" &&
                                         <div className="flex justify-between text-sm text-gray-500">
                                             <span>Số người tham gia:</span>
                                             <span>{history.countMembers}</span>
