@@ -1,6 +1,5 @@
 import formatTime from "../../util/formatTime";
 import {CheckCircle, XCircle} from "lucide-react";
-import {useEffect, useState} from "react";
 
 const formatDate = (dateArray) => {
     if (!dateArray || !Array.isArray(dateArray) || dateArray.length < 3) return "Không xác định";
