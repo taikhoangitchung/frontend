@@ -25,6 +25,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@shadcn/ui": "^0.0.4",
+    "@supabase/supabase-js": "^2.50.3",
     "@tailwindcss/postcss": "^4.1.10",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
@@ -46,6 +47,7 @@
     "tailwind": "^2.3.1",
     "tailwind-merge": "^3.3.1",
     "ui": "^0.2.4",
+    "uuid": "^11.1.0",
     "xlsx": "^0.18.5",
     "yup": "^1.6.1"
   },
