@@ -20,8 +20,8 @@ import QuestionService from "../../../services/QuestionService";
 import CategoryService from "../../../services/CategoryService";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import { Badge } from "../../../components/ui/badge";
-import {getSupabaseImageUrl} from "../../../util/getImageSupabaseUrl";
-import {supabaseConfig} from "../../../config/supabaseConfig";
+import { getSupabaseImageUrl } from "../../../util/getImageSupabaseUrl";
+import { supabaseConfig } from "../../../config/supabaseConfig";
 import SupabaseService from "../../../services/SupabaseService";
 
 const Modal = ({ onClose, children }) => {
@@ -58,13 +58,14 @@ export default function QuestionTable() {
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1); // Thay totalPage bằng totalPages
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalQuestions, setTotalQuestions] = useState(0); // Thêm state để lưu tổng số câu hỏi
     const [userId, setUserId] = useState(undefined);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [expandedIds, setExpandedIds] = useState([]);
-    const questionPerPage = 20; // Cập nhật theo yêu cầu 20 câu hỏi/trang
+    const questionPerPage = 20;
 
     const imageBaseUrl = "https://quizgymapp.onrender.com";
 
@@ -103,7 +104,7 @@ export default function QuestionTable() {
         try {
             let res;
             if (categoryFilter === "all" && ownerFilter === "all" && !debouncedSearchTerm) {
-                res = await QuestionService.getAll(page - 1, questionPerPage); // page bắt đầu từ 0
+                res = await QuestionService.getAll(page - 1, questionPerPage);
             } else {
                 const sourceId = ownerFilter === "mine" ? userId : ownerFilter === "others" ? -1 : -999;
                 res = await QuestionService.filterByCategoryAndSource(
@@ -115,8 +116,9 @@ export default function QuestionTable() {
                     questionPerPage
                 );
             }
-            setQuestions(res.data.content); // Lấy content từ Page
-            setTotalPages(res.data.totalPages); // Cập nhật tổng số trang
+            setQuestions(res.data.content || []);
+            setTotalPages(res.data.totalPages || 1);
+            setTotalQuestions(res.data.totalElements || 0); // Cập nhật tổng số câu hỏi từ totalElements
         } catch (error) {
             if (error.response?.status === 403) {
                 router.push("/forbidden");
@@ -166,10 +168,10 @@ export default function QuestionTable() {
 
     const handleDelete = async (id) => {
         try {
-            // delete image supabase
-            const questionDelete = questions.find(q => q.id = id);
-            await SupabaseService.removeFile(questionDelete.image, supabaseConfig.bucketImageQuestion);
-            // delete question
+            const questionDelete = questions.find((q) => q.id === id);
+            if (questionDelete?.image) {
+                await SupabaseService.removeFile(questionDelete.image, supabaseConfig.bucketImageQuestion);
+            }
             const res = await QuestionService.delete(id);
             toast.success(res.data);
             setPage(1);
@@ -205,9 +207,18 @@ export default function QuestionTable() {
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all">Tất cả tác giả</SelectItem>
-                                    <SelectItem value="mine">Của tôi</SelectItem>
-                                    <SelectItem value="others">Của người khác</SelectItem>
+                                    <SelectItem
+                                        value="all"
+                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                    >Tất cả tác giả</SelectItem>
+                                    <SelectItem
+                                        value="mine"
+                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                    >Của tôi</SelectItem>
+                                    <SelectItem
+                                        value="others"
+                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                    >Của người khác</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -222,9 +233,16 @@ export default function QuestionTable() {
                                     position="popper"
                                     className="z-50 bg-white border border-gray-200 shadow-lg"
                                 >
-                                    <SelectItem value="all">Tất cả danh mục</SelectItem>
+                                    <SelectItem
+                                        value="all"
+                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                    >Tất cả danh mục</SelectItem>
                                     {categories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                                        <SelectItem
+                                            key={cat.id}
+                                            value={cat.id.toString()}
+                                            className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                        >
                                             {cat.name}
                                         </SelectItem>
                                     ))}
@@ -262,7 +280,7 @@ export default function QuestionTable() {
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-medium">
-                            Danh sách câu hỏi (Tổng: {questions.length})
+                            Danh sách câu hỏi (Tổng: {totalQuestions})
                         </span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}

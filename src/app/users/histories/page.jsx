@@ -46,11 +46,13 @@ const HistoryPage = () => {
                 } catch (error) {
                     toast.error(error?.response?.data || "Lỗi khi lấy lịch sử theo id");
                 }
+            } else {
+                setCode(""); // Đặt lại code nếu không còn selectedHistoryId
             }
         };
 
         fetchRoomCode();
-    }, [selectedHistoryId]);
+    }, [selectedHistoryId, activeTab]); // Thêm activeTab để reset khi chuyển tab
 
     const fetchHistory = async () => {
         setLoading(true);
@@ -101,6 +103,8 @@ const HistoryPage = () => {
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setCurrentPage(0);
+        setSelectedHistoryId(null); // Reset selectedHistoryId khi chuyển tab
+        setCode(""); // Reset code khi chuyển tab
     };
 
     const handleCloseRanking = () => {
@@ -192,7 +196,10 @@ const HistoryPage = () => {
                 <DetailHistory selectedHistoryId={selectedHistoryId} handleCloseModal={handleCloseModal} />
             )}
             {activeTab === "created" && code && (
-                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
+                <div
+                    className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
+                    style={{ display: code ? "flex" : "none" }} // Thêm điều kiện hiển thị
+                >
                     <button
                         onClick={handleCloseRanking}
                         className="absolute top-4 left-4 text-white hover:text-red-500 p-2 rounded-full z-50 bg-black/30 cursor-pointer transition-all duration-200"

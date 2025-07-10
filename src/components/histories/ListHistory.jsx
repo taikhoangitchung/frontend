@@ -23,22 +23,8 @@ function ListHistory({
                      }) {
     return (
         <div className="mb-8">
-            {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="bg-white shadow-lg rounded-xl p-0 h-64 animate-pulse"
-                        >
-                            <div className="w-full h-36 rounded-t-xl bg-gray-200"></div>
-                            <div className="p-4 space-y-4">
-                                <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+            {loading && historyList.length === 0 ? (
+                <p className="text-gray-600 text-center">Đang tải...</p> // Thay skeleton bằng text đơn giản
             ) : historyList.length === 0 ? (
                 <p className="text-gray-600 text-center">Bạn chưa thực hiện bài thi nào.</p>
             ) : (

@@ -119,9 +119,18 @@ export default function ExamManager() {
                             <SelectContent
                                 className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md"
                             >
-                                <SelectItem value="all">Tất cả tác giả</SelectItem>
-                                <SelectItem value="mine">Của tôi</SelectItem>
-                                <SelectItem value="others">Của người khác</SelectItem>
+                                <SelectItem
+                                    value="all"
+                                    className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                >Tất cả tác giả</SelectItem>
+                                <SelectItem
+                                    value="mine"
+                                    className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                >Của tôi</SelectItem>
+                                <SelectItem
+                                    value="others"
+                                    className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                >Của người khác</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select
@@ -146,9 +155,16 @@ export default function ExamManager() {
                             <SelectContent
                                 className="z-50 min-w-36 bg-white border border-gray-200 rounded-md shadow-md"
                             >
-                                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                                <SelectItem
+                                    value="all"
+                                    className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                >Tất cả danh mục</SelectItem>
                                 {categories.map(cat => (
-                                    <SelectItem key={cat.id} value={String(cat.id)}>
+                                    <SelectItem
+                                        key={cat.id}
+                                        value={String(cat.id)}
+                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
+                                    >
                                         {cat.name}
                                     </SelectItem>
                                 ))}
