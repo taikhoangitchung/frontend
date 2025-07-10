@@ -65,9 +65,7 @@ class QuestionService {
 
     static async update(id, questionData) {
         try {
-            return await axiosInstance.put(`/questions/${id}`, questionData, {
-                headers: {'Content-Type': 'multipart/form-data'}
-            })
+            return await axiosInstance.put(`/questions/${id}`, questionData)
         } catch (error) {
             throw error
         }
