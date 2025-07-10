@@ -17,7 +17,6 @@ function UploadFile({ setImage,
 
         const uploadResult = await SupabaseService.uploadFile(file, supabaseConfig.bucketImageQuestion, supabaseConfig.buckImageQuestionPrefix);
         if (uploadResult) {
-            console.log(uploadResult)
             setImage(uploadResult);
         }
         setUploading(false);

@@ -25,6 +25,7 @@ import UploadFile from "./UploadFile";
 import {getFirstErrorMessage} from "../../util/form/getFirstErrorMessage";
 import SupabaseService from "../../services/SupabaseService";
 import {supabaseConfig} from "../../config/supabaseConfig";
+import {moveFileImage} from "../../util/supabase/moveFileImage";
 
 export default function CreateQuestionForm() {
     const router = useRouter()
@@ -98,18 +99,7 @@ export default function CreateQuestionForm() {
             let finalImagePath = null;
 
             if (image?.path) {
-                const currentPathFile = image.path;
-                const fileName = currentPathFile.split("/").pop();
-                const newPathFile = `${supabaseConfig.buckImageQuestionPrefixFinal}/${fileName}`;
-
-                const { error } = await SupabaseService.moveImage(
-                    supabaseConfig.bucketImageQuestion,
-                    currentPathFile,
-                    newPathFile
-                );
-
-                if (error) throw new Error("Di chuyển ảnh thất bại");
-                finalImagePath = newPathFile;
+                finalImagePath = await moveFileImage(image);
             }
 
             const { content, category, type, difficulty, answers } = formik.values;

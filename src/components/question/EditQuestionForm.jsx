@@ -24,6 +24,11 @@ import {questionSchema} from "../../yup/questionSchema";
 import {validateImage} from "../../util/validateImage";
 import DropDown from "../dropdown/DropDown";
 import {config} from "../../config/url.config";
+import {getSupabaseImageUrl} from "../../util/getImageSupabaseUrl";
+import {supabaseConfig} from "../../config/supabaseConfig";
+import {getFirstErrorMessage} from "../../util/form/getFirstErrorMessage";
+import UploadFile from "./UploadFile";
+import {moveFileImage} from "../../util/supabase/moveFileImage";
 
 export default function EditQuestionForm() {
     const router = useRouter()
@@ -75,7 +80,8 @@ export default function EditQuestionForm() {
             }
             setEditingQuestion(cleanedQuestion)
             if (q.image) {
-                setImage({preview: `${config.apiBaseUrl}${q.image}`});
+                //setImage({preview: `${config.apiBaseUrl}${q.image}`});
+                setImage({preview: getSupabaseImageUrl(supabaseConfig.bucketImageQuestion, q.image)});
             }
         } catch (e) {
             console.error(e)
@@ -130,29 +136,30 @@ export default function EditQuestionForm() {
     };
 
     const handleSubmit = async () => {
-        const errors = await formik.validateForm()
-        if (Object.keys(errors).length > 0) {
-            const firstError = Object.values(errors)[0]
-            if (typeof firstError === "string") {
-                toast.error(firstError)
-            } else if (Array.isArray(firstError)) {
-                const nestedFirst = firstError.find((e) => typeof e === "object" && e !== null)
-                if (nestedFirst) {
-                    const nestedMessage = Object.values(nestedFirst)[0]
-                    if (typeof nestedMessage === "string") toast.error(nestedMessage)
-                }
-            }
-            return
+        const errors = await formik.validateForm();
+        const message = getFirstErrorMessage(errors);
+        if (message) {
+            toast.error(message);
+            return;
         }
+
         try {
-            setIsSubmitting(true)
+            setIsSubmitting(true);
+
+            let finalImagePath = null;
+            if (image?.path) {
+                finalImagePath = await moveFileImage(image);
+            }
+            const  {content, category, type, difficulty} = formik.values;
             const payload = {
-                content: formik.values.content,
-                category: formik.values.category,
-                type: formik.values.type,
-                difficulty: formik.values.difficulty,
+                content,
+                category,
+                type,
+                difficulty,
+                image: finalImagePath,
                 answers: formik.values.answers.map(({id, ...rest}) => rest),
             }
+
             const formData = new FormData();
             Object.entries(payload).forEach(([key, value]) => {
                 if (key === "answers") {
@@ -164,9 +171,10 @@ export default function EditQuestionForm() {
                     formData.append(key, value);
                 }
             });
-            if (image?.file) {
-                formData.append("image", image.file);
-            }
+
+            // if (image?.file) {
+            //     formData.append("image", image.file);
+            // }
             await QuestionService.update(id, formData)
             toast.success("Cập nhật câu hỏi thành công!")
             router.push(`/users/questions/${id}/edit`)
@@ -224,57 +232,7 @@ export default function EditQuestionForm() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
                     {/* Left Section - Image Upload (3/10) */}
-                    <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-3">
-                        <h3 className="text-white font-semibold text-lg">Upload hình ảnh</h3>
-                        {!image ? (
-                            <div
-                                className="border-2 border-dashed border-white/30 rounded-lg p-8 text-center hover:border-white/50 hover:bg-white/5 transition-all duration-200 cursor-pointer h-[200px] flex flex-col justify-center"
-                                onDragOver={(e) => e.preventDefault()}
-                                onDragEnter={(e) => e.preventDefault()}
-                                onDragLeave={(e) => e.preventDefault()}
-                                onDrop={(e) => {
-                                    e.preventDefault();
-                                    const file = e.dataTransfer.files[0];
-                                    if (file && validateImage(file)) {
-                                        setImage({
-                                            file,
-                                            preview: URL.createObjectURL(file),
-                                        });
-                                    }
-                                }}
-                            >
-                                <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden"
-                                       id="image-upload"/>
-                                <label htmlFor="image-upload" className="cursor-pointer block">
-                                    <div className="w-12 h-6 text-white/70 mx-auto mb-3">📁</div>
-                                    <p className="text-white/80 mb-2">Chọn tệp</p>
-                                    <p className="text-white/60 text-sm">Kéo thả hoặc click để chọn ảnh</p>
-                                </label>
-                            </div>
-                        ) : (
-                            <div className="relative">
-                                <div
-                                    className="border-2 border-white/30 rounded-lg p-4 bg-white/5 cursor-pointer hover:scale-105 transition-all duration-200"
-                                    onClick={() => setShowImageModal(true)}
-                                >
-                                    <img
-                                        src={image.preview}
-                                        alt="Preview"
-                                        className="w-full h-[163px] object-cover rounded-lg"
-                                    />
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="font-semibold absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition-all duration-200 cursor-pointer"
-                                    onClick={() => setImage(null)}
-                                >
-                                    ✕
-                                </Button>
-                            </div>
-                        )}
-                    </Card>
-
+                    <UploadFile image={image} setImage={setImage} setShowImageModal={setShowImageModal}/>
                     {/* Right Section - Question Input (7/10) */}
                     <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-7">
                         <h3 className="text-white font-semibold text-lg">Nội dung câu hỏi</h3>
