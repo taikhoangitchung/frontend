@@ -15,6 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../../../components/ui/select";
+import Image from 'next/image';
 import QuestionService from "../../../services/QuestionService";
 import CategoryService from "../../../services/CategoryService";
 import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
@@ -336,7 +337,7 @@ export default function QuestionTable() {
                                     <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {q.image && (
                                             <div className="col-span-full">
-                                                <img
+                                                <Image
                                                     src={getSupabaseImageUrl(supabaseConfig.bucketImageQuestion, q.image)}
                                                     className="max-w-[50%] mt-2 cursor-pointer hover:scale-105 transition-transform"
                                                     onClick={() => {
@@ -344,6 +345,8 @@ export default function QuestionTable() {
                                                         setModalOpen(true);
                                                     }}
                                                     alt="image"
+                                                    width={200} // Required for static images
+                                                    height={150} // Required for static images
                                                 />
                                             </div>
                                         )}
