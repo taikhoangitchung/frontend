@@ -21,9 +21,9 @@ import {initialAnswers} from "../../util/defaultAnswers"
 import {cn} from "../../lib/utils"
 import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
 import {questionSchema} from "../../yup/questionSchema";
-import {backendBaseUrl} from "../../config/backendBaseUrl";
 import {validateImage} from "../../util/validateImage";
 import DropDown from "../dropdown/DropDown";
+import {config} from "../../config/url.config";
 
 export default function EditQuestionForm() {
     const router = useRouter()
@@ -75,7 +75,7 @@ export default function EditQuestionForm() {
             }
             setEditingQuestion(cleanedQuestion)
             if (q.image) {
-                setImage({preview: `${backendBaseUrl}${q.image}`});
+                setImage({preview: `${config.apiBaseUrl}${q.image}`});
             }
         } catch (e) {
             console.error(e)
