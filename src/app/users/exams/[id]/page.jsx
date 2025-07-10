@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader } from "../../../../components/ui/card";
 import { Button } from "../../../../components/ui/button";
 import { X, Check, Loader2, ArrowLeft, ChevronDown } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import ExamService from "../../../../services/ExamService";
 import { Badge } from "../../../../components/ui/badge";
-import { toast } from "sonner"; // Giả sử bạn dùng sonner để thông báo
+import { toast } from "sonner";
 
 const questionPerPage = 10;
 
@@ -44,10 +44,11 @@ export default function Page() {
         );
     };
 
-    const totalPage = Math.ceil(questions.length / questionPerPage);
+    const totalPages = Math.ceil(questions.length / questionPerPage);
     const start = (page - 1) * questionPerPage;
     const pagedQuestions = questions.slice(start, start + questionPerPage);
 
+    // Kiểm tra trạng thái loading và dữ liệu trước khi render
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-purple-900">
@@ -85,7 +86,7 @@ export default function Page() {
                         <Card
                             key={q.id}
                             className="bg-white transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:ring-1 hover:scale-[1.01] hover:ring-teal-300 pt-3 pb-3 gap-0 mb-2"
-                            onClick={() => toggleExpand(q.id)} // Mở/đóng khi click vào card
+                            onClick={() => toggleExpand(q.id)}
                         >
                             <CardHeader className="gap-0 !pb-0 px-6">
                                 <div className="flex justify-between items-start gap-2">
@@ -107,13 +108,13 @@ export default function Page() {
                             </CardHeader>
                             {expandedIds.includes(q.id) && (
                                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {q.image && (
+                                    {q.image && (
                                         <div className="col-span-full">
                                             <img
                                                 src={`${imageBaseUrl}${q.image}`}
                                                 className="max-w-[50%] mt-2 cursor-pointer hover:scale-105 transition-transform"
                                                 onClick={(e) => {
-                                                    e.stopPropagation(); // Ngăn sự kiện lan ra khi click vào hình
+                                                    e.stopPropagation();
                                                     setSelectedImage(`${imageBaseUrl}${q.image}`);
                                                     setModalOpen(true);
                                                 }}
@@ -136,32 +137,14 @@ export default function Page() {
                                                 ) : (
                                                     <X className="w-4 h-4 text-red-400 opacity-50" />
                                                 )}
-                                                <span className="text-sm">{a.content || "Không có nội dung đáp án"}</span>
+                                                <span className="text-sm whitespace-pre-wrap">
+                                                    {typeof a.content === "string" ? a.content.replace(/\\n/g, "\n") : a.content}
+                                                </span>
                                             </div>
                                         ))
                                     ) : (
                                         <div className="col-span-full text-gray-500">Không có đáp án để hiển thị.</div>
                                     )}
-
-                                    {q.answers.map((a) => (
-                                        <div
-                                            key={a.id}
-                                            className={`flex items-center gap-2 p-3 rounded-lg border ${
-                                                a.correct
-                                                    ? "bg-green-50 border-green-200"
-                                                    : "bg-red-50 bg-opacity-20 border-red-200"
-                                            }`}
-                                        >
-                                            {a.correct ? (
-                                                <Check className="w-4 h-4 text-green-600"/>
-                                            ) : (
-                                                <X className="w-4 h-4 text-red-400 opacity-50"/>
-                                            )}
-                                            <span className="text-sm whitespace-pre-wrap">
-  {typeof a.content === "string" ? a.content.replace(/\\n/g, "\n") : a.content}
-</span>
-                                        </div>
-                                    ))}
 
                                     <div className="col-span-full flex flex-wrap gap-2 mt-1">
                                         <Badge
@@ -192,15 +175,23 @@ export default function Page() {
                 {/* Pagination */}
                 <div className="flex justify-center gap-3 mt-6">
                     {page > 1 && (
-                        <Button variant="outline" onClick={() => setPage(page - 1)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(page - 1)}
+                            className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
+                        >
                             Trang trước
                         </Button>
                     )}
                     <Button disabled>
-                        {page}/{totalPage}
+                        {page}/{totalPages}
                     </Button>
-                    {page < totalPage && (
-                        <Button variant="outline" onClick={() => setPage(page + 1)}>
+                    {page < totalPages && (
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(page + 1)}
+                            className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
+                        >
                             Trang sau
                         </Button>
                     )}
