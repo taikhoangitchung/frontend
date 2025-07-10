@@ -9,17 +9,21 @@ class HistoryService {
         }
     }
 
-    static async getAll() {
+    static async getAll(page = 0, size = 12) {
         try {
-            return await axiosInstance.get("/histories");
+            return await axiosInstance.get("/histories", {
+                params: { page, size }
+            });
         } catch (error) {
             throw error;
         }
     }
 
-    static async getALlCreateByMe() {
+    static async getALlCreateByMe(page = 0, size = 12) {
         try {
-            return await axiosInstance.get("/histories/my");
+            return await axiosInstance.get("/histories/my", {
+                params: { page, size }
+            });
         } catch (error) {
             throw error;
         }

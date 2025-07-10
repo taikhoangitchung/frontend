@@ -17,6 +17,7 @@ export default function Page() {
     const [playedCount, setPlayedCount] = useState(0)
     const [accuracy, setAccuracy] = useState(0)
     const [inputQuiz, setInputQuiz] = useState("")
+    const [loading, setLoading] = useState(true) // Thêm trạng thái loading
     const router = useRouter()
     const username = localStorage.getItem("username")
 
@@ -25,9 +26,10 @@ export default function Page() {
     }, [])
 
     const fetchStats = async () => {
+        setLoading(true)
         try {
-            const response = await HistoryService.getAll()
-            const histories = response.data || []
+            const response = await HistoryService.getAll(0, 12) // Sử dụng phân trang với page=0, size=12
+            const histories = response.data.content || [] // Lấy content từ Page object
             const played = histories.length
             const totalScore = histories.reduce((sum, h) => sum + h.score, 0)
             const avgScore = played > 0 ? (totalScore / played).toFixed(1) : 0
@@ -35,6 +37,8 @@ export default function Page() {
             setAccuracy(avgScore)
         } catch (e) {
             console.error("Lỗi khi tính thống kê người dùng")
+        } finally {
+            setLoading(false)
         }
     }
 
