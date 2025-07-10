@@ -34,7 +34,7 @@ export default function ExamManager() {
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1); // Thay totalPage bằng totalPages
+    const [totalPages, setTotalPages] = useState(1);
     const [totalExams, setTotalExams] = useState(0);
     const examPerPage = 10;
 
@@ -59,37 +59,10 @@ export default function ExamManager() {
     const fetchExams = async () => {
         setLoading(true);
         try {
-            let res;
-            if (!categoryId && !searchTerm && ownerFilter === "all") {
-                res = await ExamService.getAll(page - 1, examPerPage); // page bắt đầu từ 0
-            } else {
-                // Logic lọc phức tạp hơn, cần API hỗ trợ lọc với Pageable (tùy chỉnh thêm nếu cần)
-                res = await ExamService.getAll(page - 1, examPerPage); // Hiện tại dùng getAll, cần mở rộng API sau
-                let filtered = res.data.content;
-                if (categoryId) {
-                    filtered = filtered.filter((e) => String(e.category.id) === categoryId);
-                }
-                if (searchTerm.trim()) {
-                    const term = searchTerm.toLowerCase();
-                    filtered = filtered.filter((e) =>
-                        e.title.toLowerCase().includes(term) ||
-                        e.category.name.toLowerCase().includes(term)
-                    );
-                }
-                if (ownerFilter === "mine") {
-                    filtered = filtered.filter((e) => e.author.id === currentUserId);
-                } else if (ownerFilter === "others") {
-                    filtered = filtered.filter((e) => e.author.id !== currentUserId);
-                }
-                setTotalExams(filtered.length);
-                setTotalPages(Math.ceil(filtered.length / examPerPage));
-                setExams(filtered.slice(0, examPerPage)); // Chỉ lấy phần trang hiện tại
-            }
-            if (!categoryId && !searchTerm && ownerFilter === "all") {
-                setExams(res.data.content);
-                setTotalPages(res.data.totalPages);
-                setTotalExams(res.data.totalElements);
-            }
+            const res = await ExamService.getAll(page - 1, examPerPage, categoryId, searchTerm, ownerFilter);
+            setExams(res.data.content);
+            setTotalPages(res.data.totalPages);
+            setTotalExams(res.data.totalElements);
         } catch (err) {
             console.error(err);
             toast.error("Đã xảy ra lỗi khi tải danh sách bài thi!");
