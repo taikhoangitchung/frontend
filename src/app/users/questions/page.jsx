@@ -21,6 +21,7 @@ import DeleteButton from "../../../components/alerts-confirms/DeleleButton";
 import { Badge } from "../../../components/ui/badge";
 import {getSupabaseImageUrl} from "../../../util/getImageSupabaseUrl";
 import {supabaseConfig} from "../../../config/supabaseConfig";
+import SupabaseService from "../../../services/SupabaseService";
 
 const Modal = ({ onClose, children }) => {
     return (
@@ -164,6 +165,10 @@ export default function QuestionTable() {
 
     const handleDelete = async (id) => {
         try {
+            // delete image supabase
+            const questionDelete = questions.find(q => q.id = id);
+            await SupabaseService.removeFile(questionDelete.image, supabaseConfig.bucketImageQuestion);
+            // delete question
             const res = await QuestionService.delete(id);
             toast.success(res.data);
             setPage(1);
