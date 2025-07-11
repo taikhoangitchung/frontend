@@ -54,7 +54,7 @@ export default function ProgressBoard({candidates = [], submittedUsers = [], onK
                                     </>
                                 )}
                                 <button
-                                    className="text-red-400 hover:text-red-600"
+                                    className="ml-2 rounded-full bg-red-500 text-white hover:bg-red-700 text-white cursor-pointer transition-all decoration-200"
                                     title="Kick khỏi phòng"
                                     onClick={() => onKick(item.email)}
                                 >

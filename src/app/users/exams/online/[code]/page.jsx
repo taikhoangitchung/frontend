@@ -233,11 +233,11 @@ export default function WaitingRoom() {
                                         </div>
                                         {hostEmail === storedEmail && (
                                             <button
-                                                className="text-red-400 hover:text-red-600"
+                                                className="rounded-full bg-red-500 text-white hover:bg-red-700 text-white cursor-pointer transition-all decoration-200"
                                                 title="Kick khỏi phòng"
                                                 onClick={() => socketRef.current?.send(`KICK:${code}:${item.email}`)}
                                             >
-                                                <X className="w-4 h-4"/>
+                                                <X className="w-5 h-5"/>
                                             </button>
                                         )}
                                     </div>
