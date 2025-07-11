@@ -49,31 +49,18 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
         questions: false,
         categories: false
     })
-    const defaultAvatar = "http://localhost:8080/media/default-avatar.png";
 
     useEffect(() => {
         const savedEmail = localStorage.getItem("email")
-        if (savedEmail) setEmail(savedEmail)
-
-        // Lấy thông tin avatar từ localStorage hoặc API
-        const storedUsername = localStorage.getItem("username") || ""
-        const storedAvatar = localStorage.getItem("avatar") || ""
-
-        setUserInfo({
-            email: savedEmail,
-            username: storedUsername,
-            avatar: storedAvatar,
-        })
-
         // Gọi API để lấy thông tin profile (giống profile.jsx)
         if (savedEmail) {
+            setEmail(savedEmail);
             UserService.getProfile(savedEmail)
                 .then((response) => {
-                    const user = response.data
-                    setUserInfo(prev => ({
-                        ...prev,
-                        avatar: user.avatar ? `http://localhost:8080${user.avatar}` : defaultAvatar,
-                    }))
+                    const {username, avatar} = response.data;
+                    setUserInfo({
+                        email: savedEmail, username, avatar
+                    })
                 })
                 .catch((err) => {
                     console.error("Lỗi khi tải avatar:", err)
@@ -239,10 +226,10 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                                 disabled={isLoading.profile || isLoading.changePassword || isLoading.logout}
                             >
                                 <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <img
-                                        src={userInfo.avatar || defaultAvatar}
-                                        alt="User Avatar"
-                                        className="w-10 h-10 rounded-full object-cover"
+                                    <Image src={userInfo.avatar || "/globe.svg"}
+                                           alt="Avatar" width="64"
+                                           height="64"
+                                           className="rounded-full object-cover"
                                     />
                                 </div>
                                 <ChevronDown className="w-5 h-5 text-gray-500"/>
@@ -254,14 +241,14 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                         >
                             <div className="flex items-center gap-3 p-3">
                                 <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <img
-                                        src={userInfo.avatar || "/placeholder.svg"}
-                                        alt="User Avatar"
-                                        className="w-10 h-10 rounded-full object-cover"
+                                    <Image src={userInfo.avatar || "/globe.svg"}
+                                           alt="Avatar" width="64"
+                                           height="64"
+                                           className="rounded-full object-cover"
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-sm font-medium text-gray-700">{userInfo.email}</div>
+                                    <div className="text-sm font-medium text-gray-700">{userInfo.username}</div>
                                 </div>
                             </div>
 
