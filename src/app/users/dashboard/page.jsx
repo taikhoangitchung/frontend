@@ -21,7 +21,6 @@ export default function Page() {
     const [statsLoaded, setStatsLoaded] = useState(false);
     const router = useRouter();
     const username = localStorage.getItem("username");
-
     useEffect(() => {
         fetchStats();
     }, []);
