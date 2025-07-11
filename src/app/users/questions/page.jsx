@@ -59,7 +59,7 @@ export default function QuestionTable() {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [totalQuestions, setTotalQuestions] = useState(0); // Thêm state để lưu tổng số câu hỏi
+    const [totalQuestions, setTotalQuestions] = useState(0);
     const [userId, setUserId] = useState(undefined);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState("");
@@ -85,7 +85,13 @@ export default function QuestionTable() {
         const fetchCategories = async () => {
             try {
                 const res = await CategoryService.getAll();
-                setCategories(res.data);
+                console.log(res.data); // Ghi log phản hồi
+                if (Array.isArray(res.data)) {
+                    setCategories(res.data);
+                } else {
+                    console.error("Mong đợi một mảng nhưng nhận được:", res.data);
+                    setCategories([]); // Thiết lập mảng rỗng nếu không phải là mảng
+                }
             } catch (err) {
                 toast.error("Không thể tải danh mục");
             }
@@ -118,7 +124,7 @@ export default function QuestionTable() {
             }
             setQuestions(res.data.content || []);
             setTotalPages(res.data.totalPages || 1);
-            setTotalQuestions(res.data.totalElements || 0); // Cập nhật tổng số câu hỏi từ totalElements
+            setTotalQuestions(res.data.totalElements || 0);
         } catch (error) {
             if (error.response?.status === 403) {
                 router.push("/forbidden");
@@ -198,51 +204,25 @@ export default function QuestionTable() {
                                     setPage(1);
                                 }}
                             >
-                                <SelectTrigger
-                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100"
-                                >
+                                <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                     <SelectValue placeholder="Tác giả"/>
                                 </SelectTrigger>
-                                <SelectContent
-                                    position="popper"
-                                    className="z-50 bg-white border border-gray-200 shadow-lg"
-                                >
-                                    <SelectItem
-                                        value="all"
-                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
-                                    >Tất cả tác giả</SelectItem>
-                                    <SelectItem
-                                        value="mine"
-                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
-                                    >Của tôi</SelectItem>
-                                    <SelectItem
-                                        value="others"
-                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
-                                    >Của người khác</SelectItem>
+                                <SelectContent position="popper" className="z-50 bg-white border border-gray-200 shadow-lg">
+                                    <SelectItem value="all" className="hover:bg-gray-100 cursor-pointer transition-all duration-200">Tất cả tác giả</SelectItem>
+                                    <SelectItem value="mine" className="hover:bg-gray-100 cursor-pointer transition-all duration-200">Của tôi</SelectItem>
+                                    <SelectItem value="others" className="hover:bg-gray-100 cursor-pointer transition-all duration-200">Của người khác</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="relative z-10">
                             <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-                                <SelectTrigger
-                                    className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100"
-                                >
+                                <SelectTrigger className="min-w-36 h-9 border border-gray-300 rounded-md bg-white text-sm cursor-pointer transition-all duration-200 hover:bg-gray-100">
                                     <SelectValue placeholder="Danh mục"/>
                                 </SelectTrigger>
-                                <SelectContent
-                                    position="popper"
-                                    className="z-50 bg-white border border-gray-200 shadow-lg"
-                                >
-                                    <SelectItem
-                                        value="all"
-                                        className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
-                                    >Tất cả danh mục</SelectItem>
+                                <SelectContent position="popper" className="z-50 bg-white border border-gray-200 shadow-lg">
+                                    <SelectItem value="all" className="hover:bg-gray-100 cursor-pointer transition-all duration-200">Tất cả danh mục</SelectItem>
                                     {categories.map((cat) => (
-                                        <SelectItem
-                                            key={cat.id}
-                                            value={cat.id.toString()}
-                                            className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
-                                        >
+                                        <SelectItem key={cat.id} value={cat.id.toString()} className="hover:bg-gray-100 cursor-pointer transition-all duration-200">
                                             {cat.name}
                                         </SelectItem>
                                     ))}
@@ -279,15 +259,12 @@ export default function QuestionTable() {
                 {/* List */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-lg font-medium">
-                            Danh sách câu hỏi (Tổng: {totalQuestions})
-                        </span>
+                        <span className="text-lg font-medium">Danh sách câu hỏi (Tổng: {totalQuestions})</span>
                         <Button
                             onClick={() => router.push("/users/questions/create")}
                             className="bg-purple-600 hover:bg-purple-700 cursor-pointer text-white"
                         >
-                            <Plus className="w-4 h-4 mr-2"/>
-                            Tạo mới
+                            <Plus className="w-4 h-4 mr-2"/> Tạo mới
                         </Button>
                     </div>
 
@@ -363,8 +340,8 @@ export default function QuestionTable() {
                                                         setModalOpen(true);
                                                     }}
                                                     alt="image"
-                                                    width={200} // Required for static images
-                                                    height={150} // Required for static images
+                                                    width={200}
+                                                    height={150}
                                                 />
                                             </div>
                                         )}
@@ -386,22 +363,13 @@ export default function QuestionTable() {
                                             </div>
                                         ))}
                                         <div className="col-span-full flex flex-wrap gap-2 mt-1">
-                                            <Badge
-                                                variant="outline"
-                                                className="text-xs border-teal-300 text-teal-700 bg-teal-50"
-                                            >
+                                            <Badge variant="outline" className="text-xs border-teal-300 text-teal-700 bg-teal-50">
                                                 {q.category.name}
                                             </Badge>
-                                            <Badge
-                                                variant="outline"
-                                                className="text-xs border-purple-300 text-purple-700 bg-purple-50"
-                                            >
+                                            <Badge variant="outline" className="text-xs border-purple-300 text-purple-700 bg-purple-50">
                                                 {q.difficulty.name}
                                             </Badge>
-                                            <Badge
-                                                variant="outline"
-                                                className="text-xs border-gray-300 text-gray-600"
-                                            >
+                                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-600">
                                                 {q.user.id === userId ? "tôi" : q.user.username}
                                             </Badge>
                                         </div>
@@ -433,11 +401,7 @@ export default function QuestionTable() {
             {/* Image modal */}
             {modalOpen && (
                 <Modal onClose={() => setModalOpen(false)}>
-                    <img
-                        src={selectedImage}
-                        alt="Question"
-                        className="w-full h-full max-h-[90vh] object-contain"
-                    />
+                    <img src={selectedImage} alt="Question" className="w-full h-full max-h-[90vh] object-contain"/>
                 </Modal>
             )}
         </div>

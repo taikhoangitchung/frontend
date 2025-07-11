@@ -26,26 +26,31 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
         prevPage: false,
         nextPage: false
     })
+    const [totalPages, setTotalPages] = useState(1)
     const router = useRouter()
 
     const fetchCategories = async () => {
-        setLoading(true)
+        setLoading(true);
         try {
-            const res = await CategoryService.getAll()
-            const sorted = res.data.sort((a, b) =>
-                a.name.localeCompare(b.name, "vi", { sensitivity: "base" })
-            )
-            setCategories(sorted)
+            const res = await CategoryService.getAll(currentPage - 1, ITEMS_PER_PAGE, searchTerm);
+            console.log(res.data); // Ghi log phản hồi
+            if (res.data && Array.isArray(res.data.content)) {
+                setCategories(res.data.content);
+                setTotalPages(res.data.totalPages);
+            } else {
+                console.error("Mong đợi một mảng nhưng nhận được:", res.data);
+                setCategories([]); // Thiết lập mảng rỗng nếu không phải là mảng
+            }
         } catch (error) {
-            console.error(error)
+            console.error(error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
         fetchCategories()
-    }, [])
+    }, [searchTerm, currentPage])
 
     const handleDelete = async (id) => {
         try {
@@ -79,27 +84,9 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                     prevPage: false,
                     nextPage: false
                 }))
-            }, 300) // Giả lập loading ngắn
+            }, 300)
         }
     }
-
-    const filteredCategories = searchTerm
-        ? categories.filter(
-            (cat) =>
-                cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (cat.description && cat.description.toLowerCase().includes(searchTerm.toLowerCase()))
-        )
-        : categories
-
-    const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE)
-    const paginatedCategories = filteredCategories.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    )
-
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [searchTerm])
 
     return (
         <div>
@@ -111,7 +98,10 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                     <Input
                         placeholder="Nhập tiêu đề hoặc mô tả danh mục..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value)
+                            setCurrentPage(1)
+                        }}
                         className="pl-10 bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-200 border border-gray-500"
                     />
                 </div>
@@ -123,7 +113,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
             <div className="space-y-4 pt-8">
                 {/* Categories Header */}
                 <div className="flex items-center justify-between">
-                    <div className="text-lg font-medium">Tổng số: {filteredCategories.length}</div>
+                    <div className="text-lg font-medium">Tổng số: {categories.length}</div>
                     {viewMode === "ADMIN" && (
                         <Button
                             onClick={handleCreate}
@@ -132,9 +122,9 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                             disabled={isLoading.create}
                         >
                             {isLoading.create ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
                             ) : (
-                                <Plus className="w-4 h-4 mr-2" />
+                                <Plus className="w-4 h-4 mr-2"/>
                             )}
                             Thêm danh mục
                         </Button>
@@ -142,7 +132,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                 </div>
 
                 {/* Category Cards */}
-                {paginatedCategories.map((category, index) => (
+                {categories.map((category, index) => (
                     <Card
                         key={category.id}
                         onClick={() => viewMode === "USER" && router.push(`/users/questions?categoryId=${category.id}`)}
@@ -154,7 +144,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
                         <CardContent className="space-y-4">
                             <div className="flex justify-between items-start">
                                 <h2 className="text-lg sm:text-xl font-semibold text-purple-900 truncate">
-                                    {index + 1}. {category.name}
+                                    {index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}. {category.name}
                                 </h2>
                                 {viewMode === "ADMIN" && (
                                     <div className="flex gap-2">
@@ -226,7 +216,7 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
             )}
 
             {/* No results */}
-            {!loading && paginatedCategories.length === 0 && searchTerm && (
+            {!loading && categories.length === 0 && searchTerm && (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                     <Search className="w-12 h-12 mb-4 opacity-50" />
                     <p>Không tìm thấy danh mục nào với từ khóa "{searchTerm}"</p>
@@ -241,34 +231,28 @@ const CategoryTable = ({ viewMode = "ADMIN" }) => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-6 text-sm text-muted-foreground">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1 || isLoading.prevPage}
-                        className="cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
-                    >
-                        {isLoading.prevPage ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : null}
-                        Trang trước
+                <div className="flex justify-center items-center py-4 px-4 gap-2 border-t border-gray-100">
+                    {currentPage > 1 && (
+                        <Button
+                            variant="outline"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
+                        >
+                            Trang trước
+                        </Button>
+                    )}
+                    <Button disabled>
+                        {currentPage}/{totalPages}
                     </Button>
-                    <span className="font-medium">
-                        Trang {currentPage} / {totalPages}
-                    </span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages || isLoading.nextPage}
-                        className="cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
-                    >
-                        {isLoading.nextPage ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : null}
-                        Trang sau
-                    </Button>
+                    {currentPage < totalPages && (
+                        <Button
+                            variant="outline"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            className="transition-all duration-200 cursor-pointer hover:bg-purple-100"
+                        >
+                            Trang sau
+                        </Button>
+                    )}
                 </div>
             )}
         </div>
