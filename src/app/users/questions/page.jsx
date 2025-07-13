@@ -84,16 +84,18 @@ export default function QuestionTable() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await CategoryService.getAll();
-                console.log(res.data); // Ghi log phản hồi
-                if (Array.isArray(res.data)) {
-                    setCategories(res.data);
+                const res = await CategoryService.getAll(0, 20); // Sử dụng page=0, size=10 mặc định
+                console.log("Response from CategoryService:", res); // Log để debug
+                if (res.data && Array.isArray(res.data.content)) {
+                    setCategories(res.data.content);
                 } else {
-                    console.error("Mong đợi một mảng nhưng nhận được:", res.data);
-                    setCategories([]); // Thiết lập mảng rỗng nếu không phải là mảng
+                    console.error("Dữ liệu content không phải mảng hoặc không tồn tại:", res.data);
+                    setCategories([]); // Gán mảng rỗng nếu không hợp lệ
                 }
             } catch (err) {
+                console.error("Lỗi khi fetch categories:", err);
                 toast.error("Không thể tải danh mục");
+                setCategories([]); // Xử lý lỗi bằng mảng rỗng
             }
         };
         fetchCategories();
