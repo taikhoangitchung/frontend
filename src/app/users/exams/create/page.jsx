@@ -70,6 +70,8 @@ const questionLimits = [
     { value: 10000, label: "Không giới hạn" },
 ];
 
+const importLimit = 100;
+
 export default function CreateExam({ id }) {
     const isEdit = id;
     const router = useRouter();
@@ -395,6 +397,7 @@ export default function CreateExam({ id }) {
 
     const handleReadFileExcel = async () => {
         try {
+            let isOver = false;
             if (!file) {
                 toast.warning("Bạn chưa thêm file .xlsx");
                 return;
@@ -421,6 +424,11 @@ export default function CreateExam({ id }) {
             const data = [];
 
             worksheet.eachRow((row, rowNumber) => {
+                if (data.length > importLimit) {
+                    isOver = true;
+                    return;
+                }
+
                 if (rowNumber === 1) return;
 
                 const values = row.values;
@@ -501,17 +509,20 @@ export default function CreateExam({ id }) {
                 data.push(item);
             });
 
+            if (isOver) return
+
             const result = data.map((q) => {
                 return { ...q, id: -data.indexOf(q) };
             });
 
             setErrorQuestionIds(result.filter((q) => q.errors?.length > 0).map((q) => q.id));
-            setOpenQuestionsExcel(true);
-            setShowImportDialog(false);
-            setFile(null);
             await setQuestionsFromExcel(result);
+            setOpenQuestionsExcel(true);
         } catch (error) {
             toast.error("❌ Lỗi khi đọc file Excel:", error);
+        } finally {
+            setShowImportDialog(false);
+            setFile(null);
         }
     };
 

@@ -1,23 +1,24 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
+import {useState, useEffect, useRef} from "react";
+import {useParams, useRouter} from "next/navigation";
+import {toast} from "sonner";
 import ExamService from "../../../../../../services/ExamService";
 import ExamResultSummary from "../../../../../../components/exam/ExamResultSummary";
 import ConfirmDialog from "../../../../../../components/alerts-confirms/ConfirmDialog";
 import formatTime from "../../../../../../util/formatTime";
-import { Button } from "../../../../../../components/ui/button";
+import {Button} from "../../../../../../components/ui/button";
 import HistoryService from "../../../../../../services/HistoryService";
-import { X } from "lucide-react";
-import { Card } from "../../../../../../components/ui/card";
+import {X} from "lucide-react";
+import {Card} from "../../../../../../components/ui/card";
 import createExamSocket from "../../../../../../config/socketConfig";
 import ProgressBoard from "../../../../../../components/exam/ProgressBoard";
 import RoomRankingPanel from "../../../../../../components/exam/RankingList";
-import { defaultColor } from "../../../../../../util/defaultColors";
+import {defaultColor} from "../../../../../../util/defaultColors";
+import {config} from "../../../../../../config/url.config";
 
 export default function PlayExamFormOnline() {
-    const { code } = useParams();
+    const {code} = useParams();
     const router = useRouter();
 
     const [questions, setQuestions] = useState([]);
@@ -38,13 +39,14 @@ export default function PlayExamFormOnline() {
     const [historyId, setHistoryId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [hostEmail, setHostEmail] = useState("");
+    const [isKicked, setKicked] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
 
     const socketRef = useRef(null);
     const timerRef = useRef(null);
 
     const storedEmail = localStorage.getItem("email");
-    const imageBaseUrl = "https://quizgymapp.onrender.com";
+    const imageBaseUrl = config.apiBaseUrl;
 
     const fetchLatestResult = async () => {
         try {
@@ -100,9 +102,9 @@ export default function PlayExamFormOnline() {
     useEffect(() => {
         if (!code || !storedEmail || !hostEmail) return;
         const isHost = storedEmail === hostEmail;
-        const { socket, cleanup } = createExamSocket({
+        const {socket, cleanup} = createExamSocket({
             code,
-            onLeave: ({ username, email, candidates }) => {
+            onLeave: ({username, email, candidates}) => {
                 if (isHost && email !== storedEmail) {
                     toast.error(`${username} đã rời phòng`);
                 }
@@ -114,7 +116,10 @@ export default function PlayExamFormOnline() {
                 setWaitingForOthers(false);
                 setSubmitting(true);
             },
-            isHost,
+            onKick: () => {
+                setKicked(true);
+            },
+            isHost
         });
         socketRef.current = socket;
         return () => {
@@ -156,7 +161,7 @@ export default function PlayExamFormOnline() {
         } else {
             updatedAnswerIds = [answerId];
         }
-        setUserAnswers((prev) => ({ ...prev, [questionIndex]: updatedAnswerIds }));
+        setUserAnswers((prev) => ({...prev, [questionIndex]: updatedAnswerIds}));
     };
 
     const handleSubmitQuiz = async (isAutoSubmit = false) => {
@@ -231,9 +236,11 @@ export default function PlayExamFormOnline() {
         if (percent <= 50) return "text-yellow-500";
         return "text-white";
     };
+
     const handleKick = (emailToKick) => {
         if (!emailToKick || !socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
         socketRef.current.send(`KICK:${code}:${emailToKick}`);
+        setCandidates((prev) => (prev.filter((item) => item.email !== emailToKick)) || []);
     };
 
 
@@ -246,12 +253,14 @@ export default function PlayExamFormOnline() {
             className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white p-6 flex flex-col gap-8 relative pb-10"
         >
             {!ready && countdown > 0 && (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-7xl font-extrabold animate-pulse select-none">
+                <div
+                    className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-7xl font-extrabold animate-pulse select-none">
                     {countdown}
                 </div>
             )}
             {!ready && countdown === 0 && (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-5xl font-bold animate-pulse select-none">
+                <div
+                    className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center text-white text-5xl font-bold animate-pulse select-none">
                     BẮT ĐẦU!
                 </div>
             )}
@@ -268,7 +277,7 @@ export default function PlayExamFormOnline() {
                         onClick={() => router.push("/users/dashboard")}
                         className="absolute top-4 left-4 text-white hover:text-red-500 p-2 rounded-full z-50 bg-black/30 cursor-pointer transition-all duration-300"
                     >
-                        <X className="w-10 h-10" />
+                        <X className="w-10 h-10"/>
                     </button>
 
                     <div
@@ -278,12 +287,12 @@ export default function PlayExamFormOnline() {
                     >
                         {!(hostEmail === storedEmail) && historyId && (
                             <div className="min-w-0">
-                                <ExamResultSummary historyId={historyId} viewMode={true} />
+                                <ExamResultSummary historyId={historyId} viewMode={true}/>
                             </div>
                         )}
 
                         <div className="min-w-0">
-                            <RoomRankingPanel code={code} />
+                            <RoomRankingPanel code={code}/>
                         </div>
                     </div>
                 </div>
@@ -299,8 +308,9 @@ export default function PlayExamFormOnline() {
                 <div className="flex items-center justify-between mb-6">
                     <ConfirmDialog
                         trigger={
-                            <div className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 cursor-pointer">
-                                <X className="w-5 h-5" />
+                            <div
+                                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold flex items-center gap-2 cursor-pointer">
+                                <X className="w-5 h-5"/>
                                 Thoát ra
                             </div>
                         }
@@ -320,7 +330,7 @@ export default function PlayExamFormOnline() {
                         </div>
                         <Button
                             onClick={() => handleSubmitQuiz(false)}
-                            disabled={submitting || submitted}
+                            disabled={submitting || submitted || isKicked}
                             className="bg-green-600 hover:bg-green-700 cursor-pointer text-white px-6 py-2 rounded-full font-semibold disabled:opacity-50"
                         >
                             {submitting ? "Đang nộp..." : "Nộp bài"}
@@ -364,7 +374,7 @@ export default function PlayExamFormOnline() {
                     </div>
                 )}
 
-                <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
+                <div className="grid gap-4 mb-6" style={{gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`}}>
                     {currentQuestion?.answers?.map((answer, index) => {
                         const isSelected = userAnswers[questionIndex]?.includes(answer.id);
                         return (
@@ -400,7 +410,8 @@ export default function PlayExamFormOnline() {
                     })}
                 </div>
 
-                <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 w-fit mx-auto border border-purple-600/30 mb-6">
+                <div
+                    className="bg-black/40 backdrop-blur-sm rounded-xl p-3 w-fit mx-auto border border-purple-600/30 mb-6">
                     <div className="text-sm font-medium text-center mb-3 text-purple-200">Bản đồ câu hỏi</div>
                     <div className="grid grid-cols-10 gap-1 overflow-y-auto max-h-[300px] p-1">
                         {questions.map((_, index) => (
@@ -477,7 +488,7 @@ export default function PlayExamFormOnline() {
 
             {storedEmail === hostEmail && waitingForOthers && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-                    <ProgressBoard candidates={candidates} submittedUsers={submittedUsers} onKick={handleKick} />
+                    <ProgressBoard candidates={candidates} submittedUsers={submittedUsers} onKick={handleKick}/>
                 </div>
             )}
         </div>

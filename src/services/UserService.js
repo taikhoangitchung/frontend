@@ -107,11 +107,9 @@ class UserService {
         }
     }
 
-    static async editProfile(formData) {
+    static async editProfile(data) {
         try {
-            return await axiosInstance.patch("/users/edit", formData, {
-                headers: {"Content-Type": "multipart/form-data"},
-            });
+            return await axiosInstance.patch("/users/edit", data);
         } catch (error) {
             console.error("Lỗi khi cập nhật thông tin user", error);
             throw error;
