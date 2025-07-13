@@ -8,7 +8,8 @@ export default function createExamSocket({
                                              onEnd,
                                              onJoin,
                                              onLeave,
-                                             isHost
+                                             isHost,
+                                             onKick
                                          }) {
     const socket = new WebSocket(`${config.socket.baseUrl}/rooms`);
     const email = localStorage.getItem("email");
@@ -53,6 +54,7 @@ export default function createExamSocket({
                 case "KICK":
                     console.log("⛔ Received KICK");
                     wasKicked = true;
+                    onKick?.();
                     break;
                 default:
                     console.warn("⚠️ Unknown message type:", data.type);
