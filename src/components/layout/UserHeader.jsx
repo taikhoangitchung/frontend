@@ -28,7 +28,9 @@ import {
 import {useRouter} from "next/navigation"
 import Image from "next/image"
 import {useEffect, useState} from "react"
-import UserService from "../../services/UserService" // Import UserService
+import UserService from "../../services/UserService"
+import AvatarUser from "../avatar/AvatarUser";
+import {getSupabaseImageUrl} from "../../util/getImageSupabaseUrl"; // Import UserService
 
 export default function UserHeader({searchTerm, setSearchTerm}) {
     const router = useRouter()
@@ -57,7 +59,10 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
             setEmail(savedEmail);
             UserService.getProfile(savedEmail)
                 .then((response) => {
-                    const {username, avatar} = response.data;
+                    let {username, avatar, googleId} = response.data;
+                    if (!googleId) {
+                        avatar = getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, avatar)
+                    }
                     setUserInfo({
                         email: savedEmail, username, avatar
                     })
@@ -225,12 +230,8 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                                 className="flex items-center gap-2 hover:bg-purple-100 rounded-lg px-4 py-2 cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"
                                 disabled={isLoading.profile || isLoading.changePassword || isLoading.logout}
                             >
-                                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <Image src={userInfo.avatar || "/globe.svg"}
-                                           alt="Avatar" width="64"
-                                           height="64"
-                                           className="rounded-full object-cover"
-                                    />
+                                <div className="bg-purple-500 rounded-full flex items-center justify-center">
+                                    <AvatarUser path={userInfo.avatar} height={40} width={40}/>
                                 </div>
                                 <ChevronDown className="w-5 h-5 text-gray-500"/>
                             </Button>
@@ -240,12 +241,8 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                             className="w-64 p-3 bg-white rounded-xl shadow-lg z-50 border-none"
                         >
                             <div className="flex items-center gap-3 p-3">
-                                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <Image src={userInfo.avatar || "/globe.svg"}
-                                           alt="Avatar" width="64"
-                                           height="64"
-                                           className="rounded-full object-cover"
-                                    />
+                                <div className="bg-purple-500 rounded-full flex items-center justify-center">
+                                    <AvatarUser path={userInfo.avatar} height={64} width={64}/>
                                 </div>
                                 <div className="flex-1">
                                     <div className="text-sm font-medium text-gray-700">{userInfo.username}</div>
