@@ -12,15 +12,34 @@ import {
     Camera,
     Upload,
     User, Loader2
-} from "lucide-react"
+} from "lucide-react";
+import AvatarUser from "../../../components/avatar/AvatarUser";
+import {validateImage} from "../../../util/validateImage";
+import SupabaseService from "../../../services/SupabaseService";
+import {getSupabaseImageUrl} from "../../../util/getImageSupabaseUrl";
+
+
+const validationSchema = Yup.object({
+    username: Yup.string().max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
+    avatar: Yup.mixed()
+        .nullable()
+        .test("fileSize", "File quá lớn", (value) => !value || (value && value.size <= 5 * 1024 * 1024))
+        .test(
+            "fileType",
+            "Chỉ hỗ trợ file ảnh",
+            (value) => !value || (value && ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(value.type)),
+        ),
+});
 
 const EditProfile = () => {
     const router = useRouter()
     const [userEmail, setUserEmail] = useState(null)
     const [avatarPreview, setAvatarPreview] = useState("")
-    const [initialUsername, setInitialUsername] = useState("")
+    const [username, setUsername] = useState("");
     const [loading, setLoading] = useState(true)
-    const [isReady, setIsReady] = useState(false)
+    const [isReady, setIsReady] = useState(true)
+    const [fileImage, setFileImage] = useState();
+    const [currentPathAvatar, setCurrentPathAvatar] = useState("");
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -29,80 +48,70 @@ const EditProfile = () => {
                 router.push("/login");
                 return;
             }
-            setUserEmail(storedUserEmail);
-            const storedUsername = localStorage.getItem("username") || "";
-            const defaultAvatar = "https://quizgymapp.onrender.com/media/default-avatar.png";
-            setInitialUsername(storedUsername);
-            setAvatarPreview(defaultAvatar);
 
             UserService.getProfile(storedUserEmail)
                 .then((response) => {
-                    const user = response.data;
-                    const username = user.username || storedUsername;
-                    const avatar = user.avatar || defaultAvatar;
-                    setInitialUsername(username);
-                    setAvatarPreview(`https://quizgymapp.onrender.com${avatar}`);
-                    localStorage.setItem("username", username);
-                    localStorage.setItem("avatar", avatar);
+                    let {username, email, avatar, googleId} = response.data;
+                    setCurrentPathAvatar(avatar)
+                    if (!googleId) {
+                        avatar = getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, avatar)
+                    }
+                    setUsername(username);
+                    setUserEmail(email)
+                    setAvatarPreview(avatar);
+                    setLoading(false);
                 })
                 .catch((err) => {
                     console.error("Lỗi khi lấy thông tin user:", err);
-                    setAvatarPreview(defaultAvatar);
                 })
-                .finally(() => {
-                    setLoading(false);
-                    setIsReady(true);
-                });
         }
     }, [router]);
 
-    const validationSchema = Yup.object({
-        username: Yup.string().max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
-        avatar: Yup.mixed()
-            .nullable()
-            .test("fileSize", "File quá lớn", (value) => !value || (value && value.size <= 5 * 1024 * 1024))
-            .test(
-                "fileType",
-                "Chỉ hỗ trợ file ảnh",
-                (value) => !value || (value && ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(value.type)),
-            ),
-    });
-
-    const handleSubmit = async (values, { setSubmitting }) => {
+    const handleSubmit = async (values) => {
+        setIsReady(false);
         try {
-            const formData = new FormData();
-            formData.append("email", userEmail);
-            if (values.username && values.username !== initialUsername) formData.append("username", values.username);
-            if (values.avatar && values.avatar instanceof File) formData.append("avatar", values.avatar);
-            const response = await UserService.editProfile(formData);
-            toast.success(response.data, { autoClose: 1500 });
-            if (values.username && values.username !== initialUsername) {
-                localStorage.setItem("username", values.username);
+            const {username} = values;
+            if (fileImage && !validateImage(fileImage)) {
+                return;
             }
-            setTimeout(() => router.push("/profile"), 1500);
+            const data = {
+                email: userEmail,
+                username,
+                avatar: currentPathAvatar
+            }
+
+            if (fileImage) {
+                // xoa avatar cu tren supabase
+                await SupabaseService.removeFile(avatarPreview, process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET)
+
+                // upload file supabase
+                const fileSupabase = await SupabaseService.uploadFile(fileImage, process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET_PATHPREFIX_TEMP);
+                data.avatar = fileSupabase.path
+            }
+
+            const response = await UserService.editProfile(data);
+            toast.success(response.data, { duration: 1500 })
+            router.push("/profile");
+
         } catch (err) {
             const errorMsg = err.response?.data || "Cập nhật không thành công";
-            toast.error(errorMsg, { autoClose: 3000 });
-        } finally {
-            setSubmitting(false);
+            toast.error(errorMsg, {
+                duration: 5000
+            });
         }
     };
 
-    const handleCancel = () => {
-        router.push("/profile");
-    };
-
-    const handleAvatarChange = (event, setFieldValue) => {
+    const handleAvatarChange = (event) => {
         const file = event.currentTarget.files[0];
         if (file) {
-            setFieldValue("avatar", file);
+            setFileImage(file);
             const reader = new FileReader();
             reader.onload = () => setAvatarPreview(reader.result);
             reader.readAsDataURL(file);
         }
     };
 
-    if (!isReady || loading || !userEmail) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-purple-900">
                 <Loader2 className="h-8 w-8 animate-spin text-white"/>
@@ -132,7 +141,7 @@ const EditProfile = () => {
                             <h1 className="text-2xl font-bold text-gray-900 mb-4">Cập nhật thông tin tài khoản</h1>
 
                             <Formik
-                                initialValues={{ username: initialUsername, avatar: null }}
+                                initialValues={{ username: username }}
                                 validationSchema={validationSchema}
                                 onSubmit={handleSubmit}
                             >
@@ -155,11 +164,7 @@ const EditProfile = () => {
                                             <div className="flex items-center space-x-4">
                                                 <div className="relative">
                                                     {avatarPreview && (
-                                                        <img
-                                                            src={avatarPreview || "/placeholder.svg"}
-                                                            alt="Avatar"
-                                                            className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
-                                                        />
+                                                        <AvatarUser path={avatarPreview} width={50} height={50}/>
                                                     )}
                                                     <div className="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-2">
                                                         <Camera className="w-3 h-3 text-white" />
@@ -173,7 +178,7 @@ const EditProfile = () => {
                                                             type="file"
                                                             name="avatar"
                                                             accept="image/*"
-                                                            onChange={(event) => handleAvatarChange(event, setFieldValue)}
+                                                            onChange={(event) => handleAvatarChange(event)}
                                                             className="hidden"
                                                         />
                                                     </label>
@@ -204,14 +209,13 @@ const EditProfile = () => {
                                         <div className="flex space-x-4">
                                             <button
                                                 type="submit"
-                                                disabled={isSubmitting}
                                                 className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-200"
                                             >
-                                                {isSubmitting ? "Đang cập nhật..." : "Cập nhật"}
+                                                {!isReady ? "Đang cập nhật..." : "Cập nhật"}
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={handleCancel}
+                                                onClick={() => router.push("/profile")}
                                                 className="flex-1 bg-white text-gray-700 py-2 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 hover:shadow-md cursor-pointer transition-all duration-200"
                                             >
                                                 Hủy

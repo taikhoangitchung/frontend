@@ -5,18 +5,13 @@ import { useRouter } from "next/navigation"
 import UserService from "../../services/UserService"
 import { toast } from "sonner"
 import { Edit, Mail, Calendar, ArrowLeft } from "lucide-react"
+import AvatarUser from "../../components/avatar/AvatarUser";
+import {getSupabaseImageUrl} from "../../util/getImageSupabaseUrl";
 
 
 const Profile = () => {
     const router = useRouter()
-    const [userInfo, setUserInfo] = useState({
-        email: "",
-        username: "",
-        avatar: "",
-        quizCount: 0,
-        createdAt: null,
-        role: "" // Thêm role vào state
-    })
+    const [userInfo, setUserInfo] = useState({})
     const [loading, setLoading] = useState(true)
     const [isReady, setIsReady] = useState(false)
 
@@ -28,30 +23,14 @@ const Profile = () => {
                 return
             }
 
-            const storedUsername = localStorage.getItem("username") || ""
-            const storedAvatar = localStorage.getItem("avatar") || ""
-            const storedRole = localStorage.getItem("role") || ""
-            const defaultAvatar = "https://quizgymapp.onrender.com/media/default-avatar.png"
-
-            setUserInfo((prev) => ({
-                ...prev,
-                email: storedUserEmail,
-                username: storedUsername,
-                avatar: storedAvatar || defaultAvatar,
-                role: storedRole
-            }))
-
             UserService.getProfile(storedUserEmail)
                 .then((response) => {
-                    const user = response.data
-                    setUserInfo({
-                        email: storedUserEmail,
-                        username: user.username || storedUsername || "Người dùng",
-                        avatar: user.avatar ? `https://quizgymapp.onrender.com${user.avatar}` : defaultAvatar,
-                        quizCount: user.quizCount || 0,
-                        createdAt: user.createdAt || null,
-                        role: user.role || storedRole // Ưu tiên role từ response, nếu không có thì dùng từ localStorage
-                    })
+                    const user = response.data;
+                    const data = {...user, quizCount: user.quizCount || 0}
+                    if (!user.googleId) {
+                        data.avatar = getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, user.avatar)
+                    }
+                    setUserInfo(data)
                 })
                 .catch((err) => {
                     toast.error("Không thể tải thông tin profile")
@@ -72,12 +51,14 @@ const Profile = () => {
         }
     }
 
-    const formatDate = (dateString) => {
-        if (!dateString) return "Không xác định"
-        const [year, month, day] = dateString;
-        const dd = String(day).padStart(2, '0');
-        const mm = String(month).padStart(2, '0');
-        return `${dd}-${mm}-${year}`;
+    const handleClickEditProfile = () => {
+        if (userInfo.googleId) {
+            toast.warning("Bạn đang đăng nhập bằng Google. Không thể sử dụng chức năng này!", {
+                duration: 5000
+            });
+            return;
+        }
+        router.push("/profile/edit")
     }
 
     if (!isReady || loading) {
@@ -96,11 +77,7 @@ const Profile = () => {
                     <div className="flex items-start justify-between">
                         {/* Left side - Avatar, Name, and Edit Button */}
                         <div className="flex items-center space-x-6">
-                            <img
-                                src={userInfo.avatar || "/placeholder.svg"}
-                                alt="Avatar"
-                                className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
-                            />
+                            <AvatarUser path={userInfo.avatar} height={150} width={150}/>
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{userInfo.username}</h1>
                                 <div className="space-y-1 mb-4">
@@ -110,11 +87,11 @@ const Profile = () => {
                                     </p>
                                     <p className="text-gray-600 flex items-center">
                                         <Calendar className="w-4 h-4 mr-2" />
-                                        Tham gia: {formatDate(userInfo.createdAt)}
+                                        Tham gia: {userInfo.createdAt}
                                     </p>
                                 </div>
                                 <button
-                                    onClick={() => router.push("/profile/edit")}
+                                    onClick={() => handleClickEditProfile()}
                                     className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded-lg cursor-pointer transition-colors text-sm"
                                 >
                                     <Edit className="w-4 h-4 text-gray-600" />
@@ -136,7 +113,6 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
-
             {/* Navigation Tabs and Quiz Count - Chỉ hiển thị nếu role khác ADMIN */}
             {userInfo.role !== "ADMIN" && (
                 <>
