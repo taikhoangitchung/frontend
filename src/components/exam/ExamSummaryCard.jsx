@@ -16,13 +16,13 @@ export default function ExamSummaryCard({ search }) {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await CategoryService.getAll();
-                setCategories(response.data);
+                const response = await CategoryService.getAll(0, 10); // Mặc định page=0, size=10
+                setCategories(response.data.content || []);
 
                 const examsData = {};
                 const currentUserId = localStorage.getItem("id");
 
-                for (const category of response.data) {
+                for (const category of response.data.content || []) {
                     try {
                         const res = await ExamService.getByCategory(category.id);
                         examsData[category.id] = res.data.filter(
@@ -51,7 +51,8 @@ export default function ExamSummaryCard({ search }) {
         setShowForm({ visible: false, exam: null });
     };
 
-    const allFilteredExamsEmpty = categories.every((category) => {
+    const allFilteredExamsEmpty = Array.isArray(categories) && categories.every((category) => {
+        if (!category || !category.id) return true; // Bỏ qua category không hợp lệ
         const lowerSearch = search?.toLowerCase() || "";
         const isCategoryMatch = category.name.toLowerCase().includes(lowerSearch);
 
@@ -71,6 +72,7 @@ export default function ExamSummaryCard({ search }) {
                 </div>
             ) : (
                 categories.map((category) => {
+                    if (!category || !category.id) return null;
                     const lowerSearch = search?.toLowerCase() || "";
                     const isCategoryMatch = category.name.toLowerCase().includes(lowerSearch);
                     const filteredExams = (examsByCategory[category.id] || []).filter(

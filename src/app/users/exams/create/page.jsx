@@ -152,8 +152,8 @@ export default function CreateExam({ id }) {
 
         const fetchData = async () => {
             try {
-                const resCategory = await CategoryService.getAll();
-                setCategories(resCategory.data);
+                const resCategory = await CategoryService.getAll(0, 50); // Thêm page=0, size=50 để lấy trang đầu tiên
+                setCategories(resCategory.data.content || []); // Chỉ lấy content, gán mảng rỗng nếu không có
 
                 const resDifficulty = await DifficultyService.getAll();
                 setDifficulties(resDifficulty.data);

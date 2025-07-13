@@ -47,8 +47,8 @@ export default function ExamManager() {
     useEffect(() => {
         async function fetchCategories() {
             try {
-                const res = await CategoryService.getAll();
-                setCategories(res.data);
+                const res = await CategoryService.getAll(0, 10); // Mặc định page=0, size=10
+                setCategories(res.data.content || []);
             } catch (err) {
                 console.error("Lỗi tải danh mục:", err);
             }
@@ -60,9 +60,9 @@ export default function ExamManager() {
         setLoading(true);
         try {
             const res = await ExamService.getAll(page - 1, examPerPage, categoryId, searchTerm, ownerFilter);
-            setExams(res.data.content);
-            setTotalPages(res.data.totalPages);
-            setTotalExams(res.data.totalElements);
+            setExams(res.data.content || []);
+            setTotalPages(res.data.totalPages || 1);
+            setTotalExams(res.data.totalElements || 0);
         } catch (err) {
             console.error(err);
             toast.error("Đã xảy ra lỗi khi tải danh sách bài thi!");
@@ -159,7 +159,7 @@ export default function ExamManager() {
                                     value="all"
                                     className="hover:bg-gray-100 cursor-pointer transition-all duration-200"
                                 >Tất cả danh mục</SelectItem>
-                                {categories.map(cat => (
+                                {Array.isArray(categories) && categories.map(cat => (
                                     <SelectItem
                                         key={cat.id}
                                         value={String(cat.id)}

@@ -19,7 +19,7 @@ class ExamService {
 
     static async create(params) {
         try {
-            return await axiosInstance.post(`/exams`,params);
+            return await axiosInstance.post(`/exams`, params);
         } catch (error) {
             return Promise.reject(error);
         }
@@ -27,7 +27,7 @@ class ExamService {
 
     static async update(params, id) {
         try {
-            return await axiosInstance.patch(`/exams/${id}`,params);
+            return await axiosInstance.patch(`/exams/${id}`, params);
         } catch (error) {
             return Promise.reject(error);
         }
@@ -45,12 +45,15 @@ class ExamService {
         }
     }
 
-    static async getAll(page = 0, size = 10) { // Thêm page và size mặc định
+    static async getAll(page = 0, size = 10, categoryId = null, searchTerm = '', ownerFilter = 'all') {
         try {
             return await axiosInstance.get("/exams", {
                 params: {
-                    page: page,
-                    size: size
+                    page,
+                    size,
+                    categoryId,
+                    searchTerm,
+                    ownerFilter
                 }
             });
         } catch (error) {
