@@ -98,18 +98,27 @@ class UserService {
         }
     }
 
-    static async getProfile(email) {
+    static async getProfile() {
+        const currentUser = getCurrentUser();
+        if (!currentUser) throw new Error("Không có thông tin người dùng");
+
+        const config = {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        };
+
         try {
-            return await axiosInstance.get("/users/profile", {params: {email}});
+            const response = await axiosInstance.get("/users/profile", config);
+            return response;
         } catch (error) {
-            console.error(`Lỗi khi lấy thông tin user với email: ${email}`, error);
+            console.error("Lỗi khi lấy thông tin profile:", error);
             throw error;
         }
     }
 
     static async editProfile(data) {
+        const config = { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } };
         try {
-            return await axiosInstance.patch("/users/edit", data);
+            return await axiosInstance.patch("/users/edit", data, config);
         } catch (error) {
             console.error("Lỗi khi cập nhật thông tin user", error);
             throw error;

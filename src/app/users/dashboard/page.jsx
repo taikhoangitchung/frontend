@@ -20,7 +20,8 @@ export default function Page() {
     const [loading, setLoading] = useState(true);
     const [statsLoaded, setStatsLoaded] = useState(false);
     const router = useRouter();
-    const username = localStorage.getItem("username");
+    const username = localStorage.getItem("username"); // Có thể thay bằng getCurrentUser().username sau
+
     useEffect(() => {
         fetchStats();
     }, []);

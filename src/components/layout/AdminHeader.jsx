@@ -1,57 +1,64 @@
-"use client"
+"use client";
 
-import { Bell, ChevronDown, LogOut, User, Lock, Loader2 } from 'lucide-react'
-
+import { Bell, ChevronDown, LogOut, User, Lock, Loader2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
-import { Button } from "../ui/button"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { useState } from "react"
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { getCurrentUser } from "../../services/authService"; // Import getCurrentUser
 
 export function AdminHeader() {
-    const router = useRouter()
-    const email = localStorage.getItem("email")
+    const router = useRouter();
+    const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState({
         profile: false,
         changePassword: false,
         logout: false,
-        notifications: false
-    })
+        notifications: false,
+    });
+
+    useEffect(() => {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            setEmail(currentUser.email);
+        }
+    }, []);
 
     const handleNavigation = async (key, path) => {
-        setIsLoading(prev => ({ ...prev, [key]: true }))
+        setIsLoading((prev) => ({ ...prev, [key]: true }));
         try {
-            await router.push(path)
+            await router.push(path);
         } catch (error) {
-            console.error("Lỗi khi chuyển trang:", error)
-            setIsLoading(prev => ({ ...prev, [key]: false }))
+            console.error("Lỗi khi chuyển trang:", error);
+            setIsLoading((prev) => ({ ...prev, [key]: false }));
         }
-    }
+    };
 
     const handleLogout = async () => {
-        setIsLoading(prev => ({ ...prev, logout: true }))
+        setIsLoading((prev) => ({ ...prev, logout: true }));
         try {
-            localStorage.clear()
-            await router.push("/login")
+            localStorage.clear();
+            await router.push("/login");
         } catch (error) {
-            console.error("Lỗi khi đăng xuất:", error)
-            setIsLoading(prev => ({ ...prev, logout: false }))
+            console.error("Lỗi khi đăng xuất:", error);
+            setIsLoading((prev) => ({ ...prev, logout: false }));
         }
-    }
+    };
 
     const handleNotifications = () => {
-        setIsLoading(prev => ({ ...prev, notifications: true }))
-        toast.info("Chức năng này đang được phát triển...")
+        setIsLoading((prev) => ({ ...prev, notifications: true }));
+        toast.info("Chức năng này đang được phát triển...");
         setTimeout(() => {
-            setIsLoading(prev => ({ ...prev, notifications: false }))
-        }, 1000)
-    }
+            setIsLoading((prev) => ({ ...prev, notifications: false }));
+        }, 1000);
+    };
 
     return (
         <header className="min-h-[50px] border-b bg-white flex items-center justify-end px-6 shadow-sm">
@@ -67,9 +74,9 @@ export function AdminHeader() {
                     disabled={isLoading.notifications}
                 >
                     {isLoading.notifications ? (
-                        <Loader2 className="w-6 h-6 animate-spin"/>
+                        <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                        <Bell className="w-6 h-6"/>
+                        <Bell className="w-6 h-6" />
                     )}
                 </Button>
 
@@ -85,7 +92,7 @@ export function AdminHeader() {
                             <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
                                 <span className="text-white font-semibold text-sm">{email?.[0]?.toUpperCase()}</span>
                             </div>
-                            <ChevronDown className="w-5 h-5 text-gray-500"/>
+                            <ChevronDown className="w-5 h-5 text-gray-500" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
@@ -101,7 +108,7 @@ export function AdminHeader() {
                             </div>
                         </div>
 
-                        <DropdownMenuSeparator className="my-2 bg-gray-100"/>
+                        <DropdownMenuSeparator className="my-2 bg-gray-100" />
 
                         <DropdownMenuItem
                             onClick={() => handleNavigation("profile", "/profile")}
@@ -109,9 +116,9 @@ export function AdminHeader() {
                             disabled={isLoading.profile}
                         >
                             {isLoading.profile ? (
-                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin"/>
+                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
                             ) : (
-                                <User className="w-5 h-5 text-gray-600"/>
+                                <User className="w-5 h-5 text-gray-600" />
                             )}
                             <span className="text-sm text-left w-full">Hồ sơ</span>
                         </DropdownMenuItem>
@@ -122,9 +129,9 @@ export function AdminHeader() {
                             disabled={isLoading.changePassword}
                         >
                             {isLoading.changePassword ? (
-                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin"/>
+                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
                             ) : (
-                                <Lock className="w-5 h-5 text-gray-600"/>
+                                <Lock className="w-5 h-5 text-gray-600" />
                             )}
                             <span className="text-sm text-left w-full">Đổi mật khẩu</span>
                         </DropdownMenuItem>
@@ -135,9 +142,9 @@ export function AdminHeader() {
                             disabled={isLoading.logout}
                         >
                             {isLoading.logout ? (
-                                <Loader2 className="w-5 h-5 animate-spin"/>
+                                <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                                <LogOut className="w-5 h-5"/>
+                                <LogOut className="w-5 h-5" />
                             )}
                             <span className="text-sm text-left w-full">Đăng xuất</span>
                         </DropdownMenuItem>
@@ -145,5 +152,5 @@ export function AdminHeader() {
                 </DropdownMenu>
             </div>
         </header>
-    )
+    );
 }
