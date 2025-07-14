@@ -17,15 +17,15 @@ import TypeService from "../../services/TypeService"
 import DifficultyService from "../../services/DifficultyService"
 import {initialAnswers} from "../../util/defaultAnswers"
 import {cn} from "../../lib/utils"
-import {getAnswerButtonColor} from "../../util/getAnswerButtonColor";
-import DropDown from "../dropdown/DropDown";
-import {questionSchema} from "../../yup/questionSchema";
-import {useRouter} from "next/navigation";
-import UploadFile from "./UploadFile";
-import {getFirstErrorMessage} from "../../util/form/getFirstErrorMessage";
-import SupabaseService from "../../services/SupabaseService";
-import {supabaseConfig} from "../../config/supabaseConfig";
-import {moveFileImage} from "../../util/supabase/moveFileImage";
+import {getAnswerButtonColor} from "../../util/getAnswerButtonColor"
+import DropDown from "../dropdown/DropDown"
+import {questionSchema} from "../../yup/questionSchema"
+import {useRouter} from "next/navigation"
+import UploadFile from "./UploadFile"
+import {getFirstErrorMessage} from "../../util/form/getFirstErrorMessage"
+import SupabaseService from "../../services/SupabaseService"
+import {supabaseConfig} from "../../config/supabaseConfig"
+import {moveFileImage} from "../../util/supabase/moveFileImage"
 
 export default function CreateQuestionForm() {
     const router = useRouter()
@@ -39,25 +39,36 @@ export default function CreateQuestionForm() {
 
     const fetchDropdowns = async () => {
         try {
-            const [catRes, typeRes, diffRes] = await Promise.all([
-                CategoryService.getAll(),
+            const allCategories = [];
+            let page = 0;
+            let totalPages = 1;
+
+            do {
+                const catRes = await CategoryService.getAll(page, 1000); // Tăng size để lấy nhiều hơn
+                allCategories.push(...(catRes.data.content || []));
+                totalPages = catRes.data.totalPages || 1;
+                page++;
+            } while (page < totalPages);
+
+            const [typeRes, diffRes] = await Promise.all([
                 TypeService.getAll(),
                 DifficultyService.getAll(),
-            ])
-            setCategories(catRes.data)
-            setTypes(typeRes.data)
-            setDifficulties(diffRes.data)
+            ]);
+            setCategories(allCategories); // Lấy toàn bộ danh mục
+            setTypes(typeRes.data || []); // Gán trực tiếp mảng cho loại
+            setDifficulties(diffRes.data || []); // Gán trực tiếp mảng cho độ khó
         } catch (error) {
+            console.error("Error in fetchDropdowns:", error);
             if (error.response?.status === 403) {
-                router.push("/forbidden")
+                router.push("/forbidden");
             } else if (error.response?.status === 401) {
-                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng...")
-                setTimeout(() => router.push("/login"), 2500)
+                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng...");
+                setTimeout(() => router.push("/login"), 2500);
             }
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
         fetchDropdowns()
@@ -95,7 +106,6 @@ export default function CreateQuestionForm() {
 
         try {
             setIsSubmitting(true)
-            // move image supabase
             let finalImagePath = null;
 
             if (image?.path) {
@@ -168,10 +178,8 @@ export default function CreateQuestionForm() {
                     />
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-8">
-                    {/* Left Section - Image Upload (3/10) */}
                     <UploadFile image={image} setImage={setImage} setShowImageModal={setShowImageModal}/>
 
-                    {/* Right Section - Question Input (7/10) */}
                     <Card className="bg-black/20 border-white/20 backdrop-blur-sm p-6 lg:col-span-7">
                         <h3 className="text-white font-semibold text-lg">Nội dung câu hỏi</h3>
                         <Textarea
@@ -186,7 +194,6 @@ export default function CreateQuestionForm() {
                     </Card>
                 </div>
 
-                {/* Đáp án */}
                 {formik.values.type === "multiple" ? (
                     <div className="grid gap-4 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
                         {formik.values.answers.map((answer, index) => (
@@ -213,7 +220,7 @@ export default function CreateQuestionForm() {
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
                                         className="bg-white/10 border-white/50 text-white placeholder:text-white/70 transition-all duration-200 hover:bg-white/20 focus:bg-white/20 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
-                                        style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
+                                        style={{fontSize: "1.25rem"}}
                                     />
                                 </div>
                             </Card>
@@ -258,7 +265,7 @@ export default function CreateQuestionForm() {
                                         }}
                                         placeholder={`Nhập đáp án ${index + 1}`}
                                         className="bg-white/10 border-white/50 text-white placeholder:text-white/70 transition-all duration-200 hover:bg-white/20 focus:bg-white/20 resize-y whitespace-pre-wrap overflow-auto h-full w-full p-3 rounded-md"
-                                        style={{fontSize: "1.25rem"}} // Thêm inline style để đảm bảo
+                                        style={{fontSize: "1.25rem"}}
                                     />
                                 </div>
                             </Card>
@@ -287,7 +294,6 @@ export default function CreateQuestionForm() {
                         )}
                     </Button>
                 </div>
-                {/* Image Modal */}
                 {showImageModal && image && (
                     <div
                         className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
