@@ -1,5 +1,4 @@
-// UserHeader.jsx
-"use client"
+"use client";
 
 import {
     Search,
@@ -14,32 +13,31 @@ import {
     Lock,
     ScrollText,
     Library,
-    Loader2
-} from "lucide-react"
-import {Button} from "../ui/button"
-import {Input} from "../ui/input"
+    Loader2,
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "../ui/dropdown-menu"
-import {useRouter} from "next/navigation"
-import Image from "next/image"
-import {useEffect, useState} from "react"
-import UserService from "../../services/UserService"
+    DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { getCurrentUser } from "../../services/authService";
+import { getSupabaseImageUrl } from "../../util/getImageSupabaseUrl";
 import AvatarUser from "../avatar/AvatarUser";
-import {getSupabaseImageUrl} from "../../util/getImageSupabaseUrl"; // Import UserService
 
-export default function UserHeader({searchTerm, setSearchTerm}) {
-    const router = useRouter()
-    const [email, setEmail] = useState("")
+export default function UserHeader({ searchTerm, setSearchTerm }) {
+    const router = useRouter();
     const [userInfo, setUserInfo] = useState({
         email: "",
         username: "",
         avatar: "",
-    })
+    });
     const [isLoading, setIsLoading] = useState({
         createQuiz: false,
         menu: false,
@@ -49,51 +47,41 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
         histories: false,
         exams: false,
         questions: false,
-        categories: false
-    })
+        categories: false,
+    });
 
     useEffect(() => {
-        const savedEmail = localStorage.getItem("email")
-        // Gọi API để lấy thông tin profile (giống profile.jsx)
-        if (savedEmail) {
-            setEmail(savedEmail);
-            UserService.getProfile(savedEmail)
-                .then((response) => {
-                    let {username, avatar, googleId} = response.data;
-                    if (!googleId) {
-                        avatar = getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, avatar)
-                        console.log(avatar)
-                    }
-                    setUserInfo({
-                        email: savedEmail, username, avatar
-                    })
-                })
-                .catch((err) => {
-                    console.error("Lỗi khi tải avatar:", err)
-                })
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            const { email, username, googleId } = currentUser;
+            let avatar = currentUser.avatar || "";
+            if (!googleId) {
+                avatar = getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, avatar);
+            }
+            setUserInfo({ email, username, avatar });
         }
-    }, [])
+    }, []);
 
     const handleNavigation = async (key, path) => {
-        setIsLoading(prev => ({...prev, [key]: true}))
+        setIsLoading((prev) => ({ ...prev, [key]: true }));
         try {
-            await router.push(path)
+            await router.push(path);
         } catch (error) {
-            console.error("Lỗi khi chuyển trang:", error)
-            setIsLoading(prev => ({...prev, [key]: false}))
+            console.error("Lỗi khi chuyển trang:", error);
+            setIsLoading((prev) => ({ ...prev, [key]: false }));
         }
-    }
+    };
 
     const handleLogout = async () => {
-        setIsLoading(prev => ({...prev, logout: true}))
+        setIsLoading((prev) => ({ ...prev, logout: true }));
         try {
-            localStorage.clear()
-            await router.push("/login")
+            localStorage.clear();
+            await router.push("/login");
         } catch (error) {
-            console.error("Lỗi khi đăng xuất:", error)
-            setIsLoading(prev => ({...prev, logout: false}))
+            console.error("Lỗi khi đăng xuất:", error);
+            setIsLoading((prev) => ({ ...prev, logout: false }));
         }
-    }
+    };
 
     return (
         <header className="fixed z-50 bg-white border-b border-gray-200 px-4 py-3 w-full">
@@ -115,7 +103,8 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                     <div className="hidden md:block flex-1 max-w-xl">
                         <div className="relative">
                             <Search
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"/>
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
+                            />
                             <Input
                                 placeholder="Tìm quiz theo tên, chủ đề..."
                                 value={searchTerm}
@@ -134,9 +123,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                             disabled={isLoading.home}
                         >
                             {isLoading.home ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                             ) : (
-                                <Home className="h-4 w-4 mr-2"/>
+                                <Home className="h-4 w-4 mr-2" />
                             )}
                             Trang chủ
                         </Button>
@@ -147,9 +136,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                             disabled={isLoading.histories}
                         >
                             {isLoading.histories ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                             ) : (
-                                <History className="h-4 w-4 mr-2"/>
+                                <History className="h-4 w-4 mr-2" />
                             )}
                             Lịch sử thi
                         </Button>
@@ -160,9 +149,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                             disabled={isLoading.exams}
                         >
                             {isLoading.exams ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                             ) : (
-                                <ScrollText className="h-4 w-4 mr-2"/>
+                                <ScrollText className="h-4 w-4 mr-2" />
                             )}
                             Thư viện Quiz
                         </Button>
@@ -173,9 +162,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                             disabled={isLoading.questions}
                         >
                             {isLoading.questions ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                             ) : (
-                                <FileQuestion className="h-4 w-4 mr-2"/>
+                                <FileQuestion className="h-4 w-4 mr-2" />
                             )}
                             Thư viện câu hỏi
                         </Button>
@@ -186,9 +175,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                             disabled={isLoading.categories}
                         >
                             {isLoading.categories ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                             ) : (
-                                <Library className="h-4 w-4 mr-2"/>
+                                <Library className="h-4 w-4 mr-2" />
                             )}
                             Thư viện danh mục
                         </Button>
@@ -203,9 +192,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                         disabled={isLoading.createQuiz}
                     >
                         {isLoading.createQuiz ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         ) : (
-                            <Plus className="h-4 w-4 mr-2"/>
+                            <Plus className="h-4 w-4 mr-2" />
                         )}
                         Tạo Quiz mới
                     </Button>
@@ -218,9 +207,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                         disabled={isLoading.menu}
                     >
                         {isLoading.menu ? (
-                            <Loader2 className="h-5 w-5 animate-spin"/>
+                            <Loader2 className="h-5 w-5 animate-spin" />
                         ) : (
-                            <Menu className="h-5 w-5"/>
+                            <Menu className="h-5 w-5" />
                         )}
                     </Button>
 
@@ -232,9 +221,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                                 disabled={isLoading.profile || isLoading.changePassword || isLoading.logout}
                             >
                                 <div className="bg-purple-500 rounded-full flex items-center justify-center">
-                                    <AvatarUser path={userInfo.avatar} height={40} width={40}/>
+                                    <AvatarUser path={userInfo.avatar} height={40} width={40} />
                                 </div>
-                                <ChevronDown className="w-5 h-5 text-gray-500"/>
+                                <ChevronDown className="w-5 h-5 text-gray-500" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
@@ -243,14 +232,14 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                         >
                             <div className="flex items-center gap-3 p-3">
                                 <div className="bg-purple-500 rounded-full flex items-center justify-center">
-                                    <AvatarUser path={userInfo.avatar} height={64} width={64}/>
+                                    <AvatarUser path={userInfo.avatar} height={64} width={64} />
                                 </div>
                                 <div className="flex-1">
                                     <div className="text-sm font-medium text-gray-700">{userInfo.username}</div>
                                 </div>
                             </div>
 
-                            <DropdownMenuSeparator className="my-2 bg-gray-100"/>
+                            <DropdownMenuSeparator className="my-2 bg-gray-100" />
 
                             <DropdownMenuItem
                                 onClick={() => handleNavigation("profile", "/profile")}
@@ -258,9 +247,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                                 disabled={isLoading.profile}
                             >
                                 {isLoading.profile ? (
-                                    <Loader2 className="w-5 h-5 text-gray-600 animate-spin"/>
+                                    <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
                                 ) : (
-                                    <User className="w-5 h-5 text-gray-600"/>
+                                    <User className="w-5 h-5 text-gray-600" />
                                 )}
                                 <span className="text-sm text-left w-full">Hồ sơ</span>
                             </DropdownMenuItem>
@@ -271,9 +260,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                                 disabled={isLoading.changePassword}
                             >
                                 {isLoading.changePassword ? (
-                                    <Loader2 className="w-5 h-5 text-gray-600 animate-spin"/>
+                                    <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
                                 ) : (
-                                    <Lock className="w-5 h-5 text-gray-600"/>
+                                    <Lock className="w-5 h-5 text-gray-600" />
                                 )}
                                 <span className="text-sm text-left w-full">Đổi mật khẩu</span>
                             </DropdownMenuItem>
@@ -284,9 +273,9 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                                 disabled={isLoading.logout}
                             >
                                 {isLoading.logout ? (
-                                    <Loader2 className="w-5 h-5 animate-spin"/>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
                                 ) : (
-                                    <LogOut className="w-5 h-5"/>
+                                    <LogOut className="w-5 h-5" />
                                 )}
                                 <span className="text-sm text-left w-full">Đăng xuất</span>
                             </DropdownMenuItem>
@@ -295,6 +284,5 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                 </div>
             </div>
         </header>
-
-    )
+    );
 }

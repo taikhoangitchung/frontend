@@ -6,6 +6,7 @@ import HistoryService from "../../services/HistoryService";
 import ExamDetailPanel from "../exam/ExamDetailPanel";
 import { config } from "../../config/url.config";
 import { defaultAvatar } from "../../config/backendBaseUrl";
+import {jwtDecode} from "jwt-decode";
 
 export default function RoomRankingPanel({ code }) {
     const [email, setEmail] = useState(null);
@@ -16,7 +17,16 @@ export default function RoomRankingPanel({ code }) {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            setEmail(localStorage.getItem("email"));
+            const token = localStorage.getItem("token");
+            if (token) {
+                try {
+                    const decoded = jwtDecode(token);
+                    setEmail(decoded.sub); // Giả sử email nằm trong trường 'sub', điều chỉnh theo cấu trúc token của bạn
+                } catch (error) {
+                    console.error("Lỗi giải mã token:", error);
+                    setEmail(null); // Đặt null nếu token không hợp lệ
+                }
+            }
         }
     }, []);
 
