@@ -27,9 +27,9 @@ import {
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { getCurrentUser } from "../../services/authService";
-import { getSupabaseImageUrl } from "../../util/getImageSupabaseUrl";
+import UserService from "../../services/UserService"; // Import UserService
 import AvatarUser from "../avatar/AvatarUser";
+import { getSupabaseImageUrl } from "../../util/getImageSupabaseUrl";
 
 export default function UserHeader({ searchTerm, setSearchTerm }) {
     const router = useRouter();
@@ -51,13 +51,19 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
     });
 
     useEffect(() => {
-        const currentUser = getCurrentUser();
-        if (currentUser) {
-            const { email, username, googleId } = currentUser;
-            const avatar = !googleId
-                ? getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, currentUser.avatar || "")
-                : currentUser.avatar || "";
-            setUserInfo({ email, username, avatar });
+        const savedEmail = localStorage.getItem("email");
+        if (savedEmail) {
+            UserService.getProfile(savedEmail)
+                .then((response) => {
+                    const { username, avatar, googleId } = response.data;
+                    const userAvatar = !googleId
+                        ? getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, avatar)
+                        : avatar || "";
+                    setUserInfo({ email: savedEmail, username, avatar: userAvatar });
+                })
+                .catch((err) => {
+                    console.error("Error loading avatar:", err);
+                });
         }
     }, []);
 
@@ -66,7 +72,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
         try {
             await router.push(path);
         } catch (error) {
-            console.error("Lỗi khi chuyển trang:", error);
+            console.error("Error navigating:", error);
             setIsLoading((prev) => ({ ...prev, [key]: false }));
         }
     };
@@ -77,7 +83,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
             localStorage.clear();
             await router.push("/login");
         } catch (error) {
-            console.error("Lỗi khi đăng xuất:", error);
+            console.error("Error logging out:", error);
             setIsLoading((prev) => ({ ...prev, logout: false }));
         }
     };
@@ -96,14 +102,12 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                     />
                 </div>
 
-                {/* Giữa: Tìm kiếm + Điều hướng */}
+                {/* Search and Navigation */}
                 <div className="flex-1 flex items-center justify-center gap-6 px-6">
-                    {/* Tìm kiếm */}
+                    {/* Search */}
                     <div className="hidden md:block flex-1 max-w-xl">
                         <div className="relative">
-                            <Search
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
-                            />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                             <Input
                                 placeholder="Tìm quiz theo tên, chủ đề..."
                                 value={searchTerm}
@@ -113,7 +117,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                         </div>
                     </div>
 
-                    {/* Điều hướng (ẩn trên mobile) */}
+                    {/* Navigation */}
                     <nav className="hidden md:flex items-center space-x-4">
                         <Button
                             variant="ghost"
@@ -183,7 +187,7 @@ export default function UserHeader({ searchTerm, setSearchTerm }) {
                     </nav>
                 </div>
 
-                {/* Bên phải: Nút + Avatar */}
+                {/* Right Side: Button + Avatar */}
                 <div className="flex items-center w-auto gap-3">
                     <Button
                         className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer transition-all duration-200 disabled:cursor-not-allowed"

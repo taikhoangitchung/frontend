@@ -23,7 +23,7 @@ const validationSchema = Yup.object({
     username: Yup.string().max(50, "Tên hiển thị không được vượt quá 50 ký tự"),
     avatar: Yup.mixed()
         .nullable()
-        .test("fileSize", "File quá lớn", (value) => !value || (value && value.size <= 5 * 1024 * 1024))
+        .test("fileSize", "File quá lớn", (value) => !value || (value && value.size <= 1 * 1024 * 1024))
         .test(
             "fileType",
             "Chỉ hỗ trợ file ảnh",
@@ -82,7 +82,9 @@ const EditProfile = () => {
 
             if (fileImage) {
                 // xoa avatar cu tren supabase
-                await SupabaseService.removeFile(avatarPreview, process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET)
+                if (currentPathAvatar.split("/").pop() !== 'default-avatar.jpg') {
+                    await SupabaseService.removeFile(avatarPreview, process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET)
+                }
 
                 // upload file supabase
                 const fileSupabase = await SupabaseService.uploadFile(fileImage, process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET_PATHPREFIX_TEMP);
@@ -98,6 +100,10 @@ const EditProfile = () => {
             toast.error(errorMsg, {
                 duration: 5000
             });
+        }finally {
+            setTimeout(() => {
+                setIsReady(true)
+            }, 2000)
         }
     };
 
@@ -182,7 +188,7 @@ const EditProfile = () => {
                                                             className="hidden"
                                                         />
                                                     </label>
-                                                    <p className="text-xs text-gray-500 mt-1">JPG, PNG, GIF tối đa 5MB</p>
+                                                    <p className="text-xs text-gray-500 mt-1">JPG, PNG, GIF, WEBP tối đa 1MB</p>
                                                 </div>
                                             </div>
                                             <ErrorMessage name="avatar" component="p" className="text-red-500 text-sm mt-1" />
@@ -228,7 +234,7 @@ const EditProfile = () => {
                     </div>
 
                     {/* Right Panel - Hero Image */}
-                    <div className="flex-1 bg-gradient-to-br from-orange-100 to-blue-100 relative overflow-hidden">
+                    <div className="hidden lg:block flex-1 bg-gradient-to-br from-orange-100 to-blue-100 relative overflow-hidden">
                         <img src="/photo-login.jpg" alt="QuizGym Hero" className="absolute inset-0 w-full h-full object-cover" />
                         <div className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-50 text-white p-4 rounded-lg">
                             <div className="flex items-center mb-2">
