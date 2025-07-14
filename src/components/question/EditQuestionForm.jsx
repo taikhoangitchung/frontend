@@ -46,25 +46,36 @@ export default function EditQuestionForm() {
 
     const fetchDropdowns = async () => {
         try {
-            const [catRes, typeRes, diffRes] = await Promise.all([
-                CategoryService.getAll(),
+            const allCategories = [];
+            let page = 0;
+            let totalPages = 1;
+
+            do {
+                const catRes = await CategoryService.getAll(page, 1000); // Tăng size để lấy nhiều hơn
+                allCategories.push(...(catRes.data.content || []));
+                totalPages = catRes.data.totalPages || 1;
+                page++;
+            } while (page < totalPages);
+
+            const [typeRes, diffRes] = await Promise.all([
                 TypeService.getAll(),
                 DifficultyService.getAll(),
-            ])
-            setCategories(catRes.data)
-            setTypes(typeRes.data)
-            setDifficulties(diffRes.data)
+            ]);
+            setCategories(allCategories); // Lấy toàn bộ danh mục
+            setTypes(typeRes.data || []); // Gán trực tiếp mảng
+            setDifficulties(diffRes.data || []); // Gán trực tiếp mảng
         } catch (error) {
+            console.error("Error in fetchDropdowns:", error);
             if (error.response?.status === 403) {
-                router.push("/forbidden")
+                router.push("/forbidden");
             } else if (error.response?.status === 401) {
-                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng...")
-                setTimeout(() => router.push("/login"), 2500)
+                toast.error("Token hết hạn hoặc không hợp lệ. Đang chuyển hướng...");
+                setTimeout(() => router.push("/login"), 2500);
             }
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const fetchQuestion = async () => {
         if (!id) return
