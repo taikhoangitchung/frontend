@@ -45,15 +45,16 @@ class ExamService {
         }
     }
 
-    static async getAll(page = 0, size = 10, categoryId = null, searchTerm = '', ownerFilter = 'all') {
+    static async getAll(page = 0, size = 10, categoryId = null, searchTerm = '', ownerFilter = 'all', currentUserId = null) {
         try {
             return await axiosInstance.get("/exams", {
                 params: {
                     page,
                     size,
-                    categoryId,
+                    categoryId: categoryId === "all" ? null : categoryId,
                     searchTerm,
-                    ownerFilter
+                    ownerFilter,
+                    currentUserId // Thêm currentUserId vào params
                 }
             });
         } catch (error) {
