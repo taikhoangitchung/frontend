@@ -62,6 +62,7 @@ export default function UserHeader({searchTerm, setSearchTerm}) {
                     let {username, avatar, googleId} = response.data;
                     if (!googleId) {
                         avatar = getSupabaseImageUrl(process.env.NEXT_PUBLIC_SUPABASE_IMAGE_AVATAR_BUCKET, avatar)
+                        console.log(avatar)
                     }
                     setUserInfo({
                         email: savedEmail, username, avatar
