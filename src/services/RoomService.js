@@ -27,9 +27,9 @@ class RoomService {
         }
     }
 
-    static async start(code) {
+    static async start(code, customDuration) {
         try {
-            return await axiosInstance.patch(`/rooms/${code}/start`)
+            return await axiosInstance.patch(`/rooms/${code}/start`, { duration: customDuration });
         } catch (error) {
             return Promise.reject(error);
         }

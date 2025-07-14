@@ -4,7 +4,7 @@ import {motion} from "framer-motion";
 import {useParams, useRouter} from "next/navigation";
 import {useEffect, useRef, useState} from "react";
 import RoomService from "../../../../../services/RoomService";
-import {Copy, LinkIcon, Loader2, QrCode, Users, X} from "lucide-react";
+import {Copy, LinkIcon, Loader2, Users, X} from "lucide-react";
 import {toast} from "sonner";
 import {Button} from "../../../../../components/ui/button";
 import ConfirmDialog from "../../../../../components/alerts-confirms/ConfirmDialog";
@@ -22,6 +22,7 @@ export default function WaitingRoom() {
     const [examTitle, setExamTitle] = useState("");
     const [copiedCode, setCopiedCode] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
+    const [customDuration, setCustomDuration] = useState(0);
     const isStartedRef = useRef(false);
 
     const [loading, setLoading] = useState(true);
@@ -37,6 +38,7 @@ export default function WaitingRoom() {
             setExamTitle(response.data.examTitle);
             setAuthorName(response.data.authorName);
             setHostEmail(response.data.hostEmail);
+            setCustomDuration(response.data.duration)
         } catch (error) {
             if (error.response?.status === 409 || error.response?.status === 404) {
                 toast.error(error.response.data + ", trở về trang chủ...");
@@ -102,7 +104,7 @@ export default function WaitingRoom() {
 
     const handleStartExam = async () => {
         try {
-            await RoomService.start(code);
+            await RoomService.start(code, customDuration);
             const expectCount = candidates.length;
             socketRef.current?.send(`START:${code}:${expectCount}`);
         } catch (error) {
@@ -158,7 +160,7 @@ export default function WaitingRoom() {
                     <div className="flex-1 flex items-center justify-center bg-white rounded-r-3xl">
                         <div className="text-center space-y-8">
                             <h1 className="text-5xl font-bold text-purple-800">{examTitle}</h1>
-                            <p className="text-sm text-gray-500">Tác giả - {authorName}</p>
+                            <p className="text font-bold text-gray-500">Tác giả - {authorName}</p>
                             <div className="border-t-4 border-purple-600 w-40 mx-auto"></div>
                         </div>
                     </div>
@@ -166,30 +168,9 @@ export default function WaitingRoom() {
                     {/* Right: Room Info */}
                     <div className="w-[400px] bg-gray-900 p-6 space-y-6 flex flex-col">
                         <div className="space-y-4">
-                            <p className="text-sm font-semibold text-gray-400">Mã phòng</p>
+                            <p className="text-sm font-semibold text-white">Mã phòng</p>
                             <div className="text-4xl font-bold tracking-widest">{code}</div>
-                            <motion.p
-                                className="text-sm font-semibold text-gray-400"
-                                animate={{opacity: [1, 0.5, 1]}}
-                                transition={{duration: 2, repeat: Infinity}}
-                            >
-                                Xin đợi các thí sinh khác cùng tham gia...
-                            </motion.p>
-                            {hostEmail === storedEmail && (
-                                <Button
-                                    className="w-full h-12 bg-purple-600 hover:bg-purple-700 cursor-pointer text-white text-lg font-semibold"
-                                    onClick={handleStartExam}
-                                    disabled={loading}
-                                >
-                                    {loading ? "ĐANG TẢI" : "BẮT ĐẦU"}
-                                </Button>
-                            )}
-
                             <div className="flex items-center justify-between">
-                                <div className="w-20 h-20 bg-white rounded p-2 flex items-center justify-center">
-                                    <QrCode className="w-14 h-14 text-black"/>
-                                </div>
-
                                 <div className="flex items-center gap-2">
                                     <Button size="icon" variant="outline" className="h-12 w-12 cursor-pointer"
                                             onClick={handleCopyLink}>
@@ -210,6 +191,43 @@ export default function WaitingRoom() {
                                     </Button>
                                 </div>
                             </div>
+                            {hostEmail === storedEmail && (
+                                <div className="flex items-center space-x-2">
+                                <span className="text-white whitespace-nowrap">
+                                    Thời gian:
+                                </span>
+                                    <div className="relative flex items-center w-28"><input
+                                        type="number"
+                                        min={1}
+                                        value={customDuration}
+                                        onChange={(e) => setCustomDuration(Number(e.target.value))}
+                                        className="w-full px-3 py-2 text-center border border-gray-300 rounded-l-md outline-none text-sm focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="0"/>
+                                        <span
+                                            className="inline-flex items-center px-3 py-2 text-sm text-gray-600 bg-gray-100 border border-l-0 border-gray-300 rounded-r-md">
+                                        phút
+                                    </span>
+                                    </div>
+                                </div>
+                            )}
+                            <motion.p
+                                className="text-sm font-semibold text-gray-400"
+                                animate={{opacity: [1, 0.5, 1]}}
+                                transition={{duration: 2, repeat: Infinity}}
+                            >
+                                Xin đợi các thí sinh khác cùng tham gia...
+                            </motion.p>
+                            {hostEmail === storedEmail && (
+                                <Button
+                                    className="w-full h-12 bg-purple-600 hover:bg-purple-700 cursor-pointer text-white text-lg font-semibold"
+                                    onClick={handleStartExam}
+                                    disabled={loading}
+                                >
+                                    {loading ? "ĐANG TẢI" : "BẮT ĐẦU"}
+                                </Button>
+                            )}
+
+
                         </div>
 
                         {/* Participants List */}
@@ -233,7 +251,7 @@ export default function WaitingRoom() {
                                         </div>
                                         {hostEmail === storedEmail && (
                                             <button
-                                                className="rounded-full bg-red-500 text-white hover:bg-red-700 text-white cursor-pointer transition-all decoration-200"
+                                                className="rounded-full bg-red-500 hover:bg-red-700 text-white cursor-pointer transition-all decoration-200"
                                                 title="Kick khỏi phòng"
                                                 onClick={() => socketRef.current?.send(`KICK:${code}:${item.email}`)}
                                             >
